@@ -1,6 +1,6 @@
-# Zerodha Clone - Backend API
+# Zerodha Clone - Full-Stack Trading Platform
 
-A comprehensive Node.js + Express backend simulating a professional stock trading platform with real-time price updates, advanced order types, and 10 financial calculators.
+A comprehensive Node.js + Express backend simulating a professional stock trading platform with real-time price updates, advanced order types, 10 financial calculators, and WebSocket notifications.
 
 ---
 
@@ -11,9 +11,13 @@ A comprehensive Node.js + Express backend simulating a professional stock tradin
 - ✅ **Market Orders** - Instant execution at current price
 - ✅ **Limit Orders** - Execute when price reaches target
 - ✅ **Short Selling** - Sell stocks you don't own
-- ✅ **Order Matching Engine** - Background service for pending orders
-- ✅ **Portfolio Management** - Real-time holdings tracking
-- ✅ **Balance Management** - Virtual money system (₹1,00,000 starting balance)
+- ✅ **Stop-Loss Orders** - Auto-sell when price drops to trigger level
+- ✅ **Bracket Orders** - 3-legged orders (entry + target + stop-loss)
+- ✅ **Order Cancellation** - Cancel pending orders with automatic refunds
+- ✅ **Order Matching Engine** - Background service for pending orders (1s interval)
+- ✅ **Portfolio Management** - Holdings with real-time P&L calculations
+- ✅ **Watchlist** - Save up to 50 favorite stocks
+- ✅ **Funds Management** - Deposit, withdraw, balance check
 
 ### Financial Calculators (10 Tools)
 
@@ -35,14 +39,23 @@ A comprehensive Node.js + Express backend simulating a professional stock tradin
 
 ### Real-time Features
 
-- ✅ **Live Price Updates** - Socket.IO broadcasts every second
-- ✅ **Price Simulation** - Random walk algorithm
+- ✅ **Live Price Updates** - Socket.IO broadcasts every 1 second
+- ✅ **Price Simulation** - Random walk algorithm (20 stocks)
+- ✅ **Historical Price Data** - 60-second snapshots, 30-day retention
+- ✅ **Order Notifications** - Real-time WebSocket alerts
 - ✅ **Alpha Vantage Integration** - Real initial prices with fallback
+
+### User & Portfolio
+
+- ✅ **Dashboard** - Net worth, total P&L, recent orders summary
+- ✅ **Holdings with P&L** - Current price, invested value, P&L %, per holding
+- ✅ **Profile Management** - Update name, change password
+- ✅ **Funds** - Deposit / withdraw with validation
 
 ### Security
 
-- ✅ **JWT Authentication** - Secure token-based auth
-- ✅ **Password Hashing** - bcrypt encryption
+- ✅ **JWT Authentication** - Secure token-based auth (30-day expiry)
+- ✅ **Password Hashing** - bcrypt encryption (10 salt rounds)
 - ✅ **Protected Routes** - Middleware authorization
 - ✅ **CORS Enabled** - Cross-origin support
 
@@ -102,16 +115,26 @@ npm start
 4. **Verify**
 
 ```
-Server running on port 5000
+🔔 Order Notifications Service Initialized
 MongoDB Connected 😛
-Routes loaded: /api/auth, /api/orders, /api/holdings, /api/calculators
+📊 Price History Service Started...
+Matching Engine Started...
+Server running on port 5000
+Routes loaded: /api/auth, /api/orders, /api/holdings, /api/prices
 ```
 
 ---
 
-## 📡 API Endpoints
+## 📡 API Endpoints (30+)
 
 ### Authentication (`/api/auth`)
+
+| Method | Endpoint            | Auth | Description                            |
+| ------ | ------------------- | ---- | -------------------------------------- |
+| POST   | `/api/auth/signup`  | ❌   | Create account (starts with ₹1,00,000) |
+| POST   | `/api/auth/login`   | ❌   | Login & get JWT token                  |
+| GET    | `/api/auth/profile` | ✅   | Get user profile                       |
+| PUT    | `/api/auth/profile` | ✅   | Update name / password                 |
 
 #### Signup
 
@@ -126,218 +149,177 @@ Content-Type: application/json
 }
 ```
 
-**Response:**
-
-```json
-{
-  "_id": "...",
-  "name": "John Doe",
-  "email": "john@example.com",
-  "balance": 100000,
-  "token": "jwt_token_here"
-}
-```
-
-#### Login
+#### Update Profile
 
 ```http
-POST /api/auth/login
-
-{
-  "email": "john@example.com",
-  "password": "securepass123"
-}
-```
-
-#### Get Profile (Protected)
-
-```http
-GET /api/auth/profile
+PUT /api/auth/profile
 Authorization: Bearer <token>
+
+{
+  "name": "New Name",
+  "currentPassword": "oldpass",
+  "newPassword": "newpass"
+}
 ```
+
+---
+
+### Stocks (`/api/stocks`)
+
+| Method | Endpoint      | Auth | Description                            |
+| ------ | ------------- | ---- | -------------------------------------- |
+| GET    | `/api/stocks` | ❌   | List all 20 stocks with current prices |
+
+**Available Stocks:** TCS, INFY, RELIANCE, HDFC, ICICI, SBIN, BHARTIARTL, HCLTECH, ITC, KOTAKBANK, LT, AXISBANK, WIPRO, BAJFINANCE, MARUTI, TITAN, SUNPHARMA, TATAMOTORS, ASIANPAINT, ULTRACEMCO
 
 ---
 
 ### Trading (`/api/orders`)
 
-#### Market Buy/Sell
+| Method | Endpoint                | Auth | Description           |
+| ------ | ----------------------- | ---- | --------------------- |
+| POST   | `/api/orders/buy`       | ✅   | Market or limit buy   |
+| POST   | `/api/orders/sell`      | ✅   | Market or limit sell  |
+| POST   | `/api/orders/stop-loss` | ✅   | Place stop-loss order |
+| POST   | `/api/orders/bracket`   | ✅   | Place bracket order   |
+| GET    | `/api/orders`           | ✅   | Get all user orders   |
+| DELETE | `/api/orders/:orderId`  | ✅   | Cancel pending order  |
+
+#### Market Buy
 
 ```http
 POST /api/orders/buy
 Authorization: Bearer <token>
 
-{
-  "stockSymbol": "TCS",
-  "quantity": 10,
-  "orderType": "MARKET"
-}
+{ "stockSymbol": "TCS", "quantity": 10, "orderType": "MARKET" }
 ```
 
-#### Limit Orders
+#### Stop-Loss Order
 
 ```http
-POST /api/orders/buy
+POST /api/orders/stop-loss
 
-{
-  "stockSymbol": "RELIANCE",
-  "quantity": 5,
-  "orderType": "LIMIT",
-  "limitPrice": 2800
-}
+{ "stockSymbol": "TCS", "quantity": 5, "triggerPrice": 3400 }
 ```
 
-**Order Statuses:**
-
-- `COMPLETED` - Executed immediately
-- `PENDING` - Awaiting price target
-- `FAILED` - Insufficient funds/holdings
-
-#### Short Selling
+#### Bracket Order
 
 ```http
-POST /api/orders/sell
+POST /api/orders/bracket
 
 {
   "stockSymbol": "INFY",
-  "quantity": 10,
-  "orderType": "MARKET"
+  "quantity": 5,
+  "entryPrice": 1800,
+  "targetPrice": 1900,
+  "stopLossPrice": 1750
 }
 ```
 
-_Holdings will show negative quantity with `isShort: true`_
+**Order Statuses:** `COMPLETED` | `PENDING` | `FAILED` | `CANCELLED`
 
-#### Get Orders
-
-```http
-GET /api/orders
-Authorization: Bearer <token>
-```
+**Order Categories:** `REGULAR` | `STOPLOSS` | `BRACKET`
 
 ---
 
 ### Portfolio (`/api/holdings`)
 
-#### Get Holdings
+| Method | Endpoint                  | Auth | Description                 |
+| ------ | ------------------------- | ---- | --------------------------- |
+| GET    | `/api/holdings`           | ✅   | Holdings with P&L per stock |
+| GET    | `/api/holdings/dashboard` | ✅   | Full portfolio dashboard    |
 
-```http
-GET /api/holdings
-Authorization: Bearer <token>
-```
-
-**Response:**
+#### Holdings Response (with P&L)
 
 ```json
-[
-  {
-    "stock": "TCS",
-    "quantity": 10,
-    "averagePrice": 3500,
-    "isShort": false
-  },
-  {
-    "stock": "INFY",
-    "quantity": -5,
-    "averagePrice": 1450,
-    "isShort": true
-  }
-]
+{
+  "success": true,
+  "count": 2,
+  "holdings": [
+    {
+      "stock": "TCS",
+      "name": "Tata Consultancy Services",
+      "quantity": 10,
+      "avgPrice": 3500.0,
+      "currentPrice": 3620.5,
+      "investedValue": 35000.0,
+      "currentValue": 36205.0,
+      "pnl": 1205.0,
+      "pnlPercent": 3.44,
+      "isShort": false
+    }
+  ]
+}
 ```
+
+#### Dashboard Response
+
+```json
+{
+  "dashboard": {
+    "user": { "name": "John", "email": "...", "balance": 65000.00 },
+    "portfolio": {
+      "totalInvested": 35000.00,
+      "currentValue": 36205.00,
+      "totalPnl": 1205.00,
+      "totalPnlPercent": 3.44,
+      "holdingsCount": 2
+    },
+    "netWorth": 101205.00,
+    "recentOrders": [...]
+  }
+}
+```
+
+---
+
+### Watchlist (`/api/watchlist`)
+
+| Method | Endpoint                 | Auth | Description                    |
+| ------ | ------------------------ | ---- | ------------------------------ |
+| GET    | `/api/watchlist`         | ✅   | Get watchlist with live prices |
+| POST   | `/api/watchlist`         | ✅   | Add stock (max 50)             |
+| DELETE | `/api/watchlist/:symbol` | ✅   | Remove stock                   |
+
+---
+
+### Funds (`/api/funds`)
+
+| Method | Endpoint              | Auth | Description              |
+| ------ | --------------------- | ---- | ------------------------ |
+| GET    | `/api/funds`          | ✅   | Check balance            |
+| POST   | `/api/funds/deposit`  | ✅   | Deposit funds (max ₹1Cr) |
+| POST   | `/api/funds/withdraw` | ✅   | Withdraw funds           |
+
+---
+
+### Price Data (`/api/prices`)
+
+| Method | Endpoint                      | Auth | Description               |
+| ------ | ----------------------------- | ---- | ------------------------- |
+| GET    | `/api/prices/:symbol`         | ❌   | Current price for a stock |
+| GET    | `/api/prices/history/:symbol` | ❌   | Historical price data     |
+
+Query params for history: `?period=1h|6h|1d|1w|1m`
 
 ---
 
 ### Calculators (`/api/calculators`)
 
-All calculator endpoints accept JSON and return instant results (no DB storage).
+All calculators are **stateless** — no data stored in database.
 
-#### Investment Calculators
-
-**SIP Calculator**
-
-```http
-POST /api/calculators/sip
-
-{
-  "monthlyInvestment": 5000,
-  "expectedReturn": 12,
-  "timePeriod": 10
-}
-```
-
-**Retirement Planning**
-
-```http
-POST /api/calculators/retirement
-
-{
-  "currentAge": 30,
-  "retirementAge": 60,
-  "monthlyExpenses": 50000,
-  "inflationRate": 6,
-  "lifeExpectancy": 85,
-  "expectedReturn": 12
-}
-```
-
-**NPS Calculator**
-
-```http
-POST /api/calculators/nps
-
-{
-  "currentAge": 30,
-  "retirementAge": 60,
-  "monthlyContribution": 10000,
-  "expectedReturn": 10
-}
-```
-
-#### Trading Calculators
-
-**Brokerage Calculator**
-
-```http
-POST /api/calculators/brokerage
-
-{
-  "tradeType": "equity_intraday",
-  "buyPrice": 500,
-  "sellPrice": 510,
-  "quantity": 100
-}
-```
-
-_Trade types: `equity_delivery`, `equity_intraday`, `fo_futures`, `fo_options`_
-
-**F&O Margin**
-
-```http
-POST /api/calculators/fo-margin
-
-{
-  "instrumentType": "futures",
-  "spotPrice": 18000,
-  "lotSize": 50,
-  "lots": 1,
-  "volatility": 15
-}
-```
-
-**Black-Scholes**
-
-```http
-POST /api/calculators/black-scholes
-
-{
-  "optionType": "call",
-  "spotPrice": 18000,
-  "strikePrice": 18500,
-  "daysToExpiry": 30,
-  "volatility": 20,
-  "riskFreeRate": 6.5
-}
-```
-
-**Response includes all Greeks:** Delta, Gamma, Theta, Vega, Rho
+| Endpoint                              | Description                |
+| ------------------------------------- | -------------------------- |
+| POST `/api/calculators/sip`           | SIP returns calculator     |
+| POST `/api/calculators/step-up-sip`   | Step-up SIP calculator     |
+| POST `/api/calculators/emi`           | EMI calculator             |
+| POST `/api/calculators/swp`           | Systematic Withdrawal Plan |
+| POST `/api/calculators/retirement`    | Retirement planning        |
+| POST `/api/calculators/nps`           | National Pension Scheme    |
+| POST `/api/calculators/stp`           | Systematic Transfer Plan   |
+| POST `/api/calculators/brokerage`     | Brokerage & charges        |
+| POST `/api/calculators/fo-margin`     | F&O margin calculator      |
+| POST `/api/calculators/black-scholes` | Option pricing + Greeks    |
 
 ---
 
@@ -345,42 +327,68 @@ POST /api/calculators/black-scholes
 
 Connect to: `ws://localhost:5000`
 
-### Events
-
-**Listen for price updates:**
+### Price Updates
 
 ```javascript
 socket.on("price_update", (prices) => {
-  console.log(prices);
-  // { TCS: 3500.20, INFY: 1450.30, ... }
+  // { TCS: 3500.20, INFY: 1450.30, SBIN: 620.10, ... }
 });
 ```
 
-Prices update every 1 second using random walk simulation.
+### Order Notifications
+
+```javascript
+// Join user room for private notifications
+socket.emit("join_user_room", userId);
+
+// Listen for events
+socket.on("order_executed", (data) => {
+  // { orderId, stock, type, quantity, price, timestamp }
+});
+
+socket.on("order_cancelled", (data) => {
+  // { orderId, stock, cancelReason, timestamp }
+});
+
+socket.on("stop_loss_triggered", (data) => {
+  // { orderId, stock, triggerPrice, executedPrice, timestamp }
+});
+
+socket.on("bracket_entry_executed", (data) => {
+  // { orderId, stock, entryPrice, targetPrice, stopLossPrice, timestamp }
+});
+```
 
 ---
 
 ## 🧪 Testing
 
-### Run API Tests
-
 ```bash
-# Test trading features
+# Trading & orders
 node test_api.js
 
-# Test Phase 1 calculators (SIP, EMI, etc.)
+# Order cancellation (4 tests)
+node test_order_cancel.js
+
+# Watchlist system (7 tests)
+node test_watchlist.js
+
+# Historical prices (6 tests)
+node test_price_history.js
+
+# Advanced orders - stop-loss & bracket (5 tests)
+node test_advanced_orders.js
+
+# Backend gaps - funds, P&L, dashboard, stocks, profile (6 tests)
+node test_backend_gaps.js
+
+# Calculators
 node test_calculators.js
-
-# Test Phase 2 calculators (Retirement, NPS, STP)
 node test_phase2_calculators.js
-
-# Test Phase 3 calculators (Brokerage, Margin, Black-Scholes)
 node test_phase3_calculators.js
 ```
 
-### Test Credentials
-
-See `test_credentials.json` for sample user data.
+**Total: 40+ automated tests**
 
 ---
 
@@ -390,37 +398,50 @@ See `test_credentials.json` for sample user data.
 backend/
 ├── src/
 │   ├── calculators/
-│   │   ├── investment/      # 7 investment calculators
-│   │   ├── brokerage/       # 3 trading calculators
-│   │   └── utils/           # Formulas & validators
+│   │   ├── investment/         # 7 investment calculators
+│   │   ├── brokerage/          # 3 trading calculators
+│   │   └── utils/              # Formulas & validators
 │   ├── config/
-│   │   ├── db.js            # MongoDB connection
-│   │   ├── stocks.js        # Stock symbols
-│   │   └── mockPrices.js    # Fallback prices
+│   │   ├── db.js               # MongoDB connection
+│   │   └── stocks.js           # 20 stock symbols
 │   ├── controllers/
-│   │   ├── authController.js
-│   │   └── orderController.js
+│   │   ├── authController.js         # Auth + profile update
+│   │   ├── orderController.js        # Buy/sell/cancel
+│   │   ├── advancedOrderController.js # Stop-loss & bracket
+│   │   ├── portfolioController.js    # Holdings P&L + dashboard
+│   │   ├── watchlistController.js    # Watchlist CRUD
+│   │   ├── priceController.js        # Price data API
+│   │   ├── fundsController.js        # Deposit/withdraw
+│   │   └── stockController.js        # List all stocks
 │   ├── models/
-│   │   ├── User.js
-│   │   ├── Order.js
-│   │   └── Holding.js
+│   │   ├── User.js             # User + balance
+│   │   ├── Order.js            # All order types
+│   │   ├── Holding.js          # Portfolio positions
+│   │   ├── Watchlist.js        # Favorite stocks (max 50)
+│   │   └── PriceHistory.js     # Historical snapshots
 │   ├── routes/
 │   │   ├── authRoutes.js
 │   │   ├── orderRoutes.js
 │   │   ├── portfolioRoutes.js
+│   │   ├── watchlistRoutes.js
+│   │   ├── priceRoutes.js
+│   │   ├── fundsRoutes.js
+│   │   ├── stockRoutes.js
 │   │   └── calculatorRoutes.js
 │   ├── middleware/
-│   │   └── authMiddleware.js
+│   │   └── authMiddleware.js   # JWT protection
 │   ├── services/
-│   │   ├── priceFetcher.js      # Alpha Vantage
-│   │   ├── priceSimulator.js    # Random walk
-│   │   └── matchingEngine.js    # Order execution
+│   │   ├── priceFetcher.js         # Alpha Vantage API
+│   │   ├── priceSimulator.js       # Random walk engine
+│   │   ├── matchingEngine.js       # Order execution (SL/bracket)
+│   │   ├── priceHistoryService.js  # 60s price snapshots
+│   │   └── orderNotifications.js   # WebSocket alerts
 │   ├── sockets/
-│   │   └── priceSocket.js       # Socket.IO
+│   │   └── priceSocket.js      # Live price broadcasts
 │   ├── utils/
 │   │   └── randomWalk.js
-│   └── server.js                # Main entry point
-├── test_*.js                    # Test scripts
+│   └── server.js               # Main entry point
+├── test_*.js                    # Test scripts (40+ tests)
 ├── package.json
 └── .env
 ```
@@ -431,59 +452,49 @@ backend/
 
 ### Matching Engine
 
-Background service checks PENDING limit orders every second:
+Background service runs every 1 second:
 
-- **BUY orders**: Execute when `currentPrice <= limitPrice`
-- **SELL orders**: Execute when `currentPrice >= limitPrice`
-- Funds/holdings remain blocked until execution or cancellation
+- **Regular Limit BUY**: Execute when `currentPrice <= limitPrice`
+- **Regular Limit SELL**: Execute when `currentPrice >= limitPrice`
+- **Stop-Loss**: Trigger when `currentPrice <= triggerPrice` → market sell
+- **Bracket Entry**: Execute when `currentPrice <= entryPrice` → creates target + SL legs
+- **Bracket Legs**: When one leg executes, the other is auto-cancelled
 
 ### Short Selling
 
 - Sell stocks you don't own
-- Holdings show negative quantity
-- `isShort: true` flag for tracking
-- Average price calculated for short positions
+- Holdings show negative quantity with `isShort: true`
+- Buy back to cover short positions
 
-### Calculator Privacy Policy
+### Background Services
 
-⚠️ **All calculators are STATELESS**
-
-- No calculation data stored in database
-- Pure computational endpoints
-- Results returned immediately
-- See `src/calculators/README.md` for policy
-
----
-
-## 🔧 Configuration
-
-### Supported Stocks
-
-Edit `src/config/stocks.js`:
-
-```javascript
-module.exports = [
-  { symbol: "TCS", name: "Tata Consultancy Services" },
-  { symbol: "INFY", name: "Infosys" },
-  // Add more...
-];
-```
-
-### Price Simulation
-
-Adjust volatility in `src/services/priceSimulator.js`:
-
-```javascript
-const volatility = 0.02; // 2% price movement
-```
+| Service          | Interval  | Description                              |
+| ---------------- | --------- | ---------------------------------------- |
+| Price Simulation | 1s        | Random walk price updates                |
+| Matching Engine  | 1s        | Execute pending orders                   |
+| Price History    | 60s       | Capture price snapshots                  |
+| Data Cleanup     | 24h       | Remove old price data (30-day retention) |
+| Notifications    | Real-time | WebSocket event emission                 |
 
 ---
 
-## 📚 Documentation
+## 📊 Performance
 
-- **Calculators API**: See `CALCULATORS.md`
-- **Calculator Policy**: See `src/calculators/README.md`
-- **Walkthrough**: See artifacts for implementation details
+- **API Response**: < 150ms average
+- **Calculator Speed**: < 50ms (pure computation)
+- **WebSocket**: 1-second price updates
+- **Database**: Indexed queries for fast lookups
+- **Matching Engine**: < 50ms per order check
+
+---
+
+## 🔐 Security Notes
+
+- Passwords hashed with bcrypt (10 salt rounds)
+- JWT tokens expire in 30 days
+- Protected routes require valid token
+- Funds validation on all financial operations
+- Calculator endpoints are stateless — no data stored
 
 ---
 
@@ -498,47 +509,29 @@ JWT_SECRET=long_random_production_secret
 FRONTEND_URL=https://your-frontend-domain.com
 ```
 
-### CORS Configuration
-
-Update `server.js` for production domains.
-
 ---
 
 ## 🐛 Troubleshooting
 
 **"next is not a function" error**
 
-- Ensure using Express 4.x, not Express 5.x beta
-- Run: `npm install express@4.21.2`
+- Ensure using Express 4.x: `npm install express@4.21.2`
 
 **MongoDB Connection Failed**
 
 - Check `MONGO_URI` in `.env`
 - Verify network access in MongoDB Atlas
 
-**Calculators not working**
+**Duplicate Index Warning**
 
-- Restart server completely: `npm start`
-- Check `Routes loaded` includes `/api/calculators`
-
----
-
-## 📊 Performance
-
-- **API Response**: < 100ms average
-- **Calculator Speed**: < 50ms (pure computation)
-- **WebSocket**: 1-second price updates
-- **Database**: Indexed queries for fast lookups
+- Drop old indexes: `db.watchlists.dropIndexes()` in MongoDB shell
 
 ---
 
-## 🔐 Security Notes
+## 📖 Documentation
 
-- Passwords hashed with bcrypt (10 salt rounds)
-- JWT tokens expire as configured
-- Protected routes require valid token
-- CORS enabled for specified origins
-- No financial data stored for calculators
+- **Calculators API**: See `CALCULATORS.md`
+- **Calculator Policy**: See `src/calculators/README.md`
 
 ---
 
@@ -552,13 +545,16 @@ This is a learning project cloning Zerodha's functionality.
 
 Built with modern web technologies for educational purposes.
 
-**Key Features:**
+**Key Highlights:**
 
-- 🎯 Advanced order types (Market, Limit, Short)
+- 🎯 6 order types (Market, Limit, Short, Stop-Loss, Bracket, Cancel)
 - 📊 10 professional financial calculators
-- 🔄 Real-time price simulation
-- 💼 Complete portfolio management
-- 🔒 Secure authentication
+- 🔄 Real-time price simulation (20 stocks)
+- 💼 Complete portfolio management with P&L
+- 🔔 WebSocket notifications
+- 📈 Historical price data
+- 🔒 Secure JWT authentication
+- 💰 Funds management system
 
 ---
 
