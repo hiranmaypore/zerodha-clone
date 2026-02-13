@@ -3,5 +3,20 @@ module.exports = [
   { symbol: "INFY", name: "Infosys" },
   { symbol: "RELIANCE", name: "Reliance Industries" },
   { symbol: "HDFC", name: "HDFC Bank" },
-  { symbol: "ICICI", name: "ICICI Bank" }
+  { symbol: "ICICI", name: "ICICI Bank" },
+  { symbol: "SBIN", name: "State Bank of India" },
+  { symbol: "BHARTIARTL", name: "Bharti Airtel" },
+  { symbol: "HCLTECH", name: "HCL Technologies" },
+  { symbol: "ITC", name: "ITC Limited" },
+  { symbol: "KOTAKBANK", name: "Kotak Mahindra Bank" },
+  { symbol: "LT", name: "Larsen & Toubro" },
+  { symbol: "AXISBANK", name: "Axis Bank" },
+  { symbol: "WIPRO", name: "Wipro" },
+  { symbol: "BAJFINANCE", name: "Bajaj Finance" },
+  { symbol: "MARUTI", name: "Maruti Suzuki" },
+  { symbol: "TITAN", name: "Titan Company" },
+  { symbol: "SUNPHARMA", name: "Sun Pharmaceutical" },
+  { symbol: "TATAMOTORS", name: "Tata Motors" },
+  { symbol: "ASIANPAINT", name: "Asian Paints" },
+  { symbol: "ULTRACEMCO", name: "UltraTech Cement" }
 ];

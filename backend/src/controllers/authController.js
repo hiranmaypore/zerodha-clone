@@ -71,4 +71,43 @@ exports.getUserProfile = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const { name, currentPassword, newPassword } = req.body;
+
+        if (name) user.name = name;
+
+        if (newPassword) {
+            if (!currentPassword) {
+                return res.status(400).json({ message: 'Current password is required to set a new password' });
+            }
+            const isMatch = await user.matchPassword(currentPassword);
+            if (!isMatch) {
+                return res.status(401).json({ message: 'Current password is incorrect' });
+            }
+            user.password = newPassword;
+        }
+
+        await user.save();
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                balance: user.balance
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

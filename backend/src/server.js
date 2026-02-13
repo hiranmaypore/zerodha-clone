@@ -12,6 +12,8 @@ const portfolioRoutes = require("./routes/portfolioRoutes");
 const calculatorRoutes = require("./routes/calculatorRoutes");
 const watchlistRoutes = require("./routes/watchlistRoutes");
 const priceRoutes = require("./routes/priceRoutes");
+const fundsRoutes = require("./routes/fundsRoutes");
+const stockRoutes = require("./routes/stockRoutes");
 
 // Price Engine
 const stocks = require("./config/stocks");
@@ -39,6 +41,8 @@ app.use("/api/holdings", portfolioRoutes);
 app.use("/api/calculators", calculatorRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 app.use("/api/prices", priceRoutes);
+app.use("/api/funds", fundsRoutes);
+app.use("/api/stocks", stockRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
