@@ -2,198 +2,176 @@ const Order = require('../models/Order');
 const Holding = require('../models/Holding');
 const User = require('../models/User');
 const { getPrices } = require('../services/priceSimulator');
-const { notifyOrderCancelled } = require('../services/orderNotifications');
+const crypto = require('crypto');
 
-// @desc    Buy stock (Market or Limit)
-// @route   POST /api/orders/buy
-// @access  Private
-exports.buyStock = async (req, res) => {
-  const { stockSymbol, quantity, orderType, limitPrice } = req.body;
-  const userId = req.user._id;
+// ─── In-memory helpers ──────────────────────────────────────────────────────────
+function memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, currentPrice) {
+  const mem = global.inMemoryDB;
+  const user = mem.users.get(userId);
+  if (!user) return { error: 'User not found', status: 404 };
 
-  if (!stockSymbol || !quantity || quantity <= 0) {
-    return res.status(400).json({ message: 'Invalid stock or quantity' });
+  const executionPrice = orderType === 'LIMIT' ? limitPrice : currentPrice;
+  const totalCost = executionPrice * quantity;
+  if (user.balance < totalCost) return { error: 'Insufficient funds', status: 400 };
+
+  user.balance -= totalCost;
+
+  const order = {
+    _id: crypto.randomUUID(), user: userId, stock: stockSymbol, type: 'BUY',
+    orderType: orderType || 'MARKET', limitPrice: orderType === 'LIMIT' ? limitPrice : undefined,
+    quantity, price: executionPrice,
+    status: orderType === 'LIMIT' ? 'PENDING' : 'COMPLETED',
+    createdAt: new Date().toISOString(),
+  };
+  mem.orders.set(order._id, order);
+
+  if (orderType !== 'LIMIT') {
+    const hKey = `${userId}:${stockSymbol}`;
+    const holding = mem.holdings.get(hKey);
+    if (holding) {
+      const newQty = holding.quantity + quantity;
+      holding.avgPrice = (holding.quantity * holding.avgPrice + totalCost) / newQty;
+      holding.quantity = newQty;
+    } else {
+      mem.holdings.set(hKey, { user: userId, stock: stockSymbol, quantity, avgPrice: currentPrice });
+    }
+  }
+  return { order };
+}
+
+function memSellStock(userId, stockSymbol, quantity, currentPrice) {
+  const mem = global.inMemoryDB;
+  const user = mem.users.get(userId);
+  if (!user) return { error: 'User not found', status: 404 };
+
+  const hKey = `${userId}:${stockSymbol}`;
+  const holding = mem.holdings.get(hKey);
+  if (!holding || holding.quantity < quantity) {
+    return { error: 'Insufficient holdings', status: 400 };
   }
 
-  if (orderType === 'LIMIT' && (!limitPrice || limitPrice <= 0)) {
-    return res.status(400).json({ message: 'Limit price is required for Limit Orders' });
+  const totalRevenue = currentPrice * quantity;
+  user.balance += totalRevenue;
+  holding.quantity -= quantity;
+  if (holding.quantity === 0) mem.holdings.delete(hKey);
+
+  const order = {
+    _id: crypto.randomUUID(), user: userId, stock: stockSymbol, type: 'SELL',
+    orderType: 'MARKET', quantity, price: currentPrice, status: 'COMPLETED',
+    createdAt: new Date().toISOString(),
+  };
+  mem.orders.set(order._id, order);
+  return { order };
+}
+
+// ─── Buy Stock ─────────────────────────────────────────────────────────────────
+exports.buyStock = async (req, res) => {
+  const { stockSymbol, quantity, orderType, limitPrice } = req.body;
+  const userId = req.user._id || req.user.id;
+
+  if (!stockSymbol || !quantity || quantity <= 0)
+    return res.status(400).json({ message: 'Invalid stock or quantity' });
+  if (orderType === 'LIMIT' && (!limitPrice || limitPrice <= 0))
+    return res.status(400).json({ message: 'Limit price required for Limit Orders' });
+
+  const prices = getPrices();
+  const currentPrice = prices[stockSymbol];
+  if (!currentPrice)
+    return res.status(400).json({ message: 'Stock price not available' });
+
+  if (!global.dbConnected) {
+    const result = memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, currentPrice);
+    if (result.error) return res.status(result.status).json({ message: result.error });
+    return res.status(201).json(result.order);
   }
 
   try {
-    // 1. Get current price
-    const prices = getPrices();
-    const currentPrice = prices[stockSymbol];
-
-    if (!currentPrice) {
-      return res.status(400).json({ message: 'Stock price not available' });
-    }
-
-    // Determine cost basis
-    // For MARKET: Cost = Current Price * Qty
-    // For LIMIT: Cost = Limit Price * Qty (We block funds based on Limit Price)
     const executionPrice = orderType === 'LIMIT' ? limitPrice : currentPrice;
     const totalCost = executionPrice * quantity;
-
-    // 2. Check User Balance
     const user = await User.findById(userId);
-    if (user.balance < totalCost) {
+    if (user.balance < totalCost)
       return res.status(400).json({ message: 'Insufficient funds' });
-    }
 
-    // 3. Deduct Balance (Block funds immediately for both Market and Limit)
     user.balance -= totalCost;
     await user.save();
 
-    // 4. Process Order based on Type
     if (orderType === 'LIMIT') {
-      // Create PENDING Order
       const order = await Order.create({
-        user: userId,
-        stock: stockSymbol,
-        type: 'BUY',
-        orderType: 'LIMIT',
-        limitPrice: limitPrice,
-        quantity,
-        price: limitPrice, // Target Price
-        status: 'PENDING'
+        user: userId, stock: stockSymbol, type: 'BUY', orderType: 'LIMIT',
+        limitPrice, quantity, price: limitPrice, status: 'PENDING'
       });
-      
       return res.status(201).json(order);
-    } 
-    
-    // MARKET ORDER EXECUTION (Immediate)
-    
-    // Update Holding directly
-    let holding = await Holding.findOne({ user: userId, stock: stockSymbol });
-
-    if (holding) {
-      const oldTotalValue = holding.quantity * holding.avgPrice;
-      const newTotalValue = oldTotalValue + totalCost;
-      const newQuantity = holding.quantity + quantity;
-      
-      holding.avgPrice = newTotalValue / newQuantity;
-      holding.quantity = newQuantity;
-      await holding.save();
-    } else {
-      holding = await Holding.create({
-        user: userId,
-        stock: stockSymbol,
-        quantity: quantity,
-        avgPrice: currentPrice
-      });
     }
 
-    // Create COMPLETED Order
+    let holding = await Holding.findOne({ user: userId, stock: stockSymbol });
+    if (holding) {
+      const newQty = holding.quantity + quantity;
+      holding.avgPrice = (holding.quantity * holding.avgPrice + totalCost) / newQty;
+      holding.quantity = newQty;
+      await holding.save();
+    } else {
+      holding = await Holding.create({ user: userId, stock: stockSymbol, quantity, avgPrice: currentPrice });
+    }
+
     const order = await Order.create({
-      user: userId,
-      stock: stockSymbol,
-      type: 'BUY',
-      orderType: 'MARKET',
-      quantity,
-      price: currentPrice,
-      status: 'COMPLETED'
+      user: userId, stock: stockSymbol, type: 'BUY', orderType: 'MARKET',
+      quantity, price: currentPrice, status: 'COMPLETED'
     });
-
     res.status(201).json(order);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error during Buy' });
   }
 };
 
-// @desc    Sell stock (Market or Limit)
-// @route   POST /api/orders/sell
-// @access  Private
+// ─── Sell Stock ────────────────────────────────────────────────────────────────
 exports.sellStock = async (req, res) => {
   const { stockSymbol, quantity, orderType, limitPrice } = req.body;
-  const userId = req.user._id;
+  const userId = req.user._id || req.user.id;
 
-  if (!stockSymbol || !quantity || quantity <= 0) {
+  if (!stockSymbol || !quantity || quantity <= 0)
     return res.status(400).json({ message: 'Invalid stock or quantity' });
-  }
 
-  if (orderType === 'LIMIT' && (!limitPrice || limitPrice <= 0)) {
-    return res.status(400).json({ message: 'Limit price is required for Limit Orders' });
+  const prices = getPrices();
+  const currentPrice = prices[stockSymbol];
+  if (!currentPrice)
+    return res.status(400).json({ message: 'Stock price not available' });
+
+  if (!global.dbConnected) {
+    const result = memSellStock(userId, stockSymbol, quantity, currentPrice);
+    if (result.error) return res.status(result.status).json({ message: result.error });
+    return res.status(201).json(result.order);
   }
 
   try {
-    // 1. Get current price
-    const prices = getPrices();
-    const currentPrice = prices[stockSymbol];
-
-    if (!currentPrice) {
-      return res.status(400).json({ message: 'Stock price not available' });
-    }
-
-    // 2. Check Holdings or Short Sell Availability
     let holding = await Holding.findOne({ user: userId, stock: stockSymbol });
-
-    // SIMPLE SHORT SELLING MODEL
-    // 1. If valid Long holding exists, Sell it.
-    // 2. If no holding or Short holding exists, Enter/Add to Short.
-
     if (holding && holding.quantity > 0) {
-        // LONG EXIT LOGIC
-        if (holding.quantity < quantity) {
-             return res.status(400).json({ message: 'Insufficient holdings (Partial short not supported)' });
-        }
-        
-        // Update Balance
-        const totalRevenue = currentPrice * quantity;
-        const user = await User.findById(userId);
-        user.balance += totalRevenue;
-        await user.save();
-
-        // Update Holding
-        holding.quantity -= quantity;
-        if (holding.quantity === 0) {
-            await Holding.deleteOne({ _id: holding._id });
-        } else {
-            await holding.save();
-        }
-
+      if (holding.quantity < quantity)
+        return res.status(400).json({ message: 'Insufficient holdings' });
+      const totalRevenue = currentPrice * quantity;
+      const user = await User.findById(userId);
+      user.balance += totalRevenue;
+      await user.save();
+      holding.quantity -= quantity;
+      if (holding.quantity === 0) await Holding.deleteOne({ _id: holding._id });
+      else await holding.save();
     } else {
-        // SHORT ENTRY LOGIC
-        // We credit cash, but tracking negative quantity.
-        
-        const totalRevenue = currentPrice * quantity;
-        const user = await User.findById(userId);
-        user.balance += totalRevenue;
-        await user.save();
-
-        if (holding) {
-             // Already Short, adding to position
-             const oldTotalValue = Math.abs(holding.quantity) * holding.avgPrice;
-             const newTotalValue = oldTotalValue + (currentPrice * quantity);
-             const newQuantity = Math.abs(holding.quantity) + quantity;
-
-             holding.avgPrice = newTotalValue / newQuantity;
-             holding.quantity -= quantity; // Becomes more negative
-             await holding.save();
-        } else {
-            // New Short Position
-            await Holding.create({
-                user: userId,
-                stock: stockSymbol,
-                quantity: -quantity,
-                avgPrice: currentPrice,
-                isShort: true
-            });
-        }
+      const totalRevenue = currentPrice * quantity;
+      const user = await User.findById(userId);
+      user.balance += totalRevenue;
+      await user.save();
+      if (holding) {
+        holding.quantity -= quantity;
+        await holding.save();
+      } else {
+        await Holding.create({ user: userId, stock: stockSymbol, quantity: -quantity, avgPrice: currentPrice, isShort: true });
+      }
     }
 
-    // 3. Create Order Record (Standard)
     const order = await Order.create({
-      user: userId,
-      stock: stockSymbol,
-      type: 'SELL',
-      orderType: orderType || 'MARKET',
-      quantity,
-      price: currentPrice,
-      status: 'COMPLETED'
+      user: userId, stock: stockSymbol, type: 'SELL',
+      orderType: orderType || 'MARKET', quantity, price: currentPrice, status: 'COMPLETED'
     });
-
     return res.status(201).json(order);
   } catch (error) {
     console.error(error);
@@ -201,100 +179,66 @@ exports.sellStock = async (req, res) => {
   }
 };
 
-// @desc    Get user orders history
-// @route   GET /api/orders
-// @access  Private
-const getOrders = async (req, res) =>{
-    try {
-        const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
-        res.json(orders);
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching orders" });
+// ─── Get Orders ────────────────────────────────────────────────────────────────
+const getOrders = async (req, res) => {
+  const userId = req.user._id || req.user.id;
+  if (!global.dbConnected) {
+    const mem = global.inMemoryDB;
+    const orders = [];
+    for (const [, o] of mem.orders) {
+      if (o.user === userId || o.user?.toString() === userId?.toString()) orders.push(o);
     }
+    orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return res.json(orders);
+  }
+  try {
+    const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching orders' });
+  }
 };
 
-/**
- * Cancel a pending order
- * DELETE /api/orders/:orderId
- */
+// ─── Cancel Order ──────────────────────────────────────────────────────────────
 const cancelOrder = async (req, res) => {
+  const { orderId } = req.params;
+  const userId = req.user._id || req.user.id;
+
+  if (!global.dbConnected) {
+    const mem = global.inMemoryDB;
+    const order = mem.orders.get(orderId);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    if (order.status !== 'PENDING') return res.status(400).json({ message: `Cannot cancel order with status: ${order.status}` });
+    order.status = 'CANCELLED';
+    order.cancelledAt = new Date().toISOString();
+    // Refund
+    const user = mem.users.get(userId);
+    if (user && order.type === 'BUY') user.balance += order.price * order.quantity;
+    return res.json({ success: true, message: 'Order cancelled', order });
+  }
+
   try {
-    const { orderId } = req.params;
-    const userId = req.user._id;
-
-    // Find the order
+    const { notifyOrderCancelled } = require('../services/orderNotifications');
     const order = await Order.findById(orderId);
-    
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
-
-    // Verify order belongs to user
-    if (order.user.toString() !== userId.toString()) {
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    if (order.user.toString() !== userId.toString())
       return res.status(403).json({ message: 'Unauthorized to cancel this order' });
-    }
-
-    // Check if order can be cancelled
-    if (order.status !== 'PENDING') {
-      return res.status(400).json({ 
-        message: `Cannot cancel order with status: ${order.status}` 
-      });
-    }
+    if (order.status !== 'PENDING')
+      return res.status(400).json({ message: `Cannot cancel order with status: ${order.status}` });
 
     const user = await User.findById(userId);
-    let refundAmount = 0;
-
-    // Unblock funds or holdings based on order type
-    if (order.type === 'BUY') {
-      // Refund blocked funds
-      refundAmount = order.price * order.quantity;
-      user.balance += refundAmount;
-      
-    } else if (order.type === 'SELL') {
-      // Unblock holdings
-      const holding = await Holding.findOne({ 
-        user: userId, 
-        stock: order.stock 
-      });
-      
-      if (holding) {
-        holding.quantity += order.quantity;
-        await holding.save();
-      }
-    }
-
-    // Update order status
+    if (order.type === 'BUY') user.balance += order.price * order.quantity;
     order.status = 'CANCELLED';
     order.cancelledAt = new Date();
     order.cancelReason = 'User cancelled';
-
     await user.save();
     await order.save();
     await notifyOrderCancelled(order);
 
-    res.json({
-      success: true,
-      message: 'Order cancelled successfully',
-      order: {
-        orderId: order._id,
-        stock: order.stock,
-        type: order.type,
-        quantity: order.quantity,
-        status: order.status,
-        refundedAmount: refundAmount || null,
-        cancelledAt: order.cancelledAt
-      }
-    });
-
+    res.json({ success: true, message: 'Order cancelled successfully', order: { orderId: order._id, status: order.status } });
   } catch (error) {
-    console.error('Cancel Order Error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-module.exports = { 
-  buyStock: exports.buyStock, 
-  sellStock: exports.sellStock, 
-  getOrders, 
-  cancelOrder 
-};
+module.exports = { buyStock: exports.buyStock, sellStock: exports.sellStock, getOrders, cancelOrder };

@@ -1,0 +1,153 @@
+/* Google Font - must be first */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+@import "tailwindcss";
+
+/* ===== Dark Pro Trader Design Tokens ===== */
+@theme {
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Background colors → bg-dark, bg-card, bg-surface, bg-hover */
+  --color-dark: #0d1117;
+  --color-card: #161b22;
+  --color-surface: #1c2333;
+  --color-hover: #1f2937;
+
+  /* Border colors → border-edge, border-subtle */
+  --color-edge: #30363d;
+  --color-subtle: #21262d;
+
+  /* Accent → bg-accent, text-accent */
+  --color-accent: #58a6ff;
+  --color-accent-hover: #79b8ff;
+  --color-accent-muted: #1f3a5f;
+
+  /* Profit/Loss → text-profit, bg-profit, text-loss, bg-loss */
+  --color-profit: #26a641;
+  --color-profit-dim: #0d2818;
+  --color-loss: #f85149;
+  --color-loss-dim: #3d1418;
+
+  /* Text → text-primary, text-secondary, text-muted */
+  --color-primary: #e6edf3;
+  --color-secondary: #8b949e;
+  --color-muted: #6e7681;
+
+  /* Status */
+  --color-warning: #d29922;
+  --color-info: #58a6ff;
+}
+
+/* ===== Base Styles ===== */
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-dark text-primary font-sans antialiased;
+    line-height: 1.6;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-edge rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted;
+  }
+
+  /* Form elements */
+  input,
+  select,
+  textarea {
+    @apply bg-dark border border-edge text-primary rounded-md px-3 py-2 text-sm outline-none transition-colors duration-200;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply border-accent;
+  }
+  input::placeholder {
+    @apply text-muted;
+  }
+}
+
+/* ===== Custom Range Slider ===== */
+@layer components {
+  .slider-purple {
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(
+      to right,
+      #7c3aed var(--slider-pct, 50%),
+      #30363d var(--slider-pct, 50%)
+    );
+    border-radius: 999px;
+    height: 6px;
+    outline: none;
+  }
+  .slider-purple::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #7c3aed;
+    border: 3px solid #161b22;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.4);
+  }
+  .slider-purple::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #7c3aed;
+    border: 3px solid #161b22;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.4);
+  }
+}
+
+/* ===== Utility animations ===== */
+@layer utilities {
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

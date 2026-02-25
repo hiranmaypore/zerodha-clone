@@ -1,77 +1,57 @@
 const User = require('../models/User');
 
-/**
- * Deposit funds
- * POST /api/funds/deposit
- */
 exports.depositFunds = async (req, res) => {
+  const { amount } = req.body;
+  const userId = req.user._id || req.user.id;
+  if (!amount || amount <= 0) return res.status(400).json({ message: 'Amount must be greater than 0' });
+  if (amount > 10000000) return res.status(400).json({ message: 'Maximum deposit is ₹1,00,00,000' });
+
+  if (!global.dbConnected) {
+    const user = global.inMemoryDB.users.get(userId) || req.user;
+    user.balance = (user.balance || 0) + Number(amount);
+    return res.json({ success: true, message: `₹${amount.toLocaleString()} deposited`, balance: parseFloat(user.balance.toFixed(2)) });
+  }
   try {
-    const { amount } = req.body;
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ message: 'Amount must be greater than 0' });
-    }
-
-    if (amount > 10000000) {
-      return res.status(400).json({ message: 'Maximum deposit is ₹1,00,00,000' });
-    }
-
-    const user = await User.findById(req.user._id);
-    user.balance += amount;
+    const user = await User.findById(userId);
+    user.balance += Number(amount);
     await user.save();
-
-    res.json({
-      success: true,
-      message: `₹${amount.toLocaleString()} deposited successfully`,
-      balance: parseFloat(user.balance.toFixed(2))
-    });
+    res.json({ success: true, message: `₹${amount.toLocaleString()} deposited successfully`, balance: parseFloat(user.balance.toFixed(2)) });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-/**
- * Withdraw funds
- * POST /api/funds/withdraw
- */
 exports.withdrawFunds = async (req, res) => {
+  const { amount } = req.body;
+  const userId = req.user._id || req.user.id;
+  if (!amount || amount <= 0) return res.status(400).json({ message: 'Amount must be greater than 0' });
+
+  if (!global.dbConnected) {
+    const user = global.inMemoryDB.users.get(userId) || req.user;
+    if ((user.balance || 0) < amount) return res.status(400).json({ message: 'Insufficient balance' });
+    user.balance -= Number(amount);
+    return res.json({ success: true, message: `₹${amount.toLocaleString()} withdrawn`, balance: parseFloat(user.balance.toFixed(2)) });
+  }
   try {
-    const { amount } = req.body;
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ message: 'Amount must be greater than 0' });
-    }
-
-    const user = await User.findById(req.user._id);
-
-    if (user.balance < amount) {
-      return res.status(400).json({ message: 'Insufficient balance' });
-    }
-
-    user.balance -= amount;
+    const user = await User.findById(userId);
+    if (user.balance < amount) return res.status(400).json({ message: 'Insufficient balance' });
+    user.balance -= Number(amount);
     await user.save();
-
-    res.json({
-      success: true,
-      message: `₹${amount.toLocaleString()} withdrawn successfully`,
-      balance: parseFloat(user.balance.toFixed(2))
-    });
+    res.json({ success: true, message: `₹${amount.toLocaleString()} withdrawn successfully`, balance: parseFloat(user.balance.toFixed(2)) });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-/**
- * Get fund balance
- * GET /api/funds
- */
 exports.getBalance = async (req, res) => {
+  const userId = req.user._id || req.user.id;
+  if (!global.dbConnected) {
+    const user = global.inMemoryDB.users.get(userId) || req.user;
+    return res.json({ success: true, balance: parseFloat((user.balance || 0).toFixed(2)) });
+  }
   try {
-    const user = await User.findById(req.user._id).select('balance');
-    res.json({
-      success: true,
-      balance: parseFloat(user.balance.toFixed(2))
-    });
+    const user = await User.findById(userId).select('balance');
+    res.json({ success: true, balance: parseFloat(user.balance.toFixed(2)) });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

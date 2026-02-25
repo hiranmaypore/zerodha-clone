@@ -5,6 +5,17 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const connectDB = require("./config/db");
 
+// In-memory store for demo mode (when DB is down)
+const inMemoryDB = {
+  users: new Map(),   // id -> user
+  orders: new Map(),  // id -> order
+  holdings: new Map(), // userId:stock -> holding
+  _nextId: 1,
+  newId() { return String(this._nextId++); }
+};
+global.inMemoryDB = inMemoryDB;
+global.dbConnected = false;
+
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const orderRoutes = require("./routes/orderRoutes"); 
@@ -44,10 +55,18 @@ app.use("/api/prices", priceRoutes);
 app.use("/api/funds", fundsRoutes);
 app.use("/api/stocks", stockRoutes);
 
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    dbConnected: global.dbConnected,
+    mode: global.dbConnected ? 'live' : 'demo'
+  });
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
-    console.error('🔥 GLOBAL ERROR HANDLER:', err);
-    console.error('Stack:', err.stack);
+    console.error('🔥 GLOBAL ERROR HANDLER:', err.message);
     res.status(500).json({ message: err.message });
 });
 
@@ -59,25 +78,6 @@ const io = new Server(server, {
   }
 });
 
-// Initialize Order Notifications
-const { initializeNotifications } = require('./services/orderNotifications');
-initializeNotifications(io);
-
-// User room management for notifications
-io.on('connection', (socket) => {
-  console.log(`Client connected: ${socket.id}`);
-  
-  // Join user-specific room for notifications
-  socket.on('join_user_room', (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined their notification room`);
-  });
-  
-  socket.on('disconnect', () => {
-    console.log(`Client disconnected: ${socket.id}`);
-  });
-});
-
 // Initialize Price Engine
 async function initPrices() {
   const initialPrices = {};
@@ -85,17 +85,15 @@ async function initPrices() {
 
   for (let stock of stocks) {
     const price = await fetchStockPrice(stock.symbol);
-    
     if (price) {
-        initialPrices[stock.symbol] = price;
+      initialPrices[stock.symbol] = price;
     } else {
-        const randomFallback = Math.floor(Math.random() * (3000 - 500) + 500); 
-        console.log(`Using fallback price for ${stock.symbol}: ${randomFallback}`);
-        initialPrices[stock.symbol] = randomFallback;
+      const randomFallback = Math.floor(Math.random() * (3000 - 500) + 500); 
+      initialPrices[stock.symbol] = randomFallback;
     }
   }
 
-  console.log("Initial Prices Set:", initialPrices);
+  console.log("✅ Initial Prices Set");
   setInitialPrices(initialPrices);
 }
 
@@ -104,16 +102,47 @@ const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
-    await connectDB();
+    // Try DB — non-fatal
+    const dbOk = await connectDB();
+    global.dbConnected = !!dbOk;
+
+    if (!dbOk) {
+      console.log("🟡 Demo Mode: Using in-memory store. Prices & WebSocket still work.");
+    }
+
+    // Always start price engine
     await initPrices();
     startSimulation(io);
-    startMatchingEngine();
-    startPriceHistoryService();
+
+    // Always start these (they handle demo mode internally)
+    try { startMatchingEngine(); } catch(e) { console.warn('Matching engine warn:', e.message); }
+    try { startPriceHistoryService(); } catch(e) { console.warn('Price history warn:', e.message); }
+
     priceSocket(io, getPrices);
 
+    // Notifications (only if DB connected)
+    if (dbOk) {
+      try {
+        const { initializeNotifications } = require('./services/orderNotifications');
+        initializeNotifications(io);
+      } catch(e) { console.warn('Notifications skipped:', e.message); }
+    }
+
+    // User room management
+    io.on('connection', (socket) => {
+      console.log(`Client connected: ${socket.id}`);
+      
+      socket.on('join_user_room', (userId) => {
+        socket.join(userId);
+      });
+      
+      socket.on('disconnect', () => {
+        console.log(`Client disconnected: ${socket.id}`);
+      });
+    });
+
     server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Routes loaded: /api/auth, /api/orders, /api/holdings, /api/prices`);
+      console.log(`🚀 Server running on port ${PORT} (${global.dbConnected ? '🟢 Live DB' : '🟡 Demo Mode'})`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
