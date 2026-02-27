@@ -1,138 +1,184 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BarChart2, ArrowUpDown } from 'lucide-react';
 
-// Generate realistic order book levels around a price
-function generateLevels(price, count = 8, side = 'ask') {
-  if (!price || price <= 0) return [];
-  const levels = [];
-  const maxTotal = Math.floor(Math.random() * 10000 + 5000);
-  let cumTotal = 0;
-  for (let i = 0; i < count; i++) {
-    const offset = (i + 1) * (price * 0.0005) * (side === 'ask' ? 1 : -1);
-    const levelPrice = +(price + offset).toFixed(2);
-    const qty = Math.floor(Math.random() * 400 + 50);
-    cumTotal += qty * levelPrice;
-    levels.push({ price: levelPrice, qty, total: Math.min(cumTotal, maxTotal) });
-  }
-  const maxT = levels[levels.length - 1]?.total || 1;
-  return levels.map(l => ({ ...l, pct: (l.total / maxT) * 100 }));
+// Stable level generation — call once, then nudge
+function buildLevels(basePrice, count, side) {
+  if (!basePrice || basePrice <= 0) return [];
+  return Array.from({ length: count }, (_, i) => {
+    const tick   = basePrice * 0.0005 * (i + 1) * (side === 'ask' ? 1 : -1);
+    const price  = +(basePrice + tick).toFixed(2);
+    const qty    = Math.floor(Math.random() * 500 + 80);
+    return { price, qty, orders: Math.floor(Math.random() * 8 + 1) };
+  });
+}
+
+// Re-compute cumulative totals + fill %
+function addDepth(levels) {
+  const total = levels.reduce((s, r) => s + r.qty, 0) || 1;
+  let cum = 0;
+  return levels.map(r => { cum += r.qty; return { ...r, cum, pct: Math.round((cum / total) * 100) }; });
 }
 
 export default function OrderBook({ selectedStock, livePrices = {}, orders = [] }) {
-  const [activeTab, setActiveTab] = useState('orderbook');
-  const [askData, setAskData] = useState([]);
-  const [bidData, setBidData] = useState([]);
+  const [activeTab, setActiveTab] = useState('book');
+  const askRef  = useRef([]);
+  const bidRef  = useRef([]);
+  const [asks, setAsks] = useState([]);
+  const [bids, setBids] = useState([]);
 
-  const currentPrice = selectedStock
+  const price = selectedStock
     ? (livePrices[selectedStock.symbol] || selectedStock.price || 0)
     : 0;
 
+  // Build fresh levels only when stock changes
   useEffect(() => {
-    if (!currentPrice) return;
-    setAskData(generateLevels(currentPrice, 7, 'ask'));
-    setBidData(generateLevels(currentPrice, 7, 'bid'));
-  }, [currentPrice]);
+    if (!price) return;
+    askRef.current = buildLevels(price, 7, 'ask');
+    bidRef.current = buildLevels(price, 7, 'bid');
+    setAsks(addDepth([...askRef.current]));
+    setBids(addDepth([...bidRef.current]));
+  }, [selectedStock?.symbol]);
 
-  const spread = askData[0] && bidData[0]
-    ? Math.abs(askData[0].price - bidData[0].price).toFixed(2)
+  // On price tick: nudge levels slightly instead of rebuilding
+  useEffect(() => {
+    if (!price || askRef.current.length === 0) return;
+    askRef.current = askRef.current.map((r, i) => ({
+      ...r,
+      price: +(price + price * 0.0005 * (i + 1)).toFixed(2),
+      qty:   Math.max(50, r.qty + Math.floor((Math.random() - 0.5) * 60)),
+    }));
+    bidRef.current = bidRef.current.map((r, i) => ({
+      ...r,
+      price: +(price - price * 0.0005 * (i + 1)).toFixed(2),
+      qty:   Math.max(50, r.qty + Math.floor((Math.random() - 0.5) * 60)),
+    }));
+    setAsks(addDepth([...askRef.current]));
+    setBids(addDepth([...bidRef.current]));
+  }, [price]);
+
+  const spread = asks[0] && bids[0]
+    ? (asks[0].price - bids[0].price).toFixed(2)
     : '—';
 
-  const completedOrders = orders.filter(o => o.status === 'COMPLETED').slice(0, 10);
+  const trades = orders
+    .filter(o => o.status === 'COMPLETED')
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 15);
+
+  const symbol = selectedStock?.symbol || 'BOOK';
 
   return (
-    <div className="bg-card border border-edge rounded-2xl flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <div className="px-3 py-2.5 border-b border-edge flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <BarChart2 className="w-3.5 h-3.5 text-blue-400" />
-          <span className="text-xs font-semibold text-primary">
-            {selectedStock?.symbol || 'Book'}
-          </span>
+    <div className="bg-card border border-edge rounded-xl flex flex-col h-full overflow-hidden">
+
+      {/* ── Header ── */}
+      <div className="px-3 py-2 border-b border-edge flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-1.5">
+          <BarChart2 className="w-3 h-3 text-accent shrink-0" />
+          <span className="text-xs font-bold text-primary">{symbol}</span>
         </div>
-        <div className="flex items-center gap-1">
-          {['orderbook', 'trades'].map(t => (
+        <div className="flex items-center gap-0.5">
+          {[['book', 'Book'], ['trades', 'Trades']].map(([id, label]) => (
             <button
-              key={t}
-              onClick={() => setActiveTab(t)}
-              className={`text-[10px] px-2 py-0.5 rounded-full font-medium transition-all ${
-                activeTab === t ? 'bg-accent text-dark' : 'text-muted hover:text-primary'
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`text-[10px] px-2 py-0.5 rounded font-medium transition-colors ${
+                activeTab === id
+                  ? 'bg-accent/15 text-accent'
+                  : 'text-muted hover:text-primary'
               }`}
             >
-              {t === 'orderbook' ? 'Book' : 'Trades'}
+              {label}
             </button>
           ))}
         </div>
       </div>
 
-      {activeTab === 'orderbook' ? (
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+      {activeTab === 'book' ? (
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+
           {/* Column headers */}
-          <div className="flex justify-between px-2 py-1 text-[9px] text-muted border-b border-edge/50">
-            <span>Price</span><span>Qty</span><span>Total</span>
+          <div className="grid grid-cols-3 px-2 py-1 text-[9px] text-muted border-b border-edge/30 shrink-0">
+            <span>Price</span>
+            <span className="text-center">Qty</span>
+            <span className="text-right">Orders</span>
           </div>
 
-          {/* ASKs (sells) */}
-          <div className="flex-1 overflow-y-auto min-h-0 flex flex-col-reverse">
-            {[...askData].reverse().map((row, i) => (
-              <div key={i} className="relative flex justify-between items-center px-2 py-0.5 group cursor-default">
-                <div
-                  className="absolute inset-0 bg-loss/8 origin-right"
-                  style={{ width: `${row.pct}%`, left: 'auto', right: 0 }}
-                />
-                <span className="relative text-[10px] font-mono text-loss z-10">₹{row.price}</span>
-                <span className="relative text-[10px] font-mono text-muted z-10">{row.qty}</span>
-                <span className="relative text-[9px] font-mono text-muted/60 z-10">{(row.total / 1000).toFixed(1)}K</span>
+          {/* ASKs — shown reversed (closest to spread at bottom) */}
+          <div className="flex-1 flex flex-col-reverse overflow-y-auto min-h-0">
+            {[...asks].reverse().map((row, i) => (
+              <div key={i} className="relative grid grid-cols-3 items-center px-2 py-[3px] hover:bg-surface/40 cursor-default">
+                <div className="absolute inset-y-0 right-0 bg-loss/10" style={{ width: `${row.pct}%` }} />
+                <span className="relative z-10 text-[10px] font-mono text-loss">{row.price.toFixed(2)}</span>
+                <span className="relative z-10 text-[10px] font-mono text-secondary text-center">{row.qty}</span>
+                <span className="relative z-10 text-[9px] text-muted text-right">{row.orders}</span>
               </div>
             ))}
           </div>
 
-          {/* Spread / LTP */}
-          <div className="px-3 py-1.5 bg-surface border-y border-edge flex items-center justify-between">
-            <span className="text-xs font-bold font-mono text-secondary">₹{currentPrice.toFixed(2)}</span>
+          {/* Spread / LTP divider */}
+          <div className="shrink-0 px-2 py-1 bg-surface/60 border-y border-edge flex items-center justify-between">
+            <span className="text-[11px] font-bold font-mono text-primary">
+              ₹{price.toFixed(2)}
+            </span>
             <div className="flex items-center gap-1 text-[9px] text-muted">
               <ArrowUpDown className="w-2.5 h-2.5" />
-              Spread: {spread}
+              {spread}
             </div>
           </div>
 
-          {/* BIDs (buys) */}
+          {/* BIDs */}
           <div className="flex-1 overflow-y-auto min-h-0">
-            {bidData.map((row, i) => (
-              <div key={i} className="relative flex justify-between items-center px-2 py-0.5 group cursor-default">
-                <div
-                  className="absolute inset-0 bg-profit/8"
-                  style={{ width: `${row.pct}%` }}
-                />
-                <span className="relative text-[10px] font-mono text-profit z-10">₹{row.price}</span>
-                <span className="relative text-[10px] font-mono text-muted z-10">{row.qty}</span>
-                <span className="relative text-[9px] font-mono text-muted/60 z-10">{(row.total / 1000).toFixed(1)}K</span>
+            {bids.map((row, i) => (
+              <div key={i} className="relative grid grid-cols-3 items-center px-2 py-[3px] hover:bg-surface/40 cursor-default">
+                <div className="absolute inset-y-0 left-0 bg-profit/10" style={{ width: `${row.pct}%` }} />
+                <span className="relative z-10 text-[10px] font-mono text-profit">{row.price.toFixed(2)}</span>
+                <span className="relative z-10 text-[10px] font-mono text-secondary text-center">{row.qty}</span>
+                <span className="relative z-10 text-[9px] text-muted text-right">{row.orders}</span>
               </div>
             ))}
+          </div>
+
+          {/* Total bid / ask qty footer */}
+          <div className="shrink-0 grid grid-cols-2 border-t border-edge">
+            <div className="px-2 py-1 text-center">
+              <div className="text-[9px] text-muted">Total Buy</div>
+              <div className="text-[10px] font-bold text-profit">
+                {bids.reduce((s, r) => s + r.qty, 0).toLocaleString()}
+              </div>
+            </div>
+            <div className="px-2 py-1 text-center border-l border-edge">
+              <div className="text-[9px] text-muted">Total Sell</div>
+              <div className="text-[10px] font-bold text-loss">
+                {asks.reduce((s, r) => s + r.qty, 0).toLocaleString()}
+              </div>
+            </div>
           </div>
         </div>
       ) : (
-        /* Trades view */
+        /* ── Trades tab ── */
         <div className="flex-1 overflow-y-auto min-h-0">
-          {completedOrders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-2 py-6">
-              <BarChart2 className="w-7 h-7 text-muted/30" />
-              <p className="text-xs text-muted">No trades yet</p>
+          <div className="grid grid-cols-4 px-2 py-1 text-[9px] text-muted border-b border-edge/30 sticky top-0 bg-card">
+            <span>Side</span>
+            <span>Price</span>
+            <span className="text-center">Qty</span>
+            <span className="text-right">Time</span>
+          </div>
+          {trades.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-24 gap-2">
+              <BarChart2 className="w-6 h-6 text-muted/20" />
+              <p className="text-[10px] text-muted">No trades yet</p>
             </div>
           ) : (
-            <div className="divide-y divide-edge/50">
-              {completedOrders.map(order => (
-                <div key={order._id} className="flex items-center justify-between px-3 py-1.5">
-                  <span className={`text-[10px] font-bold ${order.type === 'BUY' ? 'text-profit' : 'text-loss'}`}>
-                    {order.type}
-                  </span>
-                  <span className="text-[10px] font-mono text-primary">₹{(order.price || 0).toFixed(2)}</span>
-                  <span className="text-[10px] text-muted">{order.quantity}</span>
-                  <span className="text-[9px] text-muted">
-                    {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-              ))}
-            </div>
+            trades.map(o => (
+              <div key={o._id} className="grid grid-cols-4 items-center px-2 py-1 border-b border-edge/20 hover:bg-surface/40">
+                <span className={`text-[10px] font-bold ${o.type === 'BUY' ? 'text-profit' : 'text-loss'}`}>{o.type}</span>
+                <span className="text-[10px] font-mono text-primary">{(o.price || 0).toFixed(2)}</span>
+                <span className="text-[10px] font-mono text-secondary text-center">{o.quantity}</span>
+                <span className="text-[9px] text-muted text-right">
+                  {new Date(o.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </span>
+              </div>
+            ))
           )}
         </div>
       )}

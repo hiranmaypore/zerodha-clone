@@ -1,26 +1,33 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getWatchlist, removeFromWatchlist } from '../services/api';
+import { getWatchlist } from '../services/api';
+import { useWatchlist } from '../hooks/useWatchlist';
 import { connectSocket } from '../services/socket';
-import { Star, Trash2, X } from 'lucide-react';
+import { Star, TrendingUp, TrendingDown, Minus, BarChart2, Trash2 } from 'lucide-react';
 
 export default function Watchlist() {
   const navigate = useNavigate();
-  const [watchlist, setWatchlist] = useState(null);
-  const [prices, setPrices] = useState({});
+  const [stocks, setStocks]   = useState([]);
+  const [prices, setPrices]   = useState({});
   const [loading, setLoading] = useState(true);
+  const { isWatched, toggle }  = useWatchlist();
 
   useEffect(() => {
     loadWatchlist();
     const socket = connectSocket();
-    socket.on('price_update', setPrices);
+    socket.on('price_update', (incoming) => setPrices(prev => ({ ...prev, ...incoming })));
     return () => socket.off('price_update');
   }, []);
 
   const loadWatchlist = async () => {
     try {
       const res = await getWatchlist();
-      setWatchlist(res.data);
+      const list = res.data?.watchlist || res.data?.stocks || [];
+      setStocks(list);
+      // seed prices from initial data
+      const seed = {};
+      list.forEach(s => { if (s.currentPrice) seed[s.symbol] = s.currentPrice; });
+      setPrices(prev => ({ ...seed, ...prev }));
     } catch (err) {
       console.error(err);
     } finally {
@@ -29,12 +36,8 @@ export default function Watchlist() {
   };
 
   const handleRemove = async (symbol) => {
-    try {
-      await removeFromWatchlist(symbol);
-      loadWatchlist();
-    } catch (err) {
-      console.error(err);
-    }
+    await toggle(symbol);
+    setStocks(prev => prev.filter(s => s.symbol !== symbol));
   };
 
   if (loading) {
@@ -45,41 +48,89 @@ export default function Watchlist() {
     );
   }
 
-  const stocks = watchlist?.stocks || [];
-
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-primary">Watchlist</h1>
-        <p className="text-secondary text-sm mt-1">{stocks.length}/50 stocks saved</p>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-primary">Watchlist</h1>
+          <p className="text-secondary text-sm mt-1">{stocks.length}/50 stocks tracked</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted bg-card border border-edge rounded-xl px-3 py-2">
+          <Star className="w-3.5 h-3.5 text-warning fill-warning" />
+          Click the ★ on any chart stock to add it here
+        </div>
       </div>
 
+      {/* Table */}
       <div className="bg-card border border-edge rounded-xl overflow-hidden">
+        {/* Column headers */}
+        {stocks.length > 0 && (
+          <div className="px-5 py-2 grid grid-cols-12 text-[10px] text-muted border-b border-edge font-medium uppercase tracking-wide">
+            <div className="col-span-5">Stock</div>
+            <div className="col-span-3 text-right">Price</div>
+            <div className="col-span-3 text-right">Change</div>
+            <div className="col-span-1" />
+          </div>
+        )}
+
         {stocks.length > 0 ? (
           <div className="divide-y divide-edge">
             {stocks.map(stock => {
-              const price = prices[stock.symbol] || stock.currentPrice;
+              const price   = prices[stock.symbol] ?? stock.currentPrice ?? 0;
+              const base    = stock.currentPrice || price;
+              const change  = base ? price - base : 0;
+              const changePct = base ? (change / base) * 100 : 0;
+              const isUp    = changePct >= 0.05;
+              const isDown  = changePct <= -0.05;
+
               return (
                 <div
                   key={stock.symbol}
                   onClick={() => navigate(`/dashboard?stock=${stock.symbol}`)}
-                  className="px-5 py-4 flex items-center justify-between hover:bg-hover transition-colors cursor-pointer group"
+                  className="px-5 py-3.5 grid grid-cols-12 items-center hover:bg-surface/60 transition-colors cursor-pointer group"
                 >
-                  <div className="flex items-center gap-3">
-                    <Star className="w-4 h-4 text-warning fill-warning shrink-0" />
+                  {/* Symbol + name */}
+                  <div className="col-span-5 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      {stock.symbol.charAt(0)}
+                    </div>
                     <div>
-                      <p className="text-sm font-semibold text-primary">{stock.symbol}</p>
-                      <p className="text-xs text-muted">{stock.name || stock.symbol}</p>
+                      <div className="text-sm font-semibold text-primary">{stock.symbol}</div>
+                      <div className="text-[10px] text-muted truncate max-w-[120px]">{stock.name}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <p className="text-xs text-accent opacity-0 group-hover:opacity-100 transition-opacity">View chart →</p>
-                    <p className="text-sm font-bold text-primary">₹{price?.toFixed(2) || '—'}</p>
+
+                  {/* Price */}
+                  <div className="col-span-3 text-right">
+                    <span className="text-sm font-bold font-mono text-primary">
+                      ₹{price.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* Change */}
+                  <div className={`col-span-3 flex items-center justify-end gap-0.5 text-xs font-mono font-semibold ${
+                    isUp ? 'text-profit' : isDown ? 'text-loss' : 'text-muted'
+                  }`}>
+                    {isUp ? <TrendingUp className="w-3.5 h-3.5" /> : isDown ? <TrendingDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
+                    {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
+                  </div>
+
+                  {/* Actions */}
+                  <div className="col-span-1 flex items-center justify-end gap-1">
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleRemove(stock.symbol); }}
-                      className="p-1.5 rounded-lg text-muted hover:text-loss hover:bg-loss-dim transition-all cursor-pointer"
+                      onClick={e => { e.stopPropagation(); navigate(`/dashboard?stock=${stock.symbol}`); }}
+                      title="View chart"
+                      className="p-1.5 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all opacity-0 group-hover:opacity-100"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <BarChart2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); handleRemove(stock.symbol); }}
+                      title="Remove from watchlist"
+                      className="p-1.5 rounded-lg text-muted hover:text-loss hover:bg-loss/10 transition-all opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -87,9 +138,18 @@ export default function Watchlist() {
             })}
           </div>
         ) : (
-          <div className="py-12 text-center text-muted text-sm">
-            <Star className="w-8 h-8 mx-auto mb-3 opacity-50" />
-            Your watchlist is empty. Add stocks from the Market page!
+          <div className="py-16 text-center space-y-3">
+            <Star className="w-10 h-10 mx-auto text-muted/20" />
+            <p className="text-sm text-muted">Your watchlist is empty</p>
+            <p className="text-xs text-muted/60">
+              Click the <Star className="inline w-3 h-3 text-warning fill-warning mx-0.5" /> icon next to any stock on the dashboard to add it here.
+            </p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="mt-2 px-4 py-2 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent/80 transition-colors"
+            >
+              Go to Dashboard
+            </button>
           </div>
         )}
       </div>

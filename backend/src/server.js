@@ -81,19 +81,15 @@ const io = new Server(server, {
 // Initialize Price Engine
 async function initPrices() {
   const initialPrices = {};
-  console.log("Fetching initial stock prices...");
+  console.log("⏳ Setting initial stock prices...");
 
-  for (let stock of stocks) {
-    const price = await fetchStockPrice(stock.symbol);
-    if (price) {
-      initialPrices[stock.symbol] = price;
-    } else {
-      const randomFallback = Math.floor(Math.random() * (3000 - 500) + 500); 
-      initialPrices[stock.symbol] = randomFallback;
-    }
-  }
+  await Promise.all(
+    stocks.map(async (stock) => {
+      initialPrices[stock.symbol] = await fetchStockPrice(stock.symbol);
+    })
+  );
 
-  console.log("✅ Initial Prices Set");
+  console.log("✅ Initial Prices Set:", Object.keys(initialPrices).join(", "));
   setInitialPrices(initialPrices);
 }
 

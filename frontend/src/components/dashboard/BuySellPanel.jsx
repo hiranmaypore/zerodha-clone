@@ -1,36 +1,29 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { buyOrder, sellOrder } from '../../services/api';
-import { TrendingUp, TrendingDown, AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Minus, Plus } from 'lucide-react';
 
 export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderPlaced, userBalance }) {
   const { user } = useAuth();
   const balance = userBalance ?? user?.balance ?? 0;
 
-  const [activeTab, setActiveTab] = useState('buy');
-  const [quantity, setQuantity] = useState('1');
-  const [orderType, setOrderType] = useState('MARKET');
-  const [limitPrice, setLimitPrice] = useState('');
-  const [sliderValue, setSliderValue] = useState(25);
+  const [tab, setTab]         = useState('buy');
+  const [qty, setQty]         = useState(1);
+  const [orderType, setOT]    = useState('MARKET');
+  const [limitPrice, setLP]   = useState('');
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState(null); // { type: 'success'|'error', text }
+  const [msg, setMsg]         = useState(null);
 
-  const qty = parseInt(quantity) || 0;
-  const execPrice = orderType === 'LIMIT' ? parseFloat(limitPrice) || currentPrice : currentPrice;
-  const totalCost = qty * execPrice;
-  const brokerage = Math.min(totalCost * 0.0003, 20);
-  const gst = brokerage * 0.18;
-  const totalCharges = brokerage + gst;
-  const netTotal = activeTab === 'buy' ? totalCost + totalCharges : totalCost - totalCharges;
-  const maxQtyFromBalance = execPrice > 0 ? Math.floor(balance / execPrice) : 0;
+  const q          = Math.max(0, parseInt(qty) || 0);
+  const execPrice  = orderType === 'LIMIT' ? (parseFloat(limitPrice) || currentPrice) : currentPrice;
+  const total      = q * execPrice;
+  const brokerage  = Math.min(total * 0.0003, 20);
+  const charges    = +(brokerage * 1.18).toFixed(2);
+  const net        = tab === 'buy' ? total + charges : total - charges;
+  const maxQty     = execPrice > 0 ? Math.floor(balance / execPrice) : 0;
+  const insufficient = tab === 'buy' && net > balance && q > 0;
 
-  const handleSlider = (val) => {
-    setSliderValue(val);
-    if (execPrice > 0) {
-      const maxQty = Math.floor(balance / execPrice);
-      setQuantity(String(Math.max(1, Math.floor((val / 100) * maxQty))));
-    }
-  };
+  const adjustQty = (delta) => setQty(v => Math.max(1, (parseInt(v) || 1) + delta));
 
   const showMsg = (type, text) => {
     setMsg({ type, text });
@@ -38,27 +31,26 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
   };
 
   const handleSubmit = async () => {
-    if (!selectedStock) return showMsg('error', 'Select a stock first');
-    if (qty <= 0) return showMsg('error', 'Enter a valid quantity');
+    if (!selectedStock)   return showMsg('error', 'Select a stock first');
+    if (q <= 0)           return showMsg('error', 'Enter a valid quantity');
     if (orderType === 'LIMIT' && (!limitPrice || parseFloat(limitPrice) <= 0))
       return showMsg('error', 'Enter a valid limit price');
-    if (activeTab === 'buy' && netTotal > balance)
-      return showMsg('error', 'Insufficient balance');
+    if (insufficient)     return showMsg('error', 'Insufficient balance');
 
     setLoading(true);
     try {
       const payload = {
         stockSymbol: selectedStock.symbol,
-        quantity: qty,
+        quantity: q,
         orderType,
         ...(orderType === 'LIMIT' && { limitPrice: parseFloat(limitPrice) }),
       };
-      if (activeTab === 'buy') await buyOrder(payload);
-      else await sellOrder(payload);
+      if (tab === 'buy') await buyOrder(payload);
+      else               await sellOrder(payload);
 
-      showMsg('success', `${activeTab === 'buy' ? 'Buy' : 'Sell'} order placed for ${selectedStock.symbol}!`);
-      setQuantity('1');
-      setSliderValue(25);
+      showMsg('success', `${tab === 'buy' ? 'Buy' : 'Sell'} order placed!`);
+      setQty(1);
+      setLP('');
       onOrderPlaced?.();
     } catch (e) {
       showMsg('error', e.response?.data?.message || 'Order failed. Try again.');
@@ -67,52 +59,53 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
     }
   };
 
+  const isBuy  = tab === 'buy';
+
   return (
-    <div className="bg-card border border-edge rounded-2xl flex flex-col h-full overflow-hidden">
-      {/* Buy/Sell Tabs */}
-      <div className="flex border-b border-edge">
-        {['buy', 'sell'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => { setActiveTab(tab); setMsg(null); }}
-            className={`flex-1 py-2.5 text-xs font-bold transition-all ${
-              activeTab === tab
-                ? tab === 'buy'
-                  ? 'text-profit border-b-2 border-profit bg-profit/5'
-                  : 'text-loss border-b-2 border-loss bg-loss/5'
-                : 'text-muted hover:text-primary'
-            }`}
-          >
-            {tab === 'buy' ? '▲ BUY' : '▼ SELL'}
-          </button>
-        ))}
+    <div className="bg-card border border-edge rounded-xl flex flex-col h-full overflow-hidden">
+
+      {/* ── BUY / SELL tabs ── */}
+      <div className="flex border-b border-edge shrink-0">
+        <button
+          onClick={() => { setTab('buy'); setMsg(null); }}
+          className={`flex-1 py-1.5 text-[11px] font-bold tracking-wide transition-all ${
+            isBuy ? 'bg-profit text-dark' : 'text-profit/60 hover:text-profit bg-transparent'
+          }`}
+        >
+          ▲ BUY
+        </button>
+        <button
+          onClick={() => { setTab('sell'); setMsg(null); }}
+          className={`flex-1 py-1.5 text-[11px] font-bold tracking-wide transition-all ${
+            !isBuy ? 'bg-loss text-white' : 'text-loss/60 hover:text-loss bg-transparent'
+          }`}
+        >
+          ▼ SELL
+        </button>
       </div>
 
-      <div className="p-3 flex-1 flex flex-col gap-2.5 overflow-y-auto">
-        {/* Stock Display */}
-        <div className="bg-surface rounded-xl px-3 py-2 flex items-center justify-between">
+      <div className="flex-1 flex flex-col gap-1.5 p-2 overflow-y-auto min-h-0">
+
+        {/* ── Stock + LTP ── */}
+        <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs font-bold text-primary">{selectedStock?.symbol || '—'}</div>
-            <div className="text-[10px] text-muted truncate max-w-[100px]">{selectedStock?.name || 'Select a stock'}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm font-bold font-mono text-secondary">₹{currentPrice.toFixed(2)}</div>
-            <div className="text-[10px] text-muted">LTP</div>
+            <div className="text-[10px] font-bold text-primary leading-tight truncate">{selectedStock?.symbol || '—'}</div>
+            <div className="text-[9px] text-muted leading-tight">₹{currentPrice.toFixed(2)}</div>
           </div>
         </div>
 
-        {/* Order Type */}
+        {/* ── Order Type ── */}
         <div>
-          <label className="text-[10px] text-muted mb-1 block">Order Type</label>
-          <div className="flex gap-1.5">
+          <div className="text-[9px] text-muted mb-1">Order Type</div>
+          <div className="grid grid-cols-2 gap-1">
             {['MARKET', 'LIMIT'].map(t => (
               <button
                 key={t}
-                onClick={() => setOrderType(t)}
-                className={`flex-1 py-1.5 rounded-lg text-[10px] font-semibold transition-all border ${
+                onClick={() => setOT(t)}
+                className={`py-1 rounded text-[9px] font-semibold border transition-all ${
                   orderType === t
-                    ? 'border-accent text-accent bg-accent/10'
-                    : 'border-edge text-muted hover:border-secondary hover:text-primary'
+                    ? 'border-accent bg-accent/10 text-accent'
+                    : 'border-edge text-muted hover:text-primary hover:border-secondary'
                 }`}
               >
                 {t}
@@ -121,103 +114,118 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
           </div>
         </div>
 
-        {/* Limit Price */}
+        {/* ── Limit Price ── */}
         {orderType === 'LIMIT' && (
           <div>
-            <label className="text-[10px] text-muted mb-1 block">Limit Price (₹)</label>
+            <div className="text-[9px] text-muted mb-1">Limit Price (₹)</div>
             <input
               type="number"
               value={limitPrice}
-              onChange={e => setLimitPrice(e.target.value)}
+              onChange={e => setLP(e.target.value)}
               placeholder={currentPrice.toFixed(2)}
-              className="w-full bg-surface border border-edge rounded-lg px-3 py-1.5 text-xs text-primary placeholder-muted focus:border-accent focus:outline-none font-mono"
+              className="w-full bg-surface border border-edge rounded px-2 py-1 text-[10px] text-primary placeholder-muted focus:border-accent outline-none font-mono"
             />
           </div>
         )}
 
-        {/* Quantity */}
+        {/* ── Quantity ── */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-[10px] text-muted">Quantity</label>
-            <span className="text-[10px] text-muted">Max: {maxQtyFromBalance}</span>
+            <div className="text-[9px] text-muted">Qty</div>
+            <div className="text-[9px] text-muted">Max: <span className="text-secondary font-mono">{maxQty}</span></div>
           </div>
-          <input
-            type="number"
-            min="1"
-            value={quantity}
-            onChange={e => { setQuantity(e.target.value); setSliderValue(0); }}
-            className="w-full bg-surface border border-edge rounded-lg px-3 py-1.5 text-xs text-primary focus:border-accent focus:outline-none font-mono"
-          />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => adjustQty(-1)}
+              className="w-6 h-6 flex items-center justify-center rounded bg-surface border border-edge text-muted hover:text-primary transition-colors shrink-0"
+            >
+              <Minus className="w-2.5 h-2.5" />
+            </button>
+            <input
+              type="number"
+              min="1"
+              value={qty}
+              onChange={e => setQty(e.target.value)}
+              className="flex-1 bg-surface border border-edge rounded px-1 py-1 text-[10px] text-primary focus:border-accent outline-none font-mono text-center min-w-0"
+            />
+            <button
+              onClick={() => adjustQty(1)}
+              className="w-6 h-6 flex items-center justify-center rounded bg-surface border border-edge text-muted hover:text-primary transition-colors shrink-0"
+            >
+              <Plus className="w-2.5 h-2.5" />
+            </button>
+          </div>
         </div>
 
-        {/* Slider */}
-        <div>
-          <div className="flex justify-between text-[9px] text-muted mb-1">
-            <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
-          </div>
-          <input
-            type="range" min="0" max="100" value={sliderValue}
-            onChange={e => handleSlider(parseInt(e.target.value))}
-            className="w-full accent-range"
-            style={{ accentColor: activeTab === 'buy' ? 'var(--color-profit)' : 'var(--color-loss)' }}
-          />
+        {/* ── Quick % buttons ── */}
+        <div className="grid grid-cols-4 gap-1">
+          {[25, 50, 75, 100].map(pct => (
+            <button
+              key={pct}
+              onClick={() => setQty(Math.max(1, Math.floor((pct / 100) * maxQty)))}
+              className={`text-[9px] py-1 rounded border font-medium transition-colors ${
+                isBuy
+                  ? 'border-profit/20 text-profit/70 hover:border-profit hover:text-profit hover:bg-profit/5'
+                  : 'border-loss/20 text-loss/70 hover:border-loss hover:text-loss hover:bg-loss/5'
+              }`}
+            >
+              {pct}%
+            </button>
+          ))}
         </div>
 
-        {/* Order Summary */}
-        <div className="bg-surface rounded-xl px-3 py-2.5 space-y-1.5 text-[10px]">
+        {/* ── Order Summary ── */}
+        <div className="bg-surface rounded-lg p-2 space-y-1 text-[9px]">
           <div className="flex justify-between text-muted">
-            <span>{qty} × ₹{execPrice.toFixed(2)}</span>
-            <span className="font-mono text-primary">₹{totalCost.toFixed(2)}</span>
+            <span>{q} × ₹{execPrice.toFixed(0)}</span>
+            <span className="font-mono text-secondary">₹{total.toFixed(0)}</span>
           </div>
           <div className="flex justify-between text-muted">
-            <span>Brokerage + GST</span>
-            <span className="font-mono">₹{totalCharges.toFixed(2)}</span>
+            <span>Brokerage</span>
+            <span className="font-mono">₹{charges.toFixed(2)}</span>
           </div>
-          <div className="h-px bg-edge my-0.5" />
-          <div className="flex justify-between font-semibold text-xs">
-            <span className="text-primary">Net {activeTab === 'buy' ? 'Required' : 'Receivable'}</span>
-            <span className={`font-mono font-bold ${activeTab === 'buy' ? 'text-loss' : 'text-profit'}`}>
-              ₹{netTotal.toFixed(2)}
+          <div className="h-px bg-edge" />
+          <div className="flex justify-between">
+            <span className="font-semibold text-primary text-[9px]">Net {isBuy ? 'Req.' : 'Recv.'}</span>
+            <span className={`font-bold font-mono ${isBuy ? 'text-loss' : 'text-profit'} ${insufficient ? 'text-loss' : ''}`}>
+              ₹{net.toFixed(0)}
             </span>
           </div>
           <div className="flex justify-between text-muted">
-            <span>Available</span>
-            <span className={`font-mono ${balance < netTotal && activeTab === 'buy' ? 'text-loss' : 'text-secondary'}`}>
-              ₹{balance.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+            <span>Avail.</span>
+            <span className={`font-mono ${insufficient ? 'text-loss' : 'text-secondary'}`}>
+              ₹{(balance / 1000).toFixed(1)}K
             </span>
           </div>
         </div>
 
-        {/* Message */}
+        {/* ── Message ── */}
         {msg && (
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-medium ${
+          <div className={`flex items-center gap-1.5 px-2 py-1 rounded text-[9px] font-medium ${
             msg.type === 'success'
               ? 'bg-profit/10 text-profit border border-profit/20'
               : 'bg-loss/10 text-loss border border-loss/20'
           }`}>
-            {msg.type === 'success' ? <CheckCircle className="w-3 h-3 shrink-0" /> : <AlertCircle className="w-3 h-3 shrink-0" />}
+            {msg.type === 'success'
+              ? <CheckCircle className="w-3 h-3 shrink-0" />
+              : <AlertCircle className="w-3 h-3 shrink-0" />}
             {msg.text}
           </div>
         )}
 
-        {/* Submit Button */}
+        {/* ── Submit ── */}
         <button
           onClick={handleSubmit}
-          disabled={loading || !selectedStock || qty <= 0}
-          className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all mt-auto ${
-            loading || !selectedStock || qty <= 0
+          disabled={loading || !selectedStock || q <= 0 || insufficient}
+          className={`w-full py-2 rounded text-[11px] font-bold tracking-wide transition-all mt-auto ${
+            loading || !selectedStock || q <= 0 || insufficient
               ? 'opacity-40 cursor-not-allowed'
-              : ''
-          } ${
-            activeTab === 'buy'
-              ? 'bg-profit hover:bg-profit/90 text-dark shadow-lg shadow-profit/20'
-              : 'bg-loss hover:bg-loss/90 text-white shadow-lg shadow-loss/20'
-          }`}
+              : 'hover:opacity-90'
+          } ${isBuy ? 'bg-profit text-dark shadow-lg shadow-profit/20' : 'bg-loss text-white shadow-lg shadow-loss/20'}`}
         >
-          {loading
-            ? 'Processing...'
-            : `${activeTab === 'buy' ? '▲ BUY' : '▼ SELL'} ${selectedStock?.symbol || ''}`}
+          {loading ? 'Processing…' : `${isBuy ? '▲ BUY' : '▼ SELL'} ${selectedStock?.symbol || ''}`}
         </button>
+
       </div>
     </div>
   );
