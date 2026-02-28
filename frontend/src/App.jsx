@@ -9,6 +9,7 @@ import Holdings from './pages/Holdings';
 import Watchlist from './pages/Watchlist';
 import Funds from './pages/Funds';
 import Calculators from './pages/Calculators';
+import Profile from './pages/Profile';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/watchlist" element={<Watchlist />} />
             <Route path="/funds" element={<Funds />} />
             <Route path="/calculators" element={<Calculators />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
 
           {/* Fallback */}

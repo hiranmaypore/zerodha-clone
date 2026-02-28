@@ -1,5 +1,6 @@
 import { TrendingUp, TrendingDown, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { StockIcon } from '../StockIcon';
 
 export default function PortfolioSummary({ holdings = [], livePrices = {} }) {
   const navigate = useNavigate();
@@ -52,8 +53,11 @@ export default function PortfolioSummary({ holdings = [], livePrices = {} }) {
             >
               {/* Symbol + P&L % */}
               <div className="flex items-center justify-between w-full">
-                <span className="text-[10px] font-bold text-primary">{h.stock}</span>
-                <div className={`flex items-center gap-0.5 text-[9px] font-mono ${h.pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                <div className="flex items-center gap-1.5 break-all overflow-hidden mr-2">
+                  <StockIcon symbol={h.stock} className="w-3.5 h-3.5 shrink-0" textSize="text-[6px]" />
+                  <span className="text-[10px] font-bold text-primary truncate">{h.stock}</span>
+                </div>
+                <div className={`shrink-0 flex items-center gap-0.5 text-[9px] font-mono ${h.pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
                   {h.pnl >= 0 ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
                   {h.pct >= 0 ? '+' : ''}{h.pct.toFixed(1)}%
                 </div>

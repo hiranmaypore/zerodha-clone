@@ -77,7 +77,10 @@ export default function Dashboard() {
       const [oRes, hRes, bRes] = await Promise.allSettled([
         getOrders(), getHoldings(), getBalance(),
       ]);
-      if (oRes.status === 'fulfilled') setOrders(oRes.value.data?.orders   || []);
+      if (oRes.status === 'fulfilled') {
+        const d = oRes.value.data;
+        setOrders(Array.isArray(d) ? d : d?.orders || []);
+      }
       if (hRes.status === 'fulfilled') setHoldings(hRes.value.data?.holdings || []);
       if (bRes.status === 'fulfilled') setBalance(bRes.value.data?.balance  ?? 0);
     } catch {}

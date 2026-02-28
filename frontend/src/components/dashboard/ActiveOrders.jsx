@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ClipboardList, X, CheckCircle, Clock, XCircle, ChevronDown } from 'lucide-react';
+import { StockIcon } from '../StockIcon';
 
 const STATUS_MAP = {
   PENDING:   { label: 'Pending',   cls: 'text-warning bg-warning/10',   icon: <Clock className="w-3 h-3" /> },
@@ -71,7 +72,12 @@ export default function ActiveOrders({ orders = [], onCancel }) {
                 const st = STATUS_MAP[order.status] || STATUS_MAP.PENDING;
                 return (
                   <tr key={order._id} className="border-b border-edge/50 hover:bg-surface/40 transition-colors">
-                    <td className="px-3 py-2 font-bold text-primary">{order.stock}</td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <StockIcon symbol={order.stock} className="w-5 h-5" textSize="text-[8px]" />
+                        <span className="font-bold text-primary">{order.stock}</span>
+                      </div>
+                    </td>
                     <td className="px-3 py-2">
                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                         order.type === 'BUY' ? 'bg-profit/15 text-profit' : 'bg-loss/15 text-loss'

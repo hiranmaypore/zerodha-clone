@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getWatchlist } from '../services/api';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { connectSocket } from '../services/socket';
+import { StockIcon } from '../components/StockIcon';
 import { Star, TrendingUp, TrendingDown, Minus, BarChart2, Trash2 } from 'lucide-react';
 
 export default function Watchlist() {
@@ -92,9 +93,7 @@ export default function Watchlist() {
                 >
                   {/* Symbol + name */}
                   <div className="col-span-5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                      {stock.symbol.charAt(0)}
-                    </div>
+                    <StockIcon symbol={stock.symbol} className="w-8 h-8" textSize="text-xs" />
                     <div>
                       <div className="text-sm font-semibold text-primary">{stock.symbol}</div>
                       <div className="text-[10px] text-muted truncate max-w-[120px]">{stock.name}</div>

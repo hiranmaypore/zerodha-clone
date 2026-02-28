@@ -92,7 +92,7 @@ export default function Calculators() {
                   value={values[f.key] || ''}
                   onChange={(e) => handleChange(f.key, e.target.value)}
                   placeholder={f.placeholder}
-                  className="w-full"
+                  className="w-full bg-surface border border-edge rounded-xl px-4 py-2.5 text-sm text-primary placeholder-muted focus:border-accent outline-none transition-all"
                 />
               </div>
             ))}

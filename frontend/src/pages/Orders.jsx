@@ -1,138 +1,286 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getOrders, cancelOrder } from '../services/api';
-import { ShoppingCart, X, Clock, CheckCircle, XCircle, Filter } from 'lucide-react';
+import {
+  ShoppingCart, X, Clock, CheckCircle, XCircle,
+  RefreshCw, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
+  AlertCircle,
+} from 'lucide-react';
+import { StockIcon } from '../components/StockIcon';
+
+const FILTERS = ['ALL', 'PENDING', 'COMPLETED', 'CANCELLED'];
+
+const STATUS_CFG = {
+  COMPLETED: { icon: <CheckCircle className="w-3.5 h-3.5" />, color: 'text-profit',   bg: 'bg-profit/10',   label: 'Completed' },
+  PENDING:   { icon: <Clock       className="w-3.5 h-3.5" />, color: 'text-warning',  bg: 'bg-warning/10',  label: 'Pending'   },
+  CANCELLED: { icon: <XCircle     className="w-3.5 h-3.5" />, color: 'text-loss',     bg: 'bg-loss/10',     label: 'Cancelled' },
+  FAILED:    { icon: <AlertCircle className="w-3.5 h-3.5" />, color: 'text-muted',    bg: 'bg-surface',     label: 'Failed'    },
+};
 
 export default function Orders() {
-  const [orders, setOrders] = useState([]);
+  const navigate  = useNavigate();
+  const [orders,  setOrders]  = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('ALL');
-  const [toast, setToast] = useState(null);
+  const [filter,  setFilter]  = useState('ALL');
+  const [cancelling, setCancelling] = useState(null); // id being cancelled
+  const [toast,   setToast]   = useState(null);
 
-  useEffect(() => { loadOrders(); }, []);
-
-  const loadOrders = async () => {
+  const load = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await getOrders();
-      setOrders(res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      const list = Array.isArray(res.data) ? res.data : res.data?.orders || [];
+      setOrders(list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (err) {
-      console.error('Failed:', err);
+      console.error('Failed to load orders:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   const handleCancel = async (id) => {
+    setCancelling(id);
     try {
       await cancelOrder(id);
-      setToast('Order cancelled');
-      loadOrders();
-      setTimeout(() => setToast(null), 3000);
+      showToast('✅ Order cancelled successfully', 'success');
+      await load();
     } catch (err) {
-      setToast(err.response?.data?.message || 'Cancel failed');
-      setTimeout(() => setToast(null), 3000);
+      showToast(err.response?.data?.message || '❌ Cancel failed', 'error');
+    } finally {
+      setCancelling(null);
     }
+  };
+
+  const showToast = (msg, type = 'info') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
   const filtered = filter === 'ALL' ? orders : orders.filter(o => o.status === filter);
 
-  const statusIcon = {
-    COMPLETED: <CheckCircle className="w-4 h-4 text-profit" />,
-    PENDING: <Clock className="w-4 h-4 text-warning" />,
-    CANCELLED: <XCircle className="w-4 h-4 text-loss" />,
-    FAILED: <XCircle className="w-4 h-4 text-muted" />,
-  };
+  // ── Stats ──────────────────────────────────────────────────
+  const total     = orders.length;
+  const completed = orders.filter(o => o.status === 'COMPLETED').length;
+  const pending   = orders.filter(o => o.status === 'PENDING').length;
+  const cancelled = orders.filter(o => o.status === 'CANCELLED').length;
+  const buys      = orders.filter(o => o.type === 'BUY').length;
+  const sells     = orders.filter(o => o.type === 'SELL').length;
+  const totalVolume = orders
+    .filter(o => o.status === 'COMPLETED')
+    .reduce((s, o) => s + (o.price * o.quantity), 0);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const fmt = (n) =>
+    n >= 1e5 ? `₹${(n / 1e5).toFixed(2)}L` :
+    n >= 1e3 ? `₹${(n / 1e3).toFixed(1)}K` :
+    `₹${n.toFixed(2)}`;
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-[60vh]">
+      <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-primary">Orders</h1>
-          <p className="text-secondary text-sm mt-1">{orders.length} total orders</p>
-        </div>
-        <div className="flex gap-2">
-          {['ALL', 'PENDING', 'COMPLETED', 'CANCELLED'].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer
-                ${filter === f ? 'bg-accent text-white' : 'bg-card text-secondary border border-edge hover:text-primary'}`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-      </div>
+    <div className="space-y-5 animate-fade-in">
 
+      {/* ── Toast ── */}
       {toast && (
-        <div className="fixed top-4 right-4 z-50 px-4 py-3 bg-card border border-edge rounded-lg shadow-2xl text-sm text-primary animate-slide-in">
-          {toast}
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-2xl text-sm font-medium border animate-fade-in
+          ${toast.type === 'success' ? 'bg-profit/10 border-profit/20 text-profit'
+          : toast.type === 'error'   ? 'bg-loss/10   border-loss/20   text-loss'
+          :                            'bg-card       border-edge       text-primary'}`}>
+          {toast.msg}
         </div>
       )}
 
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-primary">Orders</h1>
+          <p className="text-sm text-muted mt-0.5">{total} total · {pending} pending</p>
+        </div>
+        <button
+          onClick={load}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-edge text-xs text-secondary hover:text-primary transition-colors"
+        >
+          <RefreshCw className="w-3.5 h-3.5" /> Refresh
+        </button>
+      </div>
+
+      {/* ── Summary cards ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {[
+          { label: 'Total',     value: total,         color: 'text-primary',  icon: <ShoppingCart className="w-4 h-4"/> },
+          { label: 'Completed', value: completed,     color: 'text-profit',   icon: <CheckCircle  className="w-4 h-4"/> },
+          { label: 'Pending',   value: pending,       color: 'text-warning',  icon: <Clock        className="w-4 h-4"/> },
+          { label: 'Cancelled', value: cancelled,     color: 'text-loss',     icon: <XCircle      className="w-4 h-4"/> },
+          { label: 'Buys',      value: buys,          color: 'text-profit',   icon: <TrendingUp   className="w-4 h-4"/> },
+          { label: 'Volume',    value: fmt(totalVolume), color: 'text-accent', icon: <ArrowUpRight className="w-4 h-4"/> },
+        ].map(c => (
+          <div key={c.label} className="bg-card border border-edge rounded-xl p-3.5">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] text-muted uppercase tracking-wide">{c.label}</span>
+              <span className={c.color}>{c.icon}</span>
+            </div>
+            <div className={`text-xl font-bold font-mono ${c.color}`}>{c.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Filter pills ── */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {FILTERS.map(f => {
+          const cnt = f === 'ALL' ? total : orders.filter(o => o.status === f).length;
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5
+                ${filter === f
+                  ? 'bg-accent text-white shadow-sm shadow-accent/25'
+                  : 'bg-card border border-edge text-secondary hover:text-primary'}`}
+            >
+              {f}
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono
+                ${filter === f ? 'bg-white/20' : 'bg-surface text-muted'}`}>
+                {cnt}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Orders table ── */}
       <div className="bg-card border border-edge rounded-xl overflow-hidden">
         {filtered.length > 0 ? (
-          <div className="divide-y divide-edge">
-            {filtered.map(order => (
-              <div key={order._id} className="px-5 py-4 flex items-center justify-between hover:bg-hover transition-colors">
-                <div className="flex items-center gap-4">
-                  {statusIcon[order.status]}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded text-xs font-bold
-                        ${order.type === 'BUY' ? 'bg-profit-dim text-profit' : 'bg-loss-dim text-loss'}`}>
+          <>
+            {/* Column headers */}
+            <div className="grid grid-cols-12 px-5 py-2.5 text-[10px] text-muted uppercase tracking-wide border-b border-edge font-medium">
+              <div className="col-span-1">Type</div>
+              <div className="col-span-2">Stock</div>
+              <div className="col-span-2 hidden md:block">Order Type</div>
+              <div className="col-span-1 text-right">Qty</div>
+              <div className="col-span-2 text-right">Price</div>
+              <div className="col-span-2 text-right hidden sm:block">Total</div>
+              <div className="col-span-1 text-center">Status</div>
+              <div className="col-span-1 text-right">Time</div>
+            </div>
+
+            <div className="divide-y divide-edge">
+              {filtered.map(order => {
+                const cfg  = STATUS_CFG[order.status] || STATUS_CFG.FAILED;
+                const isBuy = order.type === 'BUY';
+                const total = (order.price || 0) * (order.quantity || 0);
+
+                return (
+                  <div
+                    key={order._id}
+                    className="grid grid-cols-12 px-5 py-3.5 items-center hover:bg-surface/60 transition-colors group"
+                  >
+                    {/* BUY/SELL badge */}
+                    <div className="col-span-1">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold
+                        ${isBuy ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
+                        {isBuy ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
                         {order.type}
                       </span>
-                      <span className="text-sm font-semibold text-primary">{order.stock}</span>
-                      {order.orderCategory && order.orderCategory !== 'REGULAR' && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-accent/10 text-accent font-medium">
-                          {order.orderCategory}
-                        </span>
+                    </div>
+
+                    {/* Stock */}
+                    <div
+                      className="col-span-2 flex items-center gap-2.5 cursor-pointer"
+                      onClick={() => navigate(`/dashboard?stock=${order.stock}`)}
+                    >
+                      <StockIcon symbol={order.stock} className="w-7 h-7" textSize="text-[10px]" />
+                      <div>
+                        <div className="font-semibold text-sm text-primary group-hover:text-accent transition-colors">
+                          {order.stock}
+                        </div>
+                        {order.orderCategory && order.orderCategory !== 'REGULAR' && (
+                          <span className="text-[9px] px-1.5 py-0.5 bg-accent/10 text-accent rounded-full font-medium mt-0.5 block w-fit">
+                            {order.orderCategory}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Order type */}
+                    <div className="col-span-2 hidden md:block">
+                      <span className="text-xs text-muted">{order.orderType || 'MARKET'}</span>
+                      {order.limitPrice && (
+                        <div className="text-[10px] text-secondary font-mono">@ ₹{order.limitPrice}</div>
+                      )}
+                      {order.stopLossPrice && (
+                        <div className="text-[10px] text-loss font-mono">SL ₹{order.stopLossPrice}</div>
                       )}
                     </div>
-                    <p className="text-xs text-muted mt-1">
-                      {order.quantity} shares · {order.orderType}
-                      {order.limitPrice ? ` @ ₹${order.limitPrice}` : ''}
-                      {order.stopLossPrice ? ` · SL: ₹${order.stopLossPrice}` : ''}
-                      {order.targetPrice ? ` · Target: ₹${order.targetPrice}` : ''}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-primary">₹{order.price?.toFixed(2)}</p>
-                    <p className="text-xs text-muted">
-                      {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                    {/* Qty */}
+                    <div className="col-span-1 text-right font-mono text-sm text-primary">
+                      {order.quantity}
+                    </div>
+
+                    {/* Price */}
+                    <div className="col-span-2 text-right">
+                      <div className="font-mono font-semibold text-sm text-primary">
+                        ₹{order.price?.toFixed(2)}
+                      </div>
+                    </div>
+
+                    {/* Total */}
+                    <div className="col-span-2 text-right hidden sm:block">
+                      <div className="font-mono text-sm text-secondary">{fmt(total)}</div>
+                    </div>
+
+                    {/* Status */}
+                    <div className="col-span-1 flex justify-center">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold ${cfg.color} ${cfg.bg}`}>
+                        {cfg.icon} {cfg.label}
+                      </span>
+                    </div>
+
+                    {/* Time + Cancel */}
+                    <div className="col-span-1 text-right flex items-center justify-end gap-1">
+                      <div className="text-[10px] text-muted leading-tight text-right">
+                        {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                        <br />
+                        {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                      {order.status === 'PENDING' && (
+                        <button
+                          onClick={() => handleCancel(order._id)}
+                          disabled={cancelling === order._id}
+                          title="Cancel order"
+                          className="ml-1 p-1.5 rounded-lg text-muted hover:text-loss hover:bg-loss/10 transition-all disabled:opacity-40"
+                        >
+                          {cancelling === order._id
+                            ? <div className="w-3.5 h-3.5 border border-current border-t-transparent rounded-full animate-spin" />
+                            : <X className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  {order.status === 'PENDING' && (
-                    <button
-                      onClick={() => handleCancel(order._id)}
-                      className="p-2 rounded-lg text-muted hover:text-loss hover:bg-loss-dim transition-all cursor-pointer"
-                      title="Cancel order"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          </>
         ) : (
-          <div className="py-12 text-center text-muted text-sm">
-            <ShoppingCart className="w-8 h-8 mx-auto mb-3 opacity-50" />
-            No {filter !== 'ALL' ? filter.toLowerCase() : ''} orders found
+          <div className="py-20 text-center space-y-3">
+            <ShoppingCart className="w-12 h-12 mx-auto text-muted/20" />
+            <p className="text-primary font-semibold">No {filter !== 'ALL' ? filter.toLowerCase() : ''} orders</p>
+            <p className="text-sm text-muted">Place orders from the dashboard</p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="px-5 py-2 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent/80 transition-colors"
+            >
+              Go to Dashboard
+            </button>
           </div>
         )}
       </div>
+
     </div>
   );
 }

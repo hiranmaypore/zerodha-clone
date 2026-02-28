@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getPriceHistory } from '../../services/api';
 import { useWatchlist } from '../../hooks/useWatchlist';
+import { StockIcon } from '../StockIcon';
 import {
   ZoomIn, ZoomOut, RotateCcw, Expand, Shrink, ChevronDown, MoveHorizontal, Star
 } from 'lucide-react';
-
 
 
 const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1W'];
@@ -420,9 +420,7 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
             onClick={() => { setDropdownOpen(o => !o); setSearchQuery(''); }}
             className="flex items-center gap-2 hover:bg-surface px-2 py-1 rounded-lg transition-colors"
           >
-            <div className="w-6 h-6 rounded-full bg-linear-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
-              {symbol.charAt(0)}
-            </div>
+            <StockIcon symbol={symbol} className="w-6 h-6" textSize="text-[9px]" />
             <span className="text-sm font-bold text-primary">{symbol}</span>
             <span className="text-[10px] text-muted hidden sm:inline truncate max-w-[120px]">{stockName}</span>
             <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`} />
@@ -464,9 +462,7 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
                         onClick={() => { onStockChange({ ...s, price: livePrice }); setDropdownOpen(false); setSearchQuery(''); }}
                         className={`w-full px-3 py-2 text-left text-xs hover:bg-hover flex items-center gap-2 transition-colors ${s.symbol === symbol ? 'bg-surface' : ''}`}
                       >
-                        <div className="w-5 h-5 rounded-full bg-linear-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white text-[8px] font-bold shrink-0">
-                          {s.symbol.charAt(0)}
-                        </div>
+                        <StockIcon symbol={s.symbol} className="w-5 h-5" textSize="text-[8px]" />
                         <div className="min-w-0 flex-1">
                           <div className="font-semibold text-primary">{s.symbol}</div>
                           <div className="text-muted text-[9px] truncate">{s.name}</div>
