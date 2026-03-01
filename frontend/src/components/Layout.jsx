@@ -16,8 +16,8 @@ export default function Layout() {
         </main>
       ) : (
         /* Other pages: normal scrollable layout */
-        <main className="flex-1 pt-16 overflow-y-auto">
-          <div className="p-4 max-w-[1920px] mx-auto">
+        <main className="flex-1 pt-24 overflow-y-auto">
+          <div className="px-6 pb-12 max-w-[1400px] mx-auto">
             <Outlet />
           </div>
         </main>

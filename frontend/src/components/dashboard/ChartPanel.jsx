@@ -13,6 +13,9 @@ const MIN_VISIBLE = 10;   // most zoomed-in  (10 candles)
 const MAX_VISIBLE = 120;  // most zoomed-out (120 candles)
 const DEFAULT_VISIBLE = 60;
 
+const CHART_CACHE = {};
+const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 hours
+
 // ── Generate fallback candle data ─────────────────────────────────────────
 function generateCandleData(basePrice = 1000, count = 120) {
   const data = [];
@@ -61,6 +64,14 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
   const [cursor, setCursor]             = useState('default');
 
   const { isWatched, toggle: toggleWatch } = useWatchlist();
+
+  // ── Track cache key to use in setCandles inside intervals ─────────────
+  const cacheKeyRef = useRef(`${selectedStock?.symbol}_${activeTimeframe}`);
+  useEffect(() => {
+    if (selectedStock?.symbol) {
+      cacheKeyRef.current = `${selectedStock.symbol}_${activeTimeframe}`;
+    }
+  }, [selectedStock?.symbol, activeTimeframe]);
 
   // ── Zoom / pan state (held in refs so draw never re-registers events) ──
   const visibleCountRef = useRef(DEFAULT_VISIBLE); // how many candles fit
@@ -116,24 +127,39 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
     if (!selectedStock) return;
     panOffsetRef.current = 0; // reset pan on stock change
 
+    const cacheKey = `${selectedStock.symbol}_${activeTimeframe}`;
+    const now = Date.now();
+    
+    // Use cached data if valid (< 3 hours old)
+    if (CHART_CACHE[cacheKey] && (now - CHART_CACHE[cacheKey].timestamp < CACHE_DURATION)) {
+      setCandles(CHART_CACHE[cacheKey].data);
+      return;
+    }
+
     const fetch = async () => {
       try {
         const res = await getPriceHistory(selectedStock.symbol, activeTimeframe);
         const data = res.data?.data || [];
         if (data.length > 5) {
-          setCandles(data.map(d => ({
+          const freshData = data.map(d => ({
             time:   new Date(d.timestamp).getTime(),
             open:   d.open  || d.price,
             high:   d.high  || d.price * 1.002,
             low:    d.low   || d.price * 0.998,
             close:  d.close || d.price,
             volume: Math.floor(Math.random() * 500 + 100),
-          })));
+          }));
+          CHART_CACHE[cacheKey] = { timestamp: now, data: freshData };
+          setCandles(freshData);
         } else {
-          setCandles(generateCandleData(currentPrice || selectedStock.price || 1000));
+          const fallbackData = generateCandleData(currentPrice || selectedStock.price || 1000);
+          CHART_CACHE[cacheKey] = { timestamp: now, data: fallbackData };
+          setCandles(fallbackData);
         }
       } catch {
-        setCandles(generateCandleData(currentPrice || selectedStock.price || 1000));
+        const fallbackData = generateCandleData(currentPrice || selectedStock.price || 1000);
+        CHART_CACHE[cacheKey] = { timestamp: now, data: fallbackData };
+        setCandles(fallbackData);
       }
     };
     fetch();
@@ -151,6 +177,11 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
       last.low    = Math.min(last.low,  currentPrice);
       last.volume += Math.floor(Math.random() * 20 + 3);
       copy[copy.length - 1] = last;
+      
+      // Keep cache up to date
+      if (cacheKeyRef.current && CHART_CACHE[cacheKeyRef.current]) {
+        CHART_CACHE[cacheKeyRef.current].data = copy;
+      }
       return copy;
     });
   }, [currentPrice]);
@@ -164,7 +195,13 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
         const openPrice = prev[prev.length - 1].close;
         const newC = { time: Date.now(), open: openPrice, close: openPrice, high: openPrice, low: openPrice, volume: 80 };
         const trimmed = prev.length >= 200 ? prev.slice(1) : prev;
-        return [...trimmed, newC];
+        const copy = [...trimmed, newC];
+        
+        // Keep cache up to date
+        if (cacheKeyRef.current && CHART_CACHE[cacheKeyRef.current]) {
+          CHART_CACHE[cacheKeyRef.current].data = copy;
+        }
+        return copy;
       });
     }, 30_000);
     return () => clearInterval(id);
