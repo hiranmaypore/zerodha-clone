@@ -9,13 +9,13 @@ const calculators = [
     { key: 'timePeriod', label: 'Time Period (Years)', placeholder: '10' },
   ]},
   { id: 'emi', name: 'EMI Calculator', fields: [
-    { key: 'principal', label: 'Loan Amount (₹)', placeholder: '1000000' },
-    { key: 'rate', label: 'Interest Rate (%)', placeholder: '8.5' },
-    { key: 'tenure', label: 'Tenure (Months)', placeholder: '240' },
+    { key: 'loanAmount', label: 'Loan Amount (₹)', placeholder: '1000000' },
+    { key: 'interestRate', label: 'Interest Rate (%)', placeholder: '8.5' },
+    { key: 'loanTenure', label: 'Tenure (Years)', placeholder: '20' },
   ]},
   { id: 'swp', name: 'SWP Calculator', fields: [
-    { key: 'totalInvestment', label: 'Total Investment (₹)', placeholder: '5000000' },
-    { key: 'withdrawalPerMonth', label: 'Monthly Withdrawal (₹)', placeholder: '25000' },
+    { key: 'initialInvestment', label: 'Total Investment (₹)', placeholder: '5000000' },
+    { key: 'monthlyWithdrawal', label: 'Monthly Withdrawal (₹)', placeholder: '25000' },
     { key: 'expectedReturn', label: 'Expected Return (%)', placeholder: '8' },
     { key: 'timePeriod', label: 'Time Period (Years)', placeholder: '20' },
   ]},
@@ -50,7 +50,7 @@ export default function Calculators() {
       if (active === 'brokerage') payload.tradeType = 'equity_intraday';
 
       const res = await apiMap[active](payload);
-      setResult(res.data);
+      setResult(res.data.data);
     } catch (err) {
       setResult({ error: err.response?.data?.message || 'Calculation failed' });
     } finally {

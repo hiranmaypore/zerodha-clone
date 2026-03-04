@@ -40,6 +40,7 @@ const navItems = [
   { path: "/holdings",   label: "Holdings"  },
   { path: "/watchlist",  label: "Watchlist" },
   { path: "/funds",      label: "Funds"     },
+  { path: "/calculators",label: "Calculators"},
 ];
 
 // Config per notification type
@@ -149,7 +150,7 @@ export default function Navbar() {
     if (unreadCount > 0) setBellOpen(true);
   }, [notifications.length]);
 
-  const handleLogout = () => { logout(); navigate("/login"); };
+  const handleLogout = () => { logout(); navigate("/"); };
 
   const openBell = () => {
     setBellOpen(o => !o);

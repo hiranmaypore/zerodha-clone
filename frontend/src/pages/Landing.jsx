@@ -99,37 +99,12 @@ export default function Landing() {
       {/* ── Dashboard Preview (Abstract) ── */}
       <section className="py-20 bg-dark relative z-10">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="rounded-2xl border border-edge bg-card shadow-2xl overflow-hidden aspect-video relative flex flex-col">
-            {/* Fake browser bar */}
-            <div className="h-10 border-b border-edge bg-surface/50 flex items-center px-4 gap-2">
-              <div className="w-3 h-3 rounded-full bg-loss/40" />
-              <div className="w-3 h-3 rounded-full bg-warning/40" />
-              <div className="w-3 h-3 rounded-full bg-profit/40" />
-            </div>
-            {/* Fake Dashboard layout */}
-            <div className="flex-1 flex p-6 gap-6 pattern-grid-lg text-muted/5 relative">
-              <div className="w-64 hidden md:flex flex-col gap-4 border-r border-edge/50 pr-6">
-                <div className="h-8 bg-surface rounded-md w-full" />
-                <div className="h-8 bg-surface rounded-md w-3/4" />
-                <div className="h-8 bg-surface rounded-md w-5/6" />
-                <div className="h-8 bg-surface rounded-md w-full" />
-              </div>
-              <div className="flex-1 flex flex-col gap-6">
-                <div className="flex justify-between">
-                  <div className="w-32 h-10 bg-surface rounded-lg" />
-                  <div className="w-48 h-10 bg-surface rounded-lg" />
-                </div>
-                <div className="flex-1 border border-accent/20 rounded-xl relative overflow-hidden bg-accent/5 flex items-end justify-center">
-                  <TrendingUp className="w-64 h-64 text-accent/20 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                  {/* Fake chart bars */}
-                  <div className="flex items-end gap-2 px-8 w-full h-1/2 opacity-20">
-                    {[40, 60, 45, 80, 50, 90, 70, 100, 85, 110].map((h, i) => (
-                      <div key={i} className="flex-1 bg-accent rounded-t-sm" style={{ height: `${h}%` }} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="rounded-2xl border border-edge/50 bg-card shadow-[0_0_60px_-15px_rgba(124,58,237,0.3)] overflow-hidden relative group">
+            <img 
+              src="/dashboard-preview.png" 
+              alt="Trading Dashboard Preview" 
+              className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.02]" 
+            />
           </div>
         </div>
       </section>

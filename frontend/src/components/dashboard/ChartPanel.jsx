@@ -125,7 +125,6 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
   // ── Fetch history when stock / timeframe changes ──────────────────────
   useEffect(() => {
     if (!selectedStock) return;
-    panOffsetRef.current = 0; // reset pan on stock change
 
     const cacheKey = `${selectedStock.symbol}_${activeTimeframe}`;
     const now = Date.now();
@@ -494,10 +493,10 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
                   .map(s => {
                     const livePrice = livePrices[s.symbol] || s.price || 0;
                     return (
-                      <button
+                      <div
                         key={s.symbol}
                         onClick={() => { onStockChange({ ...s, price: livePrice }); setDropdownOpen(false); setSearchQuery(''); }}
-                        className={`w-full px-3 py-2 text-left text-xs hover:bg-hover flex items-center gap-2 transition-colors ${s.symbol === symbol ? 'bg-surface' : ''}`}
+                        className={`w-full px-3 py-2 text-left text-xs cursor-pointer hover:bg-hover flex items-center gap-2 transition-colors ${s.symbol === symbol ? 'bg-surface' : ''}`}
                       >
                         <StockIcon symbol={s.symbol} className="w-5 h-5" textSize="text-[8px]" />
                         <div className="min-w-0 flex-1">
@@ -517,7 +516,7 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
                             isWatched(s.symbol) ? 'text-warning fill-warning' : 'text-muted/40 hover:text-warning'
                           }`} />
                         </button>
-                      </button>
+                      </div>
                     );
                   })}
               </div>

@@ -9,19 +9,19 @@
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   /* Background colors → bg-dark, bg-card, bg-surface, bg-hover */
-  --color-dark: #0d1117;
-  --color-card: #161b22;
-  --color-surface: #1c2333;
-  --color-hover: #1f2937;
+  --color-dark: #000000;
+  --color-card: #0a0a0a;
+  --color-surface: #171717;
+  --color-hover: #262626;
 
   /* Border colors → border-edge, border-subtle */
-  --color-edge: #30363d;
-  --color-subtle: #21262d;
+  --color-edge: #262626;
+  --color-subtle: #171717;
 
   /* Accent → bg-accent, text-accent */
-  --color-accent: #58a6ff;
-  --color-accent-hover: #79b8ff;
-  --color-accent-muted: #1f3a5f;
+  --color-accent: #7c3aed;
+  --color-accent-hover: #8b5cf6;
+  --color-accent-muted: #2e1065;
 
   /* Profit/Loss → text-profit, bg-profit, text-loss, bg-loss */
   --color-profit: #26a641;
