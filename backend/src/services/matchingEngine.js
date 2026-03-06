@@ -18,9 +18,10 @@ const memMatchingEngine = () => {
           order.status = 'COMPLETED';
           order.price = currentPrice;
           order.executedAt = new Date().toISOString();
-          // Update holdings
           const user = mem.users.get(order.user);
-          const hKey = `${order.user}:${order.stock}`;
+          const today = new Date().toISOString().slice(0, 10);
+          const pType = order.productType || 'CNC';
+          const hKey = `${order.user}:${order.stock}:${pType}:${today}`;
           const holding = mem.holdings.get(hKey);
           if (order.type === 'BUY') {
             const refund = (order.limitPrice - currentPrice) * order.quantity;
@@ -30,7 +31,7 @@ const memMatchingEngine = () => {
               holding.avgPrice = (holding.quantity * holding.avgPrice + currentPrice * order.quantity) / newQty;
               holding.quantity = newQty;
             } else {
-              mem.holdings.set(hKey, { user: order.user, stock: order.stock, quantity: order.quantity, avgPrice: currentPrice });
+              mem.holdings.set(hKey, { user: order.user, stock: order.stock, quantity: order.quantity, avgPrice: currentPrice, productType: pType, tradeDate: today });
             }
           }
         }
@@ -59,13 +60,57 @@ const dbMatchingEngine = () => {
         const currentPrice = prices[order.stock];
         if (!currentPrice) continue;
         let executed = false;
+        const today = new Date().toISOString().slice(0, 10);
+        const pType = order.productType || 'CNC';
 
+        // ── Stop-Loss trigger ─────────────────────────────────────────
         if (order.orderCategory === 'STOPLOSS' && order.type === 'SELL' && currentPrice <= order.stopLossPrice) {
           executed = true;
           const user = await User.findById(order.user);
           user.balance += currentPrice * order.quantity;
           await user.save();
-        } else if (order.orderCategory === 'REGULAR' || !order.orderCategory) {
+
+        // ── Bracket order: target hit ─────────────────────────────────
+        } else if (order.orderCategory === 'BRACKET' && order.type === 'BUY' && order.status === 'PENDING') {
+          // First check: entry fill (limit buy)
+          if (currentPrice <= order.limitPrice) {
+            executed = true;
+            const refund = (order.limitPrice - currentPrice) * order.quantity;
+            const user = await User.findById(order.user);
+            if (refund > 0) { user.balance += refund; await user.save(); }
+
+            let holding = await Holding.findOne({ user: order.user, stock: order.stock, productType: pType, tradeDate: today });
+            if (holding) {
+              const newQty = holding.quantity + order.quantity;
+              holding.avgPrice = (holding.quantity * holding.avgPrice + currentPrice * order.quantity) / newQty;
+              holding.quantity = newQty;
+              await holding.save();
+            } else {
+              await Holding.create({ user: order.user, stock: order.stock, quantity: order.quantity, avgPrice: currentPrice, productType: pType, tradeDate: today });
+            }
+
+            // Spawn SL + Target child orders
+            if (order.stopLossPrice) {
+              await Order.create({
+                user: order.user, stock: order.stock, type: 'SELL', orderType: 'MARKET',
+                orderCategory: 'STOPLOSS', stopLossPrice: order.stopLossPrice,
+                productType: pType, quantity: order.quantity, price: order.stopLossPrice, status: 'PENDING',
+                parentOrderId: order._id,
+              });
+            }
+            if (order.targetPrice) {
+              await Order.create({
+                user: order.user, stock: order.stock, type: 'SELL', orderType: 'LIMIT',
+                orderCategory: 'TARGET',           // distinct from REGULAR — processed by TARGET branch below
+                limitPrice: order.targetPrice,
+                productType: pType, quantity: order.quantity, price: order.targetPrice, status: 'PENDING',
+                parentOrderId: order._id,
+              });
+            }
+          }
+
+        // ── Regular LIMIT + TARGET orders ─────────────────────────────
+        } else if (['REGULAR', 'TARGET'].includes(order.orderCategory) || !order.orderCategory) {
           if (order.type === 'BUY' && currentPrice <= order.limitPrice) {
             executed = true;
             const refund = (order.limitPrice - currentPrice) * order.quantity;
@@ -74,22 +119,39 @@ const dbMatchingEngine = () => {
               user.balance += refund;
               await user.save();
             }
-            let holding = await Holding.findOne({ user: order.user, stock: order.stock });
+            let holding = await Holding.findOne({ user: order.user, stock: order.stock, productType: pType, tradeDate: today });
             if (holding) {
               const newQty = holding.quantity + order.quantity;
               holding.avgPrice = (holding.quantity * holding.avgPrice + currentPrice * order.quantity) / newQty;
               holding.quantity = newQty;
               await holding.save();
             } else {
-              await Holding.create({ user: order.user, stock: order.stock, quantity: order.quantity, avgPrice: currentPrice });
+              await Holding.create({ user: order.user, stock: order.stock, quantity: order.quantity, avgPrice: currentPrice, productType: pType, tradeDate: today });
             }
           } else if (order.type === 'SELL' && currentPrice >= order.limitPrice) {
             executed = true;
             const user = await User.findById(order.user);
             user.balance += currentPrice * order.quantity;
             await user.save();
+
+            // Deduct from the holding (or delete it when qty reaches zero)
+            const holding = await Holding.findOne({ user: order.user, stock: order.stock, productType: pType, tradeDate: today });
+            if (holding) {
+              holding.quantity -= order.quantity;
+              if (holding.quantity <= 0) await Holding.deleteOne({ _id: holding._id });
+              else await holding.save();
+            }
+
+            // OCO: cancel the sibling bracket leg (SL if target hit, or target if SL hit)
+            if (order.parentOrderId) {
+              await Order.updateMany(
+                { parentOrderId: order.parentOrderId, _id: { $ne: order._id }, status: 'PENDING' },
+                { status: 'CANCELLED', cancelReason: 'Sibling order filled (OCO)' }
+              );
+            }
           }
         }
+
 
         if (executed) {
           order.status = 'COMPLETED';

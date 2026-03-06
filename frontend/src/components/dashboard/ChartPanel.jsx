@@ -3,11 +3,24 @@ import { getPriceHistory } from '../../services/api';
 import { useWatchlist } from '../../hooks/useWatchlist';
 import { StockIcon } from '../StockIcon';
 import {
-  ZoomIn, ZoomOut, RotateCcw, Expand, Shrink, ChevronDown, MoveHorizontal, Star
+  ZoomIn, ZoomOut, RotateCcw, Expand, Shrink, ChevronDown, MoveHorizontal, Star, Activity
 } from 'lucide-react';
 
 
+
 const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1W'];
+
+// Bar duration in milliseconds for each timeframe
+const TIMEFRAME_BAR_MS = {
+  '1m':  60_000,
+  '5m':  5  * 60_000,
+  '15m': 15 * 60_000,
+  '30m': 30 * 60_000,
+  '1h':  60 * 60_000,
+  '4h':  4  * 60 * 60_000,
+  '1d':  24 * 60 * 60_000,
+  '1W':  7  * 24 * 60 * 60_000,
+};
 
 const MIN_VISIBLE = 10;   // most zoomed-in  (10 candles)
 const MAX_VISIBLE = 120;  // most zoomed-out (120 candles)
@@ -17,7 +30,7 @@ const CHART_CACHE = {};
 const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 hours
 
 // ── Generate fallback candle data ─────────────────────────────────────────
-function generateCandleData(basePrice = 1000, count = 120) {
+function generateCandleData(basePrice = 1000, count = 120, barMs = 60_000) {
   const data = [];
   let price = basePrice;
   const now = Date.now();
@@ -27,7 +40,7 @@ function generateCandleData(basePrice = 1000, count = 120) {
     const high  = Math.max(open, close) + Math.random() * (basePrice * 0.004);
     const low   = Math.min(open, close) - Math.random() * (basePrice * 0.004);
     data.push({
-      time: now - (count - i) * 60_000,
+      time: now - (count - i) * barMs,
       open:  +open.toFixed(2),
       close: +close.toFixed(2),
       high:  +high.toFixed(2),
@@ -54,6 +67,34 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+// ── Technical Indicators ──────────────────────────────────────────────────
+function calcSMA(data, period) {
+  const result = new Array(data.length).fill(null);
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) {
+    sum += data[i].close;
+    if (i >= period) sum -= data[i - period].close;
+    if (i >= period - 1) result[i] = sum / period;
+  }
+  return result;
+}
+
+function calcEMA(data, period) {
+  const result = new Array(data.length).fill(null);
+  const k = 2 / (period + 1);
+  let ema = null;
+  for (let i = 0; i < data.length; i++) {
+    if (i === 0) {
+      ema = data[i].close;
+      result[i] = ema;
+    } else {
+      ema = (data[i].close - ema) * k + ema;
+      result[i] = ema;
+    }
+  }
+  return result;
+}
+
 export default function ChartPanel({ selectedStock, stocks = [], onStockChange, currentPrice, livePrices = {} }) {
   const [activeTimeframe, setActiveTimeframe] = useState('1h');
   const [candles, setCandles]           = useState([]);
@@ -61,7 +102,10 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
   const [searchQuery, setSearchQuery]   = useState('');
   const [crosshair, setCrosshair]       = useState(null);
   const [isDragging, setIsDragging]     = useState(false);
-  const [cursor, setCursor]             = useState('default');
+  const [showIndicators, setShowIndicators] = useState(false);
+  // visibleCount is mirrored as state so JSX can read it safely (refs must not be read during render)
+  const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE);
+
 
   const { isWatched, toggle: toggleWatch } = useWatchlist();
 
@@ -79,7 +123,11 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
 
   // Force a redraw after zoom/pan state changes
   const [drawTick, setDrawTick] = useState(0);
-  const redraw = useCallback(() => setDrawTick(t => t + 1), []);
+  const redraw = useCallback(() => {
+    setDrawTick(t => t + 1);
+    // Keep the state mirror in sync so the candle-count badge re-renders
+    setVisibleCount(visibleCountRef.current);
+  }, []);
 
   const canvasRef      = useRef(null);
   const containerRef   = useRef(null);   // outer card — fullscreen target
@@ -136,6 +184,7 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
     }
 
     const fetch = async () => {
+      const barMs = TIMEFRAME_BAR_MS[activeTimeframe] || 60_000;
       try {
         const res = await getPriceHistory(selectedStock.symbol, activeTimeframe);
         const data = res.data?.data || [];
@@ -151,18 +200,21 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
           CHART_CACHE[cacheKey] = { timestamp: now, data: freshData };
           setCandles(freshData);
         } else {
-          const fallbackData = generateCandleData(currentPrice || selectedStock.price || 1000);
+          const fallbackData = generateCandleData(currentPrice || selectedStock.price || 1000, 120, barMs);
           CHART_CACHE[cacheKey] = { timestamp: now, data: fallbackData };
           setCandles(fallbackData);
         }
       } catch {
-        const fallbackData = generateCandleData(currentPrice || selectedStock.price || 1000);
+        const fallbackData = generateCandleData(currentPrice || selectedStock.price || 1000, 120, barMs);
         CHART_CACHE[cacheKey] = { timestamp: now, data: fallbackData };
         setCandles(fallbackData);
       }
     };
     fetch();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedStock?.symbol, activeTimeframe]);
+
+
 
   // ── Live tick: update last candle on every price change ──────────────
   useEffect(() => {
@@ -183,7 +235,8 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
       }
       return copy;
     });
-  }, [currentPrice]);
+  }, [currentPrice, candles.length]);
+
 
   // ── New candle every 30 s ─────────────────────────────────────────────
   useEffect(() => {
@@ -195,8 +248,6 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
         const newC = { time: Date.now(), open: openPrice, close: openPrice, high: openPrice, low: openPrice, volume: 80 };
         const trimmed = prev.length >= 200 ? prev.slice(1) : prev;
         const copy = [...trimmed, newC];
-        
-        // Keep cache up to date
         if (cacheKeyRef.current && CHART_CACHE[cacheKeyRef.current]) {
           CHART_CACHE[cacheKeyRef.current].data = copy;
         }
@@ -204,7 +255,8 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
       });
     }, 30_000);
     return () => clearInterval(id);
-  }, [candles.length > 0]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [candles.length === 0]);  // re-register only when candles go from empty → populated
 
   // ── Resize observer ───────────────────────────────────────────────────
   useEffect(() => {
@@ -241,11 +293,30 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
     const startIdx = Math.max(0, total - visible - offset);
     const endIdx   = Math.max(visible, total - offset);
     const slice    = candles.slice(startIdx, endIdx);
+
+    // Indicators
+    let sliceSma = [], sliceEma = [];
+    if (showIndicators) {
+      const smaFull = calcSMA(candles, 50);
+      const emaFull = calcEMA(candles, 20);
+      sliceSma = smaFull.slice(startIdx, endIdx);
+      sliceEma = emaFull.slice(startIdx, endIdx);
+    }
+
     if (slice.length === 0) return;
 
-    const maxP = Math.max(...slice.map(c => c.high)) * 1.003;
-    const minP = Math.min(...slice.map(c => c.low))  * 0.997;
+    let maxP = Math.max(...slice.map(c => c.high));
+    let minP = Math.min(...slice.map(c => c.low));
+
+    if (showIndicators) {
+      sliceSma.forEach(v => { if (v !== null) { maxP = Math.max(maxP, v); minP = Math.min(minP, v); }});
+      sliceEma.forEach(v => { if (v !== null) { maxP = Math.max(maxP, v); minP = Math.min(minP, v); }});
+    }
+
+    maxP *= 1.003;
+    minP *= 0.997;
     const priceRange = maxP - minP || 1;
+
 
     const gap  = chartW / slice.length;
     const cw   = Math.max(1, gap * 0.7);
@@ -312,7 +383,37 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
       ctx.fillRect(x - cw / 2, bodyTop, cw, bodyH);
     });
 
+    // ── Indicators ───────────────────────────────────────────────────
+    if (showIndicators) {
+      // 50 SMA (Orange)
+      ctx.beginPath();
+      ctx.strokeStyle = '#f97316'; // orange-500
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < sliceSma.length; i++) {
+        if (sliceSma[i] === null) continue;
+        const x = toX(i);
+        const y = toY(sliceSma[i]);
+        if (i === 0 || sliceSma[i - 1] === null) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // 20 EMA (Blue)
+      ctx.beginPath();
+      ctx.strokeStyle = '#3b82f6'; // blue-500
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < sliceEma.length; i++) {
+        if (sliceEma[i] === null) continue;
+        const x = toX(i);
+        const y = toY(sliceEma[i]);
+        if (i === 0 || sliceEma[i - 1] === null) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
     // ── Live price dashed line + price tag ───────────────────────────
+
     const last      = slice[slice.length - 1];
     const liveP     = currentPrice || last.close;
     const livePy    = toY(liveP);
@@ -363,7 +464,9 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
     // Store slice info for mouse calculations
     canvas._chartMeta = { pad, chartW, chartH, W, H, gap, slice, minP, priceRange };
 
-  }, [candles, drawTick, crosshair]);
+  }, [candles, drawTick, crosshair, currentPrice, showIndicators]);
+
+
 
   // ── Mouse: wheel = zoom, drag = pan, move = crosshair ────────────────
   const handleWheel = useCallback(e => {
@@ -377,8 +480,8 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
   const handleMouseDown = useCallback(e => {
     dragRef.current = { active: true, startX: e.clientX, startOffset: panOffsetRef.current };
     setIsDragging(true);
-    setCursor('grabbing');
   }, []);
+
 
   const handleMouseMove = useCallback(e => {
     const canvas = canvasRef.current;
@@ -418,15 +521,15 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
   const handleMouseUp = useCallback(() => {
     dragRef.current.active = false;
     setIsDragging(false);
-    setCursor('default');
   }, []);
+
 
   const handleMouseLeave = useCallback(() => {
     dragRef.current.active = false;
     setIsDragging(false);
-    setCursor('default');
     setCrosshair(null);
   }, []);
+
 
   // Attach non-passive wheel listener
   useEffect(() => {
@@ -573,11 +676,26 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
             {tf}
           </button>
         ))}
+
+        <div className="w-px h-4 bg-edge mx-2 hidden sm:block" />
+        <button
+          onClick={() => setShowIndicators(p => !p)}
+          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors whitespace-nowrap ${
+            showIndicators 
+              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' 
+              : 'text-muted hover:text-secondary hover:bg-surface border border-transparent'
+          }`}
+        >
+          <Activity className="w-3 h-3" />
+          Indicators
+        </button>
+
         {/* Visible range indicator */}
         <span className="ml-auto text-[9px] text-muted whitespace-nowrap pl-2">
-          {Math.min(visibleCountRef.current, candles.length)} candles
+          {Math.min(visibleCount, candles.length)} candles
         </span>
       </div>
+
 
       {/* ── Canvas area — this is the fullscreen target ── */}
       <div
@@ -599,9 +717,25 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
                 {tf}
               </button>
             ))}
+
+            <div className="w-px h-4 bg-edge mx-2" />
+            <button
+              onClick={() => setShowIndicators(p => !p)}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors whitespace-nowrap ${
+                showIndicators 
+                  ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' 
+                  : 'text-muted hover:text-secondary hover:bg-surface border border-transparent'
+              }`}
+            >
+              <Activity className="w-3 h-3" />
+              Indicators
+            </button>
+
             <span className="ml-auto text-[9px] text-muted pl-2">
-              {Math.min(visibleCountRef.current, candles.length)} candles
+              {Math.min(visibleCount, candles.length)} candles
             </span>
+
+
             <button
               onClick={toggleFullscreen}
               className="ml-2 p-1.5 rounded text-accent bg-accent/10 hover:bg-accent/20 transition-colors"

@@ -41,12 +41,38 @@ exports.getHoldings = async (req, res) => {
   }
 
   try {
-    const holdings = await Holding.find({ user: userId });
+    const holdings = await Holding.find({ user: userId, productType: { $ne: 'MIS' } });
     res.json({ success: true, count: holdings.length, holdings: holdings.map(h => enrichHolding(h, prices)) });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching holdings', error: error.message });
   }
 };
+
+// ─── Get Positions (Intraday / MIS) ────────────────────────────────
+exports.getPositions = async (req, res) => {
+  const userId = req.user._id || req.user.id;
+  const prices = getPrices();
+  const today = new Date().toISOString().slice(0, 10);
+
+  if (!global.dbConnected) {
+    const mem = global.inMemoryDB;
+    const positions = [];
+    for (const [key, h] of mem.holdings) {
+      if (key.startsWith(userId + ':') && h.productType === 'MIS' && h.tradeDate === today) {
+        positions.push(h);
+      }
+    }
+    return res.json({ success: true, count: positions.length, positions: positions.map(h => enrichHolding(h, prices)) });
+  }
+
+  try {
+    const positions = await Holding.find({ user: userId, productType: 'MIS', tradeDate: today });
+    res.json({ success: true, count: positions.length, positions: positions.map(h => enrichHolding(h, prices)) });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching positions', error: error.message });
+  }
+};
+
 
 // ─── Get Dashboard ─────────────────────────────────────────
 exports.getDashboard = async (req, res) => {

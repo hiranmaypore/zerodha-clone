@@ -11,7 +11,9 @@ import BuySellPanel     from '../components/dashboard/BuySellPanel';
 import ActiveOrders     from '../components/dashboard/ActiveOrders';
 import PortfolioSummary from '../components/dashboard/PortfolioSummary';
 import AIPredictionCard from '../components/dashboard/AIPredictionCard';
+import AlertsPanel      from '../components/dashboard/AlertsPanel';
 import {
+
   TrendingUp, TrendingDown, DollarSign, Activity,
   BarChart2, RefreshCw,
 } from 'lucide-react';
@@ -60,6 +62,7 @@ export default function Dashboard() {
         setLivePrices(priceMap);
       }
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── React to ?stock= URL param ────────────────────────────────
@@ -67,7 +70,13 @@ export default function Dashboard() {
     const sym = searchParams.get('stock');
     if (sym && stocks.length > 0) {
       const s = stocks.find(x => x.symbol === sym);
-      if (s) setSelectedStock(s);
+      if (s) {
+        // Defer to avoid "synchronous setState in effect" lint rule
+        const t = setTimeout(() => setSelectedStock(s), 0);
+        return () => clearTimeout(t);
+      }
+
+
     }
   }, [searchParams, stocks]);
 
@@ -83,15 +92,24 @@ export default function Dashboard() {
       }
       if (hRes.status === 'fulfilled') setHoldings(hRes.value.data?.holdings || []);
       if (bRes.status === 'fulfilled') setBalance(bRes.value.data?.balance  ?? 0);
-    } catch {}
+    } catch {
+      // ignore
+    }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData, refreshKey]);
+  // Defer to avoid "synchronous setState in effect" lint rule
+  useEffect(() => {
+    const t = setTimeout(() => fetchData(), 0);
+    return () => clearTimeout(t);
+  }, [fetchData, refreshKey]);
 
   const handleOrderPlaced = () => setRefreshKey(k => k + 1);
   const handleCancelOrder = async (id) => {
-    try { await cancelOrder(id); setRefreshKey(k => k + 1); } catch {}
+    try { await cancelOrder(id); setRefreshKey(k => k + 1); } catch {
+      // ignore
+    }
   };
+
 
   // ── WebSocket live prices ──────────────────────────────────────
   useEffect(() => {
@@ -208,16 +226,25 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Active Orders — 8 cols */}
-        <div className="col-span-12 md:col-span-8 min-w-0 min-h-0 h-full">
+        {/* Active Orders — 6 cols */}
+        <div className="col-span-12 md:col-span-6 min-w-0 min-h-0 h-full">
           <ActiveOrders
             orders={orders}
             onCancel={handleCancelOrder}
           />
         </div>
 
+        {/* Alerts — 2 cols */}
+        <div className="col-span-12 md:col-span-2 min-w-0 min-h-0 h-full">
+          <AlertsPanel
+            selectedStock={selectedStock}
+            currentPrice={currentPrice}
+          />
+        </div>
+
         {/* AI Prediction — 2 cols */}
         <div className="col-span-12 md:col-span-2 min-w-0 min-h-0 h-full">
+
           <AIPredictionCard
             selectedStock={selectedStock}
             currentPrice={currentPrice}

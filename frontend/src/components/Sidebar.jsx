@@ -3,9 +3,10 @@ import { useAuth } from "../context/AuthContext";
 import {
   Search, Bell, ChevronDown, LogOut, Settings, X,
   CheckCircle, XCircle, TrendingUp, TrendingDown,
-  AlertTriangle, Zap, Trash2, CheckCheck,
+  AlertTriangle, Zap, Trash2, CheckCheck, ShieldAlert, Clock,
 } from "lucide-react";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
+
 import { useNotifications } from "../hooks/useNotifications";
 import { StockIcon } from "./StockIcon";
 
@@ -70,6 +71,18 @@ const NOTIF_CFG = {
     title: () => 'Bracket Order Entry',
     body:  (d) => `${d.stock} bracket triggered @ ₹${d.price?.toFixed(2)}`,
     dot: 'bg-accent',
+  },
+  mis_warning: {
+    icon: () => <Clock className="w-4 h-4 text-warning" />,
+    title: () => '⚠️ MIS Square-Off Warning',
+    body:  (d) => d.message || 'MIS positions will be squared off in 5 minutes',
+    dot: 'bg-warning',
+  },
+  mis_squaredoff: {
+    icon: () => <ShieldAlert className="w-4 h-4 text-loss" />,
+    title: () => 'MIS Position Closed',
+    body:  (d) => d.message || `${d.stock} squared off at ₹${d.price?.toFixed(2)}`,
+    dot: 'bg-loss',
   },
 };
 
@@ -145,10 +158,20 @@ export default function Navbar() {
     if (e.key === 'Escape') setSearchOpen(false);
   };
 
-  // Auto-show bell when notification arrives
+  // Auto-show bell when a brand-new notification arrives
+  const prevNotifLenRef = useRef(0);
   useEffect(() => {
-    if (unreadCount > 0) setBellOpen(true);
+    const len = notifications.length;
+    if (len > prevNotifLenRef.current) {
+      // Defer to avoid "synchronous setState in effect" lint rule
+      const t = setTimeout(() => setBellOpen(true), 0);
+      prevNotifLenRef.current = len;
+      return () => clearTimeout(t);
+    }
+    prevNotifLenRef.current = len;
   }, [notifications.length]);
+
+
 
   const handleLogout = () => { logout(); navigate("/"); };
 

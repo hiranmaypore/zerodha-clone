@@ -5,7 +5,8 @@ import { getOrders } from '../../services/api';
 import { getSocket } from '../../services/socket';
 import { StockIcon } from '../StockIcon';
 
-export default function RunningTrades({ selectedStock, livePrices }) {
+export default function RunningTrades() {
+
   const navigate = useNavigate();
   const [trades, setTrades] = useState([]);
 

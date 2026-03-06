@@ -9,6 +9,7 @@ import {
   ArrowUpRight, ArrowDownRight, Minus,
   BarChart2, Activity, Zap, RefreshCw,
 } from 'lucide-react';
+import OptionChain from '../components/market/OptionChain';
 
 // Sector mapping
 const SECTORS = {
@@ -58,11 +59,15 @@ export default function Market() {
     load();
     const socket = connectSocket();
     socket.on('price_update', (incoming) => {
-      setPrevPrices(prev => ({ ...prev, ...prices }));
-      setPrices(prev => ({ ...prev, ...incoming }));
+
+      setPrices(currentPrices => {
+        setPrevPrices(p => ({ ...p, ...currentPrices }));
+        return { ...currentPrices, ...incoming };
+      });
     });
     return () => socket.off('price_update');
   }, []);
+
 
   const load = async () => {
     setLoading(true);
@@ -181,8 +186,10 @@ export default function Market() {
 
   const modalPrice = modal ? (prices[modal.stock.symbol] || modal.stock.price || 0) : 0;
   const modalTotal = qty > 0 ? (orderType === 'LIMIT' ? parseFloat(limitPx||0) : modalPrice) * parseInt(qty||0) : 0;
+  const currentMarketAvg = avgChange;
 
   return (
+
     <div className="space-y-5 animate-fade-in">
 
       {/* ── Toast ── */}
@@ -276,7 +283,7 @@ export default function Market() {
       {/* ── Tabs + Sector filter ── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex gap-1">
-          {['ALL','GAINERS','LOSERS','WATCHLIST'].map(t => (
+          {['ALL','GAINERS','LOSERS','WATCHLIST','OPTIONS'].map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -287,6 +294,7 @@ export default function Market() {
             </button>
           ))}
         </div>
+
         <div className="flex gap-1 flex-wrap">
           {sectors.map(s => (
             <button
@@ -301,9 +309,13 @@ export default function Market() {
         </div>
       </div>
 
-      {/* ── Table ── */}
-      <div className="bg-card border border-edge rounded-xl overflow-hidden">
-        {/* Headers */}
+      {/* ── Table OR Option Chain ── */}
+      {tab === 'OPTIONS' ? (
+        <OptionChain spotPrice={(currentMarketAvg * 100) + 22000} />
+      ) : (
+        <div className="bg-card border border-edge rounded-xl overflow-hidden">
+          {/* Headers */}
+
         <div className="grid grid-cols-12 px-5 py-2.5 text-[10px] text-muted uppercase tracking-wide border-b border-edge font-medium">
           <div className="col-span-4 cursor-pointer hover:text-primary select-none" onClick={() => toggleSort('symbol')}>
             Stock <SortArrow col="symbol" />
@@ -391,8 +403,10 @@ export default function Market() {
           </div>
         )}
       </div>
+      )}
 
       {/* ── Order Modal ── */}
+
       {modal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setModal(null)}>
           <div

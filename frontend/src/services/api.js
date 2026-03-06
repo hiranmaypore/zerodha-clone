@@ -46,7 +46,9 @@ export const placeBracket = (data) => API.post('/orders/bracket', data);
 
 // Holdings & Dashboard
 export const getHoldings = () => API.get('/holdings');
+export const getPositions = () => API.get('/holdings/positions');
 export const getDashboard = () => API.get('/holdings/dashboard');
+
 
 // Watchlist
 export const getWatchlist = () => API.get('/watchlist');
@@ -74,4 +76,10 @@ export const calcBrokerage = (data) => API.post('/calculators/brokerage', data);
 export const calcFOMargin = (data) => API.post('/calculators/fo-margin', data);
 export const calcBlackScholes = (data) => API.post('/calculators/black-scholes', data);
 
+// Alerts
+export const getAlerts = () => API.get('/alerts');
+export const createAlert = (data) => API.post('/alerts', data);
+export const deleteAlert = (id) => API.delete(`/alerts/${id}`);
+
 export default API;
+

@@ -25,6 +25,8 @@ const watchlistRoutes = require("./routes/watchlistRoutes");
 const priceRoutes = require("./routes/priceRoutes");
 const fundsRoutes = require("./routes/fundsRoutes");
 const stockRoutes = require("./routes/stockRoutes");
+const alertRoutes = require("./routes/alertRoutes");
+
 
 // Price Engine
 const stocks = require("./config/stocks");
@@ -35,10 +37,13 @@ const {
   getPrices
 } = require("./services/priceSimulator");
 const priceSocket = require("./sockets/priceSocket");
-const startMatchingEngine = require("./services/matchingEngine");
-const { startPriceHistoryService } = require("./services/priceHistoryService");
+const startMatchingEngine = require('./services/matchingEngine');
+const { startPriceHistoryService } = require('./services/priceHistoryService');
+const { startAutoSquareOffService } = require('./services/autoSquareOff');
+const { startAlertEngine } = require('./services/alertEngine');
 
 const app = express();
+
 const server = http.createServer(app);
 
 // Middleware
@@ -54,6 +59,8 @@ app.use("/api/watchlist", watchlistRoutes);
 app.use("/api/prices", priceRoutes);
 app.use("/api/funds", fundsRoutes);
 app.use("/api/stocks", stockRoutes);
+app.use("/api/alerts", alertRoutes);
+
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -124,7 +131,14 @@ const PORT = process.env.PORT || 5000;
       } catch(e) { console.warn('Notifications skipped:', e.message); }
     }
 
+    // MIS Auto Square-Off — always start (handles both demo + DB)
+    try { startAutoSquareOffService(io); } catch(e) { console.warn('AutoSquareOff warn:', e.message); }
+
+    // Alerts Engine
+    try { startAlertEngine(io); } catch(e) { console.warn('AlertEngine warn:', e.message); }
+
     // User room management
+
     io.on('connection', (socket) => {
       console.log(`Client connected: ${socket.id}`);
       

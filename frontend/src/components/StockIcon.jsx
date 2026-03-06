@@ -58,8 +58,8 @@ const SYMBOL_COLORS = {
  */
 export function StockIcon({ symbol = '', className = 'w-8 h-8', textSize = 'text-xs' }) {
   const [failed, setFailed] = useState(false);
-  const domain = STOCK_DOMAINS[symbol];
   const gradient = SYMBOL_COLORS[symbol] || 'from-purple-500 to-indigo-600';
+
 
   if (!failed) {
     return (

@@ -11,7 +11,8 @@ export default function Watchlist() {
   const [stocks, setStocks]   = useState([]);
   const [prices, setPrices]   = useState({});
   const [loading, setLoading] = useState(true);
-  const { isWatched, toggle }  = useWatchlist();
+  const { toggle }  = useWatchlist();
+
 
   useEffect(() => {
     loadWatchlist();

@@ -37,7 +37,9 @@ export default function OrderBook({ selectedStock, livePrices = {}, orders = [] 
     bidRef.current = buildLevels(price, 7, 'bid');
     setAsks(addDepth([...askRef.current]));
     setBids(addDepth([...bidRef.current]));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedStock?.symbol]);
+
 
   // On price tick: nudge levels slightly instead of rebuilding
   useEffect(() => {

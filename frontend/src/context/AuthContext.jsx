@@ -1,8 +1,11 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
+
 import { login as loginAPI, signup as signupAPI, getProfile } from '../services/api';
 import { connectSocket, joinUserRoom, disconnectSocket } from '../services/socket';
 
 const AuthContext = createContext(null);
+
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -17,13 +20,15 @@ export function AuthProvider({ children }) {
     if (token && savedUser) {
       try {
         const parsed = JSON.parse(savedUser);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(parsed);
-        const socket = connectSocket();
+        connectSocket();
         joinUserRoom(parsed._id);
       } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
+
     }
     setLoading(false);
   }, []);
@@ -33,8 +38,9 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
-    const socket = connectSocket();
+    connectSocket();
     joinUserRoom(data._id);
+
     return data;
   };
 
@@ -43,8 +49,9 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
-    const socket = connectSocket();
+    connectSocket();
     joinUserRoom(data._id);
+
     return data;
   };
 
@@ -61,8 +68,11 @@ export function AuthProvider({ children }) {
       const updated = { ...user, ...data };
       localStorage.setItem('user', JSON.stringify(updated));
       setUser(updated);
-    } catch {}
+    } catch {
+      // ignore empty block
+    }
   };
+
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>

@@ -5,7 +5,7 @@ const { getPrices } = require('../services/priceSimulator');
 const crypto = require('crypto');
 
 // ─── In-memory helpers ──────────────────────────────────────────────────────────
-function memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, currentPrice) {
+function memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, currentPrice, productType) {
   const mem = global.inMemoryDB;
   const user = mem.users.get(userId);
   if (!user) return { error: 'User not found', status: 404 };
@@ -16,9 +16,11 @@ function memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, curre
 
   user.balance -= totalCost;
 
+  const today = new Date().toISOString().slice(0, 10);
   const order = {
     _id: crypto.randomUUID(), user: userId, stock: stockSymbol, type: 'BUY',
     orderType: orderType || 'MARKET', limitPrice: orderType === 'LIMIT' ? limitPrice : undefined,
+    productType: productType || 'CNC',
     quantity, price: executionPrice,
     status: orderType === 'LIMIT' ? 'PENDING' : 'COMPLETED',
     createdAt: new Date().toISOString(),
@@ -26,14 +28,14 @@ function memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, curre
   mem.orders.set(order._id, order);
 
   if (orderType !== 'LIMIT') {
-    const hKey = `${userId}:${stockSymbol}`;
+    const hKey = `${userId}:${stockSymbol}:${productType || 'CNC'}:${today}`;
     const holding = mem.holdings.get(hKey);
     if (holding) {
       const newQty = holding.quantity + quantity;
       holding.avgPrice = (holding.quantity * holding.avgPrice + totalCost) / newQty;
       holding.quantity = newQty;
     } else {
-      mem.holdings.set(hKey, { user: userId, stock: stockSymbol, quantity, avgPrice: currentPrice });
+      mem.holdings.set(hKey, { user: userId, stock: stockSymbol, quantity, avgPrice: currentPrice, productType: productType || 'CNC', tradeDate: today });
     }
   }
   return { order };
@@ -66,7 +68,7 @@ function memSellStock(userId, stockSymbol, quantity, currentPrice) {
 
 // ─── Buy Stock ─────────────────────────────────────────────────────────────────
 exports.buyStock = async (req, res) => {
-  const { stockSymbol, quantity, orderType, limitPrice } = req.body;
+  const { stockSymbol, quantity, orderType, limitPrice, productType } = req.body;
   const userId = req.user._id || req.user.id;
 
   if (!stockSymbol || !quantity || quantity <= 0)
@@ -80,7 +82,7 @@ exports.buyStock = async (req, res) => {
     return res.status(400).json({ message: 'Stock price not available' });
 
   if (!global.dbConnected) {
-    const result = memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, currentPrice);
+    const result = memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, currentPrice, productType);
     if (result.error) return res.status(result.status).json({ message: result.error });
     return res.status(201).json(result.order);
   }
@@ -98,23 +100,27 @@ exports.buyStock = async (req, res) => {
     if (orderType === 'LIMIT') {
       const order = await Order.create({
         user: userId, stock: stockSymbol, type: 'BUY', orderType: 'LIMIT',
+        productType: productType || 'CNC',
         limitPrice, quantity, price: limitPrice, status: 'PENDING'
       });
       return res.status(201).json(order);
     }
 
-    let holding = await Holding.findOne({ user: userId, stock: stockSymbol });
+    const today = new Date().toISOString().slice(0, 10);
+    const pType = productType || 'CNC';
+    let holding = await Holding.findOne({ user: userId, stock: stockSymbol, productType: pType, tradeDate: today });
     if (holding) {
       const newQty = holding.quantity + quantity;
       holding.avgPrice = (holding.quantity * holding.avgPrice + totalCost) / newQty;
       holding.quantity = newQty;
       await holding.save();
     } else {
-      holding = await Holding.create({ user: userId, stock: stockSymbol, quantity, avgPrice: currentPrice });
+      holding = await Holding.create({ user: userId, stock: stockSymbol, quantity, avgPrice: currentPrice, productType: pType, tradeDate: today });
     }
 
     const order = await Order.create({
       user: userId, stock: stockSymbol, type: 'BUY', orderType: 'MARKET',
+      productType: pType,
       quantity, price: currentPrice, status: 'COMPLETED'
     });
     res.status(201).json(order);

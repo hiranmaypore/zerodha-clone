@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StockIcon } from '../components/StockIcon';
-import { getHoldings } from '../services/api';
+import { getHoldings, getPositions } from '../services/api';
 import { connectSocket } from '../services/socket';
 import {
   TrendingUp, TrendingDown, Briefcase, BarChart2,
-  ArrowUpRight, ArrowDownRight, Minus, RefreshCw,
+  ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Activity,
 } from 'lucide-react';
 
 export default function Holdings() {
   const navigate  = useNavigate();
+  const [tab,      setTab]     = useState('holdings'); // 'holdings' | 'positions'
   const [holdings, setHoldings] = useState([]);
+  const [positions, setPositions] = useState([]);
   const [prices,   setPrices]   = useState({});
   const [loading,  setLoading]  = useState(true);
   const [sort,     setSort]     = useState({ key: 'pnl', dir: -1 });
@@ -27,18 +29,24 @@ export default function Holdings() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await getHoldings();
-      const list = res.data.holdings || [];
-      setHoldings(list);
-      const seed = {};
-      list.forEach(h => { if (h.currentPrice) seed[h.stock] = h.currentPrice; });
-      setPrices(prev => ({ ...seed, ...prev }));
+      const [hRes, pRes] = await Promise.allSettled([getHoldings(), getPositions()]);
+      if (hRes.status === 'fulfilled') {
+        const list = hRes.value.data.holdings || [];
+        setHoldings(list);
+        const seed = {};
+        list.forEach(h => { if (h.currentPrice) seed[h.stock] = h.currentPrice; });
+        setPrices(prev => ({ ...seed, ...prev }));
+      }
+      if (pRes.status === 'fulfilled') {
+        setPositions(pRes.value.data.positions || []);
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
+
 
   // ── Enrich with live prices ──────────────────────────────────
   const enriched = holdings.map(h => {
@@ -100,8 +108,8 @@ export default function Holdings() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Holdings</h1>
-          <p className="text-sm text-muted mt-0.5">{enriched.length} stocks · long-term portfolio</p>
+          <h1 className="text-2xl font-bold text-primary">Portfolio</h1>
+          <p className="text-sm text-muted mt-0.5">Manage your investments and intraday trades</p>
         </div>
         <button
           onClick={load}
@@ -111,7 +119,98 @@ export default function Holdings() {
         </button>
       </div>
 
-      {enriched.length > 0 ? (
+      {/* ── Tab bar ── */}
+      <div className="flex gap-1 bg-surface/50 p-1 rounded-xl border border-edge w-fit">
+        <button
+          onClick={() => setTab('holdings')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            tab === 'holdings'
+              ? 'bg-accent text-white shadow-lg'
+              : 'text-muted hover:text-primary'
+          }`}
+        >
+          <Briefcase className="w-4 h-4" />
+          Holdings <span className="text-xs opacity-70">({enriched.length})</span>
+        </button>
+        <button
+          onClick={() => setTab('positions')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            tab === 'positions'
+              ? 'bg-warning/80 text-dark shadow-lg'
+              : 'text-muted hover:text-primary'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          Positions <span className="text-xs opacity-70">({positions.length})</span>
+        </button>
+      </div>
+
+      {/* ── POSITIONS view (MIS intraday) ── */}
+      {tab === 'positions' && (
+        <>
+          {positions.length > 0 ? (
+            <div className="bg-card border border-edge rounded-xl overflow-hidden">
+              <div className="px-5 py-3 border-b border-edge flex items-center gap-2">
+                <Activity className="w-4 h-4 text-warning" />
+                <span className="text-sm font-semibold text-primary">Today's Intraday Positions (MIS)</span>
+                <span className="text-xs text-warning/80 bg-warning/10 px-2 py-0.5 rounded-full ml-auto">Auto square-off at 3:20 PM</span>
+              </div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-edge text-[10px] text-muted uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 font-medium">Stock</th>
+                    <th className="text-right px-4 py-3 font-medium">Qty</th>
+                    <th className="text-right px-4 py-3 font-medium">Avg Price</th>
+                    <th className="text-right px-4 py-3 font-medium">LTP</th>
+                    <th className="text-right px-5 py-3 font-medium">P&L</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-edge">
+                  {positions.map(p => (
+                    <tr key={p._id} onClick={() => navigate(`/dashboard?stock=${p.stock}`)} className="hover:bg-surface/60 transition-colors cursor-pointer">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <StockIcon symbol={p.stock} className="w-8 h-8" textSize="text-xs" />
+                          <div>
+                            <div className="font-semibold text-primary">{p.stock}</div>
+                            <div className="text-[10px] text-warning bg-warning/10 px-1.5 py-0.5 rounded-full inline-block">MIS</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="text-right px-4 py-3.5 font-mono text-primary">{Math.abs(p.quantity)}</td>
+                      <td className="text-right px-4 py-3.5 font-mono text-secondary">₹{p.avgPrice?.toFixed(2)}</td>
+                      <td className="text-right px-4 py-3.5 font-mono font-semibold text-primary">₹{(prices[p.stock] ?? p.currentPrice ?? 0).toFixed(2)}</td>
+                      <td className="text-right px-5 py-3.5">
+                        <div className={`font-semibold font-mono text-sm ${p.pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                          {p.pnl >= 0 ? '+' : ''}{fmt(p.pnl)}
+                        </div>
+                        <div className={`text-[10px] font-mono ${p.pnlPercent >= 0 ? 'text-profit' : 'text-loss'}`}>
+                          {p.pnlPercent >= 0 ? '+' : ''}{p.pnlPercent?.toFixed(2)}%
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="bg-card border border-edge rounded-xl py-20 text-center space-y-4">
+              <Activity className="w-12 h-12 mx-auto text-muted/20" />
+              <div>
+                <p className="text-primary font-semibold">No intraday positions today</p>
+                <p className="text-sm text-muted mt-1">Use MIS product type when placing orders for intraday trading</p>
+              </div>
+              <button onClick={() => navigate('/dashboard')} className="px-5 py-2 bg-warning/80 text-dark rounded-xl text-sm font-medium hover:bg-warning transition-colors">
+                Trade Intraday
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── HOLDINGS view (CNC long-term) ── */}
+      {tab === 'holdings' && enriched.length > 0 ? (
+
         <>
           {/* ── Summary cards ── */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -314,12 +413,12 @@ export default function Holdings() {
             </div>
           </div>
         </>
-      ) : (
+      ) : tab === 'holdings' && enriched.length === 0 ? (
         <div className="bg-card border border-edge rounded-xl py-20 text-center space-y-4">
           <Briefcase className="w-12 h-12 mx-auto text-muted/20" />
           <div>
             <p className="text-primary font-semibold">No holdings yet</p>
-            <p className="text-sm text-muted mt-1">Buy stocks from the dashboard to see them here</p>
+            <p className="text-sm text-muted mt-1">Buy stocks using CNC from the dashboard to see them here</p>
           </div>
           <button
             onClick={() => navigate('/dashboard')}
@@ -328,7 +427,7 @@ export default function Holdings() {
             Go to Dashboard
           </button>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

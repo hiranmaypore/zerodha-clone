@@ -15,6 +15,17 @@ const STATUS_CFG = {
   PENDING:   { icon: <Clock       className="w-3.5 h-3.5" />, color: 'text-warning',  bg: 'bg-warning/10',  label: 'Pending'   },
   CANCELLED: { icon: <XCircle     className="w-3.5 h-3.5" />, color: 'text-loss',     bg: 'bg-loss/10',     label: 'Cancelled' },
   FAILED:    { icon: <AlertCircle className="w-3.5 h-3.5" />, color: 'text-muted',    bg: 'bg-surface',     label: 'Failed'    },
+  REJECTED:  { icon: <XCircle     className="w-3.5 h-3.5" />, color: 'text-muted',    bg: 'bg-surface',     label: 'Rejected'  },
+};
+
+const PRODUCT_CFG = {
+  CNC: { label: 'CNC', cls: 'bg-accent/10 text-accent' },
+  MIS: { label: 'MIS', cls: 'bg-warning/20 text-warning' },
+};
+
+const CATEGORY_CFG = {
+  BRACKET:  { label: '🛡 Bracket',  cls: 'bg-purple-500/10 text-purple-300' },
+  STOPLOSS: { label: '⚡ Stop-Loss', cls: 'bg-loss/10 text-loss'             },
 };
 
 export default function Orders() {
@@ -66,7 +77,6 @@ export default function Orders() {
   const pending   = orders.filter(o => o.status === 'PENDING').length;
   const cancelled = orders.filter(o => o.status === 'CANCELLED').length;
   const buys      = orders.filter(o => o.type === 'BUY').length;
-  const sells     = orders.filter(o => o.type === 'SELL').length;
   const totalVolume = orders
     .filter(o => o.status === 'COMPLETED')
     .reduce((s, o) => s + (o.price * o.quantity), 0);
@@ -160,10 +170,11 @@ export default function Orders() {
             <div className="grid grid-cols-12 px-5 py-2.5 text-[10px] text-muted uppercase tracking-wide border-b border-edge font-medium">
               <div className="col-span-1">Type</div>
               <div className="col-span-2">Stock</div>
-              <div className="col-span-2 hidden md:block">Order Type</div>
+              <div className="col-span-2 hidden md:block">Order Details</div>
+              <div className="col-span-1 text-center hidden sm:block">Product</div>
               <div className="col-span-1 text-right">Qty</div>
               <div className="col-span-2 text-right">Price</div>
-              <div className="col-span-2 text-right hidden sm:block">Total</div>
+              <div className="col-span-1 text-right hidden sm:block">Total</div>
               <div className="col-span-1 text-center">Status</div>
               <div className="col-span-1 text-right">Time</div>
             </div>
@@ -198,22 +209,43 @@ export default function Orders() {
                         <div className="font-semibold text-sm text-primary group-hover:text-accent transition-colors">
                           {order.stock}
                         </div>
-                        {order.orderCategory && order.orderCategory !== 'REGULAR' && (
-                          <span className="text-[9px] px-1.5 py-0.5 bg-accent/10 text-accent rounded-full font-medium mt-0.5 block w-fit">
-                            {order.orderCategory}
-                          </span>
-                        )}
                       </div>
                     </div>
 
-                    {/* Order type */}
-                    <div className="col-span-2 hidden md:block">
-                      <span className="text-xs text-muted">{order.orderType || 'MARKET'}</span>
+                    {/* Order details: type + category + prices + cancel reason */}
+                    <div className="col-span-2 hidden md:block space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs text-muted">{order.orderType || 'MARKET'}</span>
+                        {CATEGORY_CFG[order.orderCategory] && (
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${CATEGORY_CFG[order.orderCategory].cls}`}>
+                            {CATEGORY_CFG[order.orderCategory].label}
+                          </span>
+                        )}
+                      </div>
                       {order.limitPrice && (
                         <div className="text-[10px] text-secondary font-mono">@ ₹{order.limitPrice}</div>
                       )}
                       {order.stopLossPrice && (
                         <div className="text-[10px] text-loss font-mono">SL ₹{order.stopLossPrice}</div>
+                      )}
+                      {order.targetPrice && (
+                        <div className="text-[10px] text-profit font-mono">TGT ₹{order.targetPrice}</div>
+                      )}
+                      {order.cancelReason && (
+                        <div className="text-[9px] text-muted/60 truncate max-w-[140px]" title={order.cancelReason}>
+                          {order.cancelReason}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Product type pill (CNC / MIS) */}
+                    <div className="col-span-1 hidden sm:flex justify-center items-start pt-1">
+                      {order.productType && (
+                        <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
+                          (PRODUCT_CFG[order.productType] || PRODUCT_CFG.CNC).cls
+                        }`}>
+                          {order.productType}
+                        </span>
                       )}
                     </div>
 
@@ -230,7 +262,7 @@ export default function Orders() {
                     </div>
 
                     {/* Total */}
-                    <div className="col-span-2 text-right hidden sm:block">
+                    <div className="col-span-1 text-right hidden sm:block">
                       <div className="font-mono text-sm text-secondary">{fmt(total)}</div>
                     </div>
 
