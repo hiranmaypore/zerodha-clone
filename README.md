@@ -1,529 +1,178 @@
-# 📈 Zerodha Clone — Full-Stack Virtual Trading Platform
+# 📈 Zerodha Clone — Professional Full-Stack Virtual Trading Platform
 
-A professional-grade virtual trading platform built with **React + Vite** (frontend) and **Node.js + Express** (backend), featuring real-time price simulation, advanced order types, a live candlestick chart, financial calculators, and a stunning dark-first UI.
+A high-fidelity, professional-grade virtual trading platform built with the **MERN Stack** (MongoDB, Express, React, Node.js). This platform features real-time price simulation, advanced algorithmic trading signals, a stunning dark/light theme system, and institutional-grade portfolio analytics.
 
-> 💡 Users start with **₹1,00,000** in virtual capital and can trade 20 real NSE stocks with zero real money risk.
-
----
-
-## ✨ What's New (Advanced AI & Quant Trading)
-
-### 🤖 AlgoBot — Quantitative Trading Engine
-
-- **Dual-Strategy Core:** A high-performance background engine running two concurrent quantitative strategies:
-  - **EMA Crossover (9/21):** Detects momentum shifts using the 9-period Fast and 21-period Slow Exponential Moving Averages.
-  - **RSI Mean Reversion:** Identifies "Oversold" (<30) and "Overbought" (>70) conditions using the 14-period Relative Strength Index.
-- 📊 **Portfolio Equity Curve**: Visualize your net worth growth over time with interactive charts.
-- 🔥 **Market Heatmap**: Real-time sector analysis to identify industrial rotations and momentum.
-- ⚙️ **Custom Algo Architect**: Tune EMA periods and risk parameters (SL/Target) for your bot.
-- 🏆 **Trader Ranks & Milestones**: Gamified progress system tracking your career profits.
-- 🚀 **One-Click Copy Trading**: Execute AI signals instantly with pre-filled orders.
-- **Top-Middle Live Feed:** New signals are broadcasted via WebSockets and displayed in a premium, top-center floating overlay with strategy-specific "BUY" and "SELL" badges.
-
-### ⚡ One-Click Copy Trading
-
-- **Instant Execution:** Every AI signal features a "COPY TRADE" button.
-- **Auto-Fill Logic:** Clicking it instantly pre-fills the Buy/Sell Panel with the correct ticker, side (Buy/Sell), current price as a Limit, and calculates a 10% portfolio exposure quantity automatically.
-
-### 📊 Local Quant Backtesting Module
-
-- **Historical Performance:** Added a brand new `BacktestPanel` that analyzes the last 24 hours of 1-minute tick data locally.
-- **Instant ROI:** Calculates Total Trades, Win Rate, and Net P&L (₹) for any stock before you commit capital to an AI strategy.
-
-### 🔔 Contextual AI Preferences
-
-- **Strategy Filtering:** Choose to see All signals, or filter strictly for EMA or RSI strategies in your Profile settings.
-- **Desktop Push Notifications:** Integrated browser-level `Notification API` alerts so you never miss a crossover while multi-tasking.
+> 💡 **Start Trading Instantly**: New users are credited with **₹1,00,000** in virtual capital to trade 20 real NSE stocks with zero financial risk.
 
 ---
 
-## 🎯 Full Feature List
+## 🚀 What's New: Professional Upgrades
 
-### AI & Quant Suite
+### 🌓 High-Fidelity Theme System
 
-| Feature                                   | Status |
-| ----------------------------------------- | ------ |
-| **EMA Crossover (9/21) Engine**           | ✅ NEW |
-| **RSI Overbought/Oversold Engine**        | ✅ NEW |
-| **Top-Middle Live Signal Feed**           | ✅ NEW |
-| **One-Click Copy Trading (Auto-Fill)**    | ✅ NEW |
-| **Historical Quant Backtester**           | ✅ NEW |
-| **Browser Push Notifications**            | ✅ NEW |
-| **Strategy Filtering (Profile Settings)** | ✅ NEW |
+- **CopyCase Switcher**: A premium, animated Sun/Moon toggle (inspired by CopyCase Dribbble design) with custom CSS micro-animations.
+- **Adaptive Design**: Semantic CSS variables ensure every component (cards, charts, buttons) adapts its visual language perfectly between Dark and Light modes.
+- **State Persistence**: Your theme preference is preserved across sessions using LocalStorage.
 
-### Trading System
+### 🔥 Market Heatmap & Sector Analysis
 
-| Feature                                    | Status |
-| ------------------------------------------ | ------ |
-| Market Orders (instant execution)          | ✅     |
-| Limit Orders (pending engine)              | ✅     |
-| **CNC / MIS product type per order**       | ✅     |
-| Stop-Loss Orders (trigger price auto-sell) | ✅     |
-| **Bracket Orders (Entry + SL + Target)**   | ✅     |
-| **OCO — Target fill auto-cancels SL leg**  | ✅     |
-| Short Selling                              | ✅     |
-| Order Cancellation + Auto Refund           | ✅     |
-| Background Matching Engine (2s interval)   | ✅     |
-| Live P&L across all panels                 | ✅     |
+- **Sector Rotation**: Visualize which sectors (Banking, IT, Auto, FMCG, etc.) are currently leading the market.
+- **Live Performance**: Real-time "Day Change %" calculation based on backend-verified opening prices.
+- **Visual Intelligence**: Interactive heatmap blocks that shift colors based on sector-wide momentum.
 
-### Portfolio Management
+### 🤖 Persistent AI Trading Signals
 
-| Feature                                    | Status |
-| ------------------------------------------ | ------ |
-| **Holdings tab (CNC long-term only)**      | ✅     |
-| **Positions tab (MIS intraday only)**      | ✅     |
-| Real-time P&L with live prices via Socket  | ✅     |
-| Portfolio allocation bar chart             | ✅     |
-| Sort by P&L, invested, quantity            | ✅     |
-| Click row → navigate to stock on Dashboard | ✅     |
+- **Signal Persistence**: Every AI-generated signal (EMA Crossover & RSI Mean Reversion) is now saved to MongoDB.
+- **Historical Feed**: The dashboard loads the last 5 high-probability signals instantly, ensuring you never miss a trade even if you refresh the page.
+- **Signal Model**: High-fidelity data including strategy type, ticker, price, and timestamp.
 
-### Dashboard
+### 📊 Portfolio Equity Curve
 
-| Feature                                    | Status |
-| ------------------------------------------ | ------ |
-| Canvas candlestick chart with zoom/pan     | ✅     |
-| Live stock ticker + order book             | ✅     |
-| **Technical Indicators (SMA/EMA)**         | ✅     |
-| **Global AlgoBot Signal Feed**             | ✅ NEW |
-| **One-Click Copy Trade System**            | ✅ NEW |
-| **Backtesting Simulation Module**          | ✅ NEW |
-| Active orders with cancel button           | ✅     |
-| **Server-Side Price Alerts Panel UI**      | ✅     |
-| **Chart state preserved on stock switch**  | ✅     |
-| **Bracket Order panel + SL/Target inputs** | ✅     |
-| **Max Loss / Max Gain estimator**          | ✅     |
-
-### Financial Calculators (10 Tools)
-
-| Calculator    | Description                                  |
-| ------------- | -------------------------------------------- |
-| SIP           | Systematic Investment Plan returns           |
-| Step-Up SIP   | SIP with annual step-up percentage           |
-| EMI           | Loan EMI breakdown                           |
-| SWP           | Systematic Withdrawal Plan                   |
-| Retirement    | Corpus requirement planner                   |
-| NPS           | National Pension Scheme estimator            |
-| STP           | Systematic Transfer Plan                     |
-| Brokerage     | Zerodha's exact fee structure                |
-| F&O Margin    | Futures & Options margin calculator          |
-| Black-Scholes | Option pricing with Delta/Gamma/Theta Greeks |
-
-### Pages
-
-| Page                             | Description                                                               |
-| -------------------------------- | ------------------------------------------------------------------------- |
-| **Landing** (`/`)                | Marketing hero page, calculator preview, dashboard screenshot             |
-| **Login/Signup** (`/login`)      | Auth forms                                                                |
-| **Dashboard** (`/dashboard`)     | Full trading terminal + **AlgoBot Signals** + **Backtest Module**         |
-| **Portfolio** (`/holdings`)      | Holdings + Positions tabs                                                 |
-| **Market** (`/market`)           | All stocks, Sector filters, **Live Option Chain (New)**                   |
-| **Orders** (`/orders`)           | Full order history                                                        |
-| **Watchlist** (`/watchlist`)     | Saved stocks                                                              |
-| **Funds** (`/funds`)             | Deposit / Withdraw / Net Worth                                            |
-| **Calculators** (`/calculators`) | All 10 financial tools                                                    |
-| **Profile** (`/profile`)         | Account settings + **Algo Strategy Selection** + **Notification Toggles** |
+- **Net Worth Tracking**: Automatic snapshots of your total wealth (Cash + Holdings Value).
+- **Interactive Recharts**: A professional Area Chart on the Funds page to visualize your performance over time like a fund manager.
+- **Theme-Aware Scaling**: Chart grids and labels automatically adjust for maximum legibility in light and dark modes.
 
 ---
 
-## 🛠️ Tech Stack
+## 🎯 Core Features
+
+### 🧠 AI & Quant Suite
+
+| Feature                       | Description                                                                 | Status |
+| ----------------------------- | --------------------------------------------------------------------------- | ------ |
+| **EMA Crossover (9/21)**      | Generates BUY/SELL signals on 9-period/21-period moving average crossovers. | ✅     |
+| **RSI Mean Reversion**        | Identifies overbought (>70) and oversold (<30) market conditions.           | ✅     |
+| **Floating Signal Feed**      | Premium top-middle overlay for real-time AI signal broadcasts.              | ✅     |
+| **Persistent Signal History** | Historical signals saved to DB and available on load.                       | ✅ NEW |
+| **One-Click Copy Trading**    | Instantly auto-fills order panels based on AI signals.                      | ✅     |
+| **Quant Backtester**          | Analyze the last 24h performance of any stock locally.                      | ✅     |
+| **Custom Algo Architect**     | Tune EMA periods and risk parameters directly from your profile.            | ✅     |
+
+### ⚡ Trading System
+
+| Feature                     | Logic                                                                  | Status |
+| --------------------------- | ---------------------------------------------------------------------- | ------ |
+| **Market/Limit Orders**     | Immediate execution vs. Price-triggered matching.                      | ✅     |
+| **CNC / MIS Products**      | Long-term Cash & Carry vs. Intraday Margin Intraday Square-off.        | ✅     |
+| **Bracket Orders**          | Comprehensive Entry + Take-Profit + Stop-Loss legs.                    | ✅     |
+| **OCO (One Cancels Other)** | Target execution auto-cancels the Stop-Loss leg and vice-versa.        | ✅     |
+| **Short Selling**           | SELL first and BUY later to profit from falling prices.                | ✅     |
+| **Matching Engine**         | High-performance background service processing orders every 2 seconds. | ✅     |
+
+### 🏠 Trading Dashboard
+
+- **Canvas Candlestick Chart**: Custom-built high-performance chart with zoom, pan, and SMA/EMA overlays.
+- **Live Order Book**: Simulated real-time Bid/Ask depth for all 20 stocks.
+- **Stat Cards**: Real-time tracking of Balance, Invested Capital, and live Day P&L.
+- **Price Alerts UI**: Set and manage target price notifications.
+
+---
+
+## 🛠️ Technology Stack
 
 ### Frontend
 
-| Category    | Technology                                  |
-| ----------- | ------------------------------------------- |
-| Framework   | React 18 + Vite 7                           |
-| Routing     | React Router DOM v7                         |
-| Styling     | Tailwind CSS v4 (custom dark design tokens) |
-| Charts      | Custom Canvas-based candlestick renderer    |
-| Real-time   | Socket.IO Client                            |
-| HTTP Client | Axios                                       |
-| Icons       | Lucide React                                |
-| Fonts       | Inter (Google Fonts)                        |
+- **Framework**: React 18 + Vite (@latest)
+- **Styling**: Tailwind CSS v4 (with custom design tokens)
+- **State Management**: React Context (Auth, Watchlist)
+- **Animations**: CSS Keyframes + Framer-Motion style transitions
+- **Charts**: Custom Canvas API (Candlesticks) + Recharts (Equity Curve)
+- **Real-time**: Socket.IO Client
 
 ### Backend
 
-| Category   | Technology                                    |
-| ---------- | --------------------------------------------- |
-| Runtime    | Node.js                                       |
-| Framework  | Express.js 4.x                                |
-| Database   | MongoDB + Mongoose                            |
-| Auth       | JWT + bcryptjs                                |
-| Real-time  | Socket.IO                                     |
-| Price Data | Alpha Vantage API (with random-walk fallback) |
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB + Mongoose
+- **Real-time**: Socket.IO Server
+- **Auth**: JWT + bcryptjs
+- **Services**: Price Simulation (Random Walk), Signal Engine (AlgoBot), Matching Engine.
 
 ---
 
-## 📦 Installation
+## 📦 Installation & Setup
 
-### Prerequisites
+### 1. Prerequisites
 
-- Node.js v18+
-- MongoDB (local or Atlas URI)
-- Alpha Vantage API key (optional — random-walk fallback will be used if absent)
-
-### 1. Clone & Install
-
-```bash
-# Install backend
-cd backend
-npm install
-
-# Install frontend
-cd ../frontend
-npm install
-```
+- Node.js (v18 or higher)
+- MongoDB (Local or Atlas)
 
 ### 2. Environment Variables
 
-**`backend/.env`**
+**Backend (`backend/.env`)**
 
 ```env
 PORT=5000
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/zerodha_clone
-JWT_SECRET=your_super_secret_key_here
-ALPHA_VANTAGE_KEY=your_api_key_optional
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_secret_key
 FRONTEND_URL=http://localhost:5173
 ```
 
-**`frontend/.env`** (optional, for production)
+**Frontend (`frontend/.env`)**
 
 ```env
 VITE_API_URL=http://localhost:5000
+VITE_WS_URL=http://localhost:5000
 ```
 
-### 3. Run in Development
-
-Open **two terminals**:
+### 3. Run Locally
 
 ```bash
-# Terminal 1 — Backend
+# Terminal 1: Backend
 cd backend
+npm install
 npm run dev
-# → Server on http://localhost:5000
 
-# Terminal 2 — Frontend
+# Terminal 2: Frontend
 cd frontend
+npm install
 npm run dev
-# → App on http://localhost:5173
-```
-
-### 4. Verify Backend Startup
-
-```
-🔔 Order Notifications Service Initialized
-📊 Price History Service Started...
-⚙️  Matching Engine Started (DB mode)...
-MongoDB Connected 😛
-Server running on port 5000
 ```
 
 ---
 
-## 📡 API Reference
-
-### Authentication (`/api/auth`)
-
-| Method | Endpoint            | Auth | Description                              |
-| ------ | ------------------- | ---- | ---------------------------------------- |
-| POST   | `/api/auth/signup`  | ❌   | Register (starts with ₹1,00,000 balance) |
-| POST   | `/api/auth/login`   | ❌   | Login & receive JWT                      |
-| GET    | `/api/auth/profile` | ✅   | Get user profile                         |
-| PUT    | `/api/auth/profile` | ✅   | Update name / change password            |
-
-### Orders (`/api/orders`)
-
-| Method | Endpoint                | Auth | Description                         |
-| ------ | ----------------------- | ---- | ----------------------------------- |
-| POST   | `/api/orders/buy`       | ✅   | Market or Limit BUY (CNC or MIS)    |
-| POST   | `/api/orders/sell`      | ✅   | Market or Limit SELL                |
-| POST   | `/api/orders/stop-loss` | ✅   | Place a Stop-Loss trigger           |
-| POST   | `/api/orders/bracket`   | ✅   | Place Bracket (entry + SL + target) |
-| GET    | `/api/orders`           | ✅   | All orders for user                 |
-| DELETE | `/api/orders/:id`       | ✅   | Cancel a PENDING order              |
-
-#### Example — Bracket Order
-
-```http
-POST /api/orders/bracket
-Authorization: Bearer <token>
-
-{
-  "stockSymbol": "INFY",
-  "quantity": 5,
-  "entryPrice": 1800,
-  "targetPrice": 1900,
-  "stopLossPrice": 1750,
-  "productType": "MIS"
-}
-```
-
-#### Example — MIS Market Buy
-
-```http
-POST /api/orders/buy
-
-{
-  "stockSymbol": "TCS",
-  "quantity": 10,
-  "orderType": "MARKET",
-  "productType": "MIS"
-}
-```
-
-### Portfolio (`/api/holdings`)
-
-| Method | Endpoint                  | Auth | Description                              |
-| ------ | ------------------------- | ---- | ---------------------------------------- |
-| GET    | `/api/holdings`           | ✅   | CNC long-term holdings only              |
-| GET    | `/api/holdings/positions` | ✅   | **NEW** — Today's MIS intraday positions |
-| GET    | `/api/holdings/dashboard` | ✅   | Full portfolio summary                   |
-
-#### Positions Response (New)
-
-```json
-{
-  "success": true,
-  "count": 2,
-  "positions": [
-    {
-      "stock": "TCS",
-      "name": "Tata Consultancy Services",
-      "quantity": 5,
-      "avgPrice": 3500.0,
-      "currentPrice": 3520.5,
-      "pnl": 102.5,
-      "pnlPercent": 0.59
-    }
-  ]
-}
-```
-
-### Funds (`/api/funds`)
-
-| Method | Endpoint              | Auth | Description          |
-| ------ | --------------------- | ---- | -------------------- |
-| GET    | `/api/funds`          | ✅   | Current cash balance |
-| POST   | `/api/funds/deposit`  | ✅   | Add virtual funds    |
-| POST   | `/api/funds/withdraw` | ✅   | Withdraw funds       |
-
-### Prices (`/api/prices`)
-
-| Method | Endpoint                      | Auth | Description          |
-| ------ | ----------------------------- | ---- | -------------------- |
-| GET    | `/api/prices/:symbol`         | ❌   | Current live price   |
-| GET    | `/api/prices/history/:symbol` | ❌   | Historical OHLC bars |
-
-#### History Query Parameters
-
-| Param    | Type                     | Description                                                  |
-| -------- | ------------------------ | ------------------------------------------------------------ |
-| `period` | `1h` `6h` `1d` `1w` `1m` | **Preferred** — automatically sets `from`, `to`, and `limit` |
-| `from`   | ISO date string          | Start date override (only used when `period` is absent)      |
-| `to`     | ISO date string          | End date override (only used when `period` is absent)        |
-| `limit`  | integer 1–1000           | Bar count override (default 100)                             |
-
-> **Period → Window mapping**
->
-> | Period | Lookback   | Bars returned     |
-> | ------ | ---------- | ----------------- |
-> | `1h`   | 60 minutes | 60 (1-min bars)   |
-> | `6h`   | 6 hours    | 72 (5-min bars)   |
-> | `1d`   | 24 hours   | 96 (15-min bars)  |
-> | `1w`   | 7 days     | 168 (hourly bars) |
-> | `1m`   | 30 days    | 200 (daily bars)  |
-
-**Examples:**
-
-```http
-GET /api/prices/history/TCS?period=1d
-GET /api/prices/history/INFY?from=2026-03-01&to=2026-03-06&limit=50
-```
-
----
-
-## 🔌 WebSocket Events
-
-Connect to `ws://localhost:5000`
-
-```javascript
-// Live price stream
-socket.on("price_update", (prices) => {
-  // { TCS: 3500.20, INFY: 1450.30, ... }
-});
-
-// Join your private notification room
-socket.emit("join_user_room", userId);
-
-// Order alerts
-socket.on("order_executed",       (data) => { ... });
-socket.on("order_cancelled",      (data) => { ... });
-socket.on("stop_loss_triggered",  (data) => { ... });
-socket.on("bracket_entry_executed",(data) => { ... });
-```
-
----
-
-## 🏗️ Project Structure
+## 🏗️ Project Architecture
 
 ```
 zerodha-clone/
-├── backend/
-│   └── src/
-│       ├── calculators/          # 10 financial calculators
-│       │   ├── investment/       #   SIP, SWP, EMI, NPS, STP, Retirement
-│       │   ├── brokerage/        #   Brokerage, F&O Margin, Black-Scholes
-│       │   └── utils/            #   Formulas & validators
-│       ├── config/
-│       │   ├── db.js             # MongoDB connection
-│       │   └── stocks.js         # 20 NSE stock definitions
-│       ├── controllers/
-│       │   ├── authController.js
-│       │   ├── orderController.js         # Buy/sell/cancel + productType
-│       │   ├── advancedOrderController.js # Stop-Loss & Bracket
-│       │   ├── portfolioController.js     # Holdings + NEW Positions
-│       │   ├── fundsController.js
-│       │   ├── watchlistController.js
-│       │   ├── priceController.js
-│       │   └── stockController.js
-│       ├── models/
-│       │   ├── User.js           # User + balance
-│       │   ├── Order.js          # + productType (CNC/MIS) field
-│       │   ├── Holding.js        # + productType + tradeDate fields
-│       │   ├── Watchlist.js
-│       │   └── PriceHistory.js
-│       ├── routes/
-│       │   ├── portfolioRoutes.js  # NEW: GET /positions route
-│       │   └── ...
-│       ├── services/
-│       │   ├── matchingEngine.js   # UPGRADED: Bracket OCO + CNC/MIS keying
-│       │   ├── priceFetcher.js     # Alpha Vantage + fallback
-│       │   ├── priceSimulator.js   # Random walk engine
-│       │   ├── priceHistoryService.js
-│       │   └── orderNotifications.js
-│       └── server.js
-│
-└── frontend/
-    └── src/
-        ├── components/
-        │   ├── dashboard/
-        │   │   ├── BuySellPanel.jsx     # UPGRADED: CNC/MIS + Bracket mode
-        │   │   ├── ChartPanel.jsx       # FIXED: no snap-back on stock switch
-        │   │   ├── ActiveOrders.jsx
-        │   │   ├── OrderBook.jsx
-        │   │   ├── AIPredictionCard.jsx
-        │   │   └── PortfolioSummary.jsx
-        │   ├── Layout.jsx
-        │   ├── Sidebar.jsx              # Logout → Landing page
-        │   ├── StockIcon.jsx
-        │   └── Toast.jsx
-        ├── context/
-        │   └── AuthContext.jsx
-        ├── hooks/
-        │   └── useWatchlist.js
-        ├── pages/
-        │   ├── Landing.jsx              # Premium landing page
-        │   ├── Login.jsx
-        │   ├── Dashboard.jsx
-        │   ├── Holdings.jsx             # UPGRADED: Holdings + Positions tabs
-        │   ├── Market.jsx
-        │   ├── Orders.jsx
-        │   ├── Watchlist.jsx
-        │   ├── Funds.jsx
-        │   ├── Calculators.jsx
-        │   └── Profile.jsx
-        ├── services/
-        │   ├── api.js                   # + getPositions()
-        │   └── socket.js
-        ├── App.jsx                      # FIXED: ProtectedRoute → /
-        └── index.css                    # True Dark Black design tokens
+├── backend/src/
+│   ├── config/             # DB & Stock Metadata (Sectors added)
+│   ├── controllers/        # Auth, Orders, Portfolio, Signals
+│   ├── models/             # User, Order, Holding, Signal (Persistent)
+│   ├── routes/             # API Endpoints (inc. Signal History)
+│   ├── services/           # AlgoBot, MatchingEngine, PriceSimulator
+│   └── server.js           # Server Entry & Socket.io setup
+├── frontend/src/
+│   ├── components/
+│   │   ├── dashboard/      # Trading UI Components
+│   │   ├── market/         # Option Chain & Sector Heatmap
+│   │   └── ThemeToggle.jsx # Professional Sun/Moon Switcher
+│   ├── context/            # Auth & Theme State
+│   ├── pages/              # Dashboard, Market, Funds, Profile
+│   └── services/           # API (Axios) & Socket.io client
+└── index.css               # Design System & Theme Tokens
 ```
 
 ---
 
-## ⚙️ Matching Engine — How It Works
+## 📈 Available Stocks
 
-The engine runs every **2 seconds** in the background:
-
-| Trigger                 | Condition                | Action                                     |
-| ----------------------- | ------------------------ | ------------------------------------------ |
-| Regular LIMIT BUY       | `price <= limitPrice`    | Fill order, add to CNC/MIS holding         |
-| Regular LIMIT SELL      | `price >= limitPrice`    | Fill order, credit balance                 |
-| Stop-Loss SELL          | `price <= stopLossPrice` | Market sell, credit balance                |
-| **Bracket BUY entry**   | `price <= limitPrice`    | Fill, spawn SL child + Target child orders |
-| **Bracket Target fill** | `price >= targetPrice`   | Fill, **cancel sibling SL** (OCO)          |
+The platform tracks 20 major NSE symbols across various sectors:
+`TCS`, `INFY`, `RELIANCE`, `HDFC`, `ICICI`, `SBIN`, `BHARTIARTL`, `HCLTECH`, `ITC`, `KOTAKBANK`, `LT`, `AXISBANK`, `WIPRO`, `BAJFINANCE`, `MARUTI`, `TITAN`, `SUNPHARMA`, `TATAMOTORS`, `ASIANPAINT`, `ULTRACEMCO`.
 
 ---
 
-## 🎨 Design System
+## 🛡️ Best Practices & Features
 
-All colors are defined as CSS custom properties via Tailwind v4 `@theme`:
-
-| Token             | Value     | Usage                     |
-| ----------------- | --------- | ------------------------- |
-| `--color-dark`    | `#000000` | Page background           |
-| `--color-card`    | `#0a0a0a` | Card backgrounds          |
-| `--color-surface` | `#171717` | Input fields, panels      |
-| `--color-accent`  | `#7c3aed` | Buttons, active states    |
-| `--color-profit`  | `#26a641` | Green P&L, BUY button     |
-| `--color-loss`    | `#f85149` | Red P&L, SELL button      |
-| `--color-warning` | `#d29922` | MIS badge, caution states |
-
----
-
-## 🐛 Known Issues & Fixes Applied
-
-| Issue                                                        | Fix                                                 |
-| ------------------------------------------------------------ | --------------------------------------------------- |
-| Nested `<button>` in chart stock dropdown (hydration error)  | Outer element changed to `<div>`                    |
-| Chart pan/zoom reset on stock switch                         | Removed `panOffsetRef.current = 0` on stock fetch   |
-| Logout redirecting to `/login` instead of `/`                | Fixed `handleLogout` + `ProtectedRoute` fallback    |
-| Calculator inputs returning success message instead of value | Updated API response parsing to use `res.data.data` |
-| Public landing page blocked by ProtectedRoute                | Separated `PublicRoute` and made `/` open           |
-
----
-
-## 🚀 Deployment
-
-### Backend (Render / Railway)
-
-```env
-PORT=5000
-MONGO_URI=<your_atlas_uri>
-JWT_SECRET=<random_256bit_secret>
-FRONTEND_URL=https://your-app.vercel.app
-```
-
-### Frontend (Vercel / Netlify)
-
-```env
-VITE_API_URL=https://your-backend.onrender.com
-```
-
-Update `frontend/vite.config.js` proxy target to your deployed backend URL for production.
-
----
-
-## 📈 Available Stocks (20 NSE Symbols)
-
-`TCS` · `INFY` · `RELIANCE` · `HDFC` · `ICICI` · `SBIN` · `BHARTIARTL` · `HCLTECH` · `ITC` · `KOTAKBANK` · `LT` · `AXISBANK` · `WIPRO` · `BAJFINANCE` · `MARUTI` · `TITAN` · `SUNPHARMA` · `TATAMOTORS` · `ASIANPAINT` · `ULTRACEMCO`
-
----
-
-## 🔒 Security
-
-- Passwords hashed with **bcrypt** (10 salt rounds)
-- JWT tokens expire in **30 days**
-- All sensitive routes protected by `authMiddleware`
-- CORS restricted to `FRONTEND_URL`
-- Funds operations validated server-side (cannot withdraw more than balance)
-- Calculator endpoints are **stateless** — no user data persisted
+- **Security**: JWT-based authentication with protected API routes.
+- **Performance**: Canvas-based charting and efficient WebSocket broadcasts.
+- **UX**: Professional visual cues for Profit/Loss, real-time feedback, and accessible theme switching.
+- **Scalability**: Centralized backend stock metadata and modular service architecture.
 
 ---
 
 ## 📖 License
 
-This is an educational project built for learning full-stack development. Not affiliated with Zerodha.
-
----
+Built for educational purposes as a demonstration of a modern, full-stack fintech application.
 
 **Happy Trading! 📈**
