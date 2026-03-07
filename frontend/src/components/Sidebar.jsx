@@ -10,6 +10,7 @@ import { useState, useRef, useEffect } from "react";
 
 import { useNotifications } from "../hooks/useNotifications";
 import { StockIcon } from "./StockIcon";
+import ThemeToggle from "./ThemeToggle";
 
 // All available stocks for search
 const ALL_STOCKS = [
@@ -404,6 +405,8 @@ export default function Navbar() {
             )}
           </div>
 
+          <ThemeToggle />
+
           {/* Settings → Profile */}
           <button
             onClick={() => navigate('/profile')}
@@ -454,21 +457,28 @@ export default function Navbar() {
 
       {/* ── Mobile Bottom Nav ── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-edge z-50 flex items-center justify-around px-2 pb-safe">
-        {/* eslint-disable-next-line no-unused-vars */}
-        {navItems.filter(item => item.icon).map(({ path, label, icon: NavIcon }) => (
-          <NavLink
-            key={path}
-            to={path}
-            className={({ isActive }) =>
-              `flex flex-col items-center justify-center gap-1 w-full h-full text-[10px] font-medium transition-colors ${
-                isActive ? "text-accent" : "text-muted hover:text-secondary"
-              }`
-            }
-          >
-            <NavIcon className="w-5 h-5" />
-            <span>{label}</span>
-          </NavLink>
-        ))}
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          if (!Icon) return null;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center gap-1 w-full h-full text-[10px] font-medium transition-colors ${
+                  isActive ? "text-accent" : "text-muted hover:text-secondary"
+                }`
+              }
+            >
+              <Icon className="w-5 h-5" />
+              <span>{item.label}</span>
+            </NavLink>
+          );
+        })}
+        <div className="flex flex-col items-center justify-center gap-1 w-full h-full">
+          <ThemeToggle />
+          <span className="text-[10px] font-medium text-muted">Theme</span>
+        </div>
       </nav>
     </header>
   );

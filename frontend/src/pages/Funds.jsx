@@ -179,7 +179,7 @@ export default function Funds() {
                       <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#262626" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-edge" />
                   <XAxis 
                     dataKey="timestamp" 
                     hide 

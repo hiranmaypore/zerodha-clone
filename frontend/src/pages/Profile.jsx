@@ -8,6 +8,7 @@ import {
   Trophy, Medal, Target as TargetIcon, Settings2, Zap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function Profile() {
   const { user, logout, refreshUser, preferences, updatePreference } = useAuth();
@@ -360,6 +361,11 @@ export default function Profile() {
           </div>
 
           {[
+            { 
+              label: 'App Theme', 
+              sub: `Currently using ${preferences.theme} mode`, 
+              component: <ThemeToggle />
+            },
             { label: 'AlgoBot Signal Feed',      sub: 'Show live BUY/SELL signals on dashboard', on: preferences.showAlgoSignals, key: 'showAlgoSignals' },
             { 
               label: 'Desktop Notifications',  
@@ -382,13 +388,17 @@ export default function Profile() {
                 <p className="text-sm text-primary">{p.label}</p>
                 <p className="text-[11px] text-muted">{p.sub}</p>
               </div>
-              {/* Toggle */}
-              <div 
-                onClick={() => p.toggle ? p.toggle(p.on) : p.key && updatePreference(p.key, !p.on)}
-                className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${p.on ? 'bg-accent' : 'bg-surface border border-edge'}`}
-              >
-                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${p.on ? 'left-5' : 'left-0.5'}`} />
-              </div>
+              {/* Toggle or Component */}
+              {p.component ? (
+                p.component
+              ) : (
+                <div 
+                  onClick={() => p.toggle ? p.toggle(p.on) : p.key && updatePreference(p.key, !p.on)}
+                  className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${p.on ? 'bg-accent' : 'bg-surface border border-edge'}`}
+                >
+                  <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${p.on ? 'left-5' : 'left-0.5'}`} />
+                </div>
+              )}
             </div>
           ))}
         </div>

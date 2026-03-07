@@ -23,7 +23,8 @@ export function AuthProvider({ children }) {
       fastEMA: 9,
       slowEMA: 21,
       defaultSL: 2,     // 2% default stop loss
-      defaultTarget: 5  // 5% default target
+      defaultTarget: 5, // 5% default target
+      theme: 'dark'     // 'dark' | 'light'
     };
     const saved = localStorage.getItem('preferences');
     if (!saved) return defaults;
@@ -41,6 +42,15 @@ export function AuthProvider({ children }) {
   const updatePreference = (key, value) => {
     setPreferences(prev => ({ ...prev, [key]: value }));
   };
+
+  // ── Sync light/dark class with preferences ──
+  useEffect(() => {
+    if (preferences.theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [preferences.theme]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
