@@ -1,16 +1,19 @@
 const { getPrices } = require('./priceSimulator');
+const logger = require('../utils/logger');
+
 
 // Handles checking alerts and sending WS notifications
 const startAlertEngine = (io) => {
   const Alert = require('../models/Alert');
   const User = require('../models/User');
 
-  console.log('🔔 Alert Engine Started...');
+  logger.info('🔔 Alert Engine Started...');
 
   setInterval(async () => {
     try {
       const prices = getPrices();
       if (!prices) return;
+
 
       if (!global.dbConnected) {
         if (!global.inMemoryDB.alerts) return;
@@ -75,7 +78,7 @@ const startAlertEngine = (io) => {
         }
       }
     } catch (e) {
-      console.warn('Alert Engine Error:', e.message);
+      logger.error(`Alert Engine Error: ${e.message}`);
     }
   }, 2000); // Check every 2 seconds
 };

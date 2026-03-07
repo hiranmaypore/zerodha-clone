@@ -41,13 +41,24 @@ function memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, curre
   return { order };
 }
 
-function memSellStock(userId, stockSymbol, quantity, currentPrice) {
+function memSellStock(userId, stockSymbol, quantity, currentPrice, productType) {
   const mem = global.inMemoryDB;
   const user = mem.users.get(userId);
   if (!user) return { error: 'User not found', status: 404 };
 
-  const hKey = `${userId}:${stockSymbol}`;
-  const holding = mem.holdings.get(hKey);
+  // Holdings are keyed as userId:stock:productType:date — scan for a match
+  const pType = productType || 'CNC';
+  const prefix = `${userId}:${stockSymbol}:`;
+  let holdingKey = null;
+  let holding = null;
+  for (const [key, h] of mem.holdings) {
+    if (key.startsWith(prefix) && (!productType || h.productType === pType)) {
+      holdingKey = key;
+      holding = h;
+      break;
+    }
+  }
+
   if (!holding || holding.quantity < quantity) {
     return { error: 'Insufficient holdings', status: 400 };
   }
@@ -55,10 +66,10 @@ function memSellStock(userId, stockSymbol, quantity, currentPrice) {
   const totalRevenue = currentPrice * quantity;
   user.balance += totalRevenue;
   holding.quantity -= quantity;
-  if (holding.quantity === 0) mem.holdings.delete(hKey);
+  if (holding.quantity === 0) mem.holdings.delete(holdingKey);
 
   const order = {
-    _id: crypto.randomUUID(), user: userId, stock: stockSymbol, type: 'SELL',
+    _id: require('crypto').randomUUID(), user: userId, stock: stockSymbol, type: 'SELL',
     orderType: 'MARKET', quantity, price: currentPrice, status: 'COMPLETED',
     createdAt: new Date().toISOString(),
   };
@@ -77,9 +88,18 @@ exports.buyStock = async (req, res) => {
     return res.status(400).json({ message: 'Limit price required for Limit Orders' });
 
   const prices = getPrices();
-  const currentPrice = prices[stockSymbol];
-  if (!currentPrice)
-    return res.status(400).json({ message: 'Stock price not available' });
+  let currentPrice = prices[stockSymbol];
+  
+  if (!currentPrice) {
+    // Check if it's an options contract from the UI (e.g. NIFTY_22000_CE_7D)
+    if (stockSymbol.includes('_CE_') || stockSymbol.includes('_PE_')) {
+      currentPrice = req.body.quotedPrice || req.body.limitPrice;
+    }
+    
+    if (!currentPrice) {
+      return res.status(400).json({ message: 'Stock price not available' });
+    }
+  }
 
   if (!global.dbConnected) {
     const result = memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, currentPrice, productType);
@@ -132,19 +152,27 @@ exports.buyStock = async (req, res) => {
 
 // ─── Sell Stock ────────────────────────────────────────────────────────────────
 exports.sellStock = async (req, res) => {
-  const { stockSymbol, quantity, orderType, limitPrice } = req.body;
+  const { stockSymbol, quantity, orderType, limitPrice, productType } = req.body;
   const userId = req.user._id || req.user.id;
 
   if (!stockSymbol || !quantity || quantity <= 0)
     return res.status(400).json({ message: 'Invalid stock or quantity' });
 
   const prices = getPrices();
-  const currentPrice = prices[stockSymbol];
-  if (!currentPrice)
-    return res.status(400).json({ message: 'Stock price not available' });
+  let currentPrice = prices[stockSymbol];
+  
+  if (!currentPrice) {
+    if (stockSymbol.includes('_CE_') || stockSymbol.includes('_PE_')) {
+      currentPrice = req.body.quotedPrice || req.body.limitPrice;
+    }
+    
+    if (!currentPrice) {
+      return res.status(400).json({ message: 'Stock price not available' });
+    }
+  }
 
   if (!global.dbConnected) {
-    const result = memSellStock(userId, stockSymbol, quantity, currentPrice);
+    const result = memSellStock(userId, stockSymbol, quantity, currentPrice, productType);
     if (result.error) return res.status(result.status).json({ message: result.error });
     return res.status(201).json(result.order);
   }

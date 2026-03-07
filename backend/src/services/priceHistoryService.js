@@ -1,4 +1,6 @@
 const { getPrices } = require('./priceSimulator');
+const logger = require('../utils/logger');
+
 
 /**
  * In-memory OHLC history per symbol.
@@ -39,6 +41,7 @@ const capturePriceSnapshot = async () => {
   const mk     = minuteKey(now);
   const prices = getPrices();
   if (!prices || !Object.keys(prices).length) return;
+
 
   if (!global.dbConnected) {
     for (const [symbol, price] of Object.entries(prices)) {
@@ -88,7 +91,7 @@ const capturePriceSnapshot = async () => {
 
 // ── Service start/stop ────────────────────────────────────────────────────────
 const startPriceHistoryService = () => {
-  console.log('📊 Price History Service Started (5s OHLC bars)...');
+  logger.info('📊 Price History Service Started (5s OHLC bars)...');
   capturePriceSnapshot();
   historyInterval = setInterval(capturePriceSnapshot, SNAP_MS);
 };

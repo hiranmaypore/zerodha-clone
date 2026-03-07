@@ -4,6 +4,7 @@ import {
   Search, Bell, ChevronDown, LogOut, Settings, X,
   CheckCircle, XCircle, TrendingUp, TrendingDown,
   AlertTriangle, Zap, Trash2, CheckCheck, ShieldAlert, Clock,
+  LayoutDashboard, LineChart, ActivitySquare, Briefcase, Bookmark
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -35,13 +36,13 @@ const ALL_STOCKS = [
 ];
 
 const navItems = [
-  { path: "/dashboard",  label: "Home"      },
-  { path: "/market",     label: "Markets"   },
-  { path: "/orders",     label: "Trade"     },
-  { path: "/holdings",   label: "Holdings"  },
-  { path: "/watchlist",  label: "Watchlist" },
-  { path: "/funds",      label: "Funds"     },
-  { path: "/calculators",label: "Calculators"},
+  { path: "/dashboard",  label: "Home",       icon: LayoutDashboard },
+  { path: "/market",     label: "Markets",    icon: LineChart },
+  { path: "/orders",     label: "Trade",      icon: ActivitySquare },
+  { path: "/holdings",   label: "Holdings",   icon: Briefcase },
+  { path: "/watchlist",  label: "Watchlist",  icon: Bookmark },
+  { path: "/funds",      label: "Funds",      icon: null },
+  { path: "/calculators",label: "Calculators",icon: null },
 ];
 
 // Config per notification type
@@ -450,6 +451,25 @@ export default function Navbar() {
 
         </div>
       </div>
+
+      {/* ── Mobile Bottom Nav ── */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-edge z-50 flex items-center justify-around px-2 pb-safe">
+        {/* eslint-disable-next-line no-unused-vars */}
+        {navItems.filter(item => item.icon).map(({ path, label, icon: NavIcon }) => (
+          <NavLink
+            key={path}
+            to={path}
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center gap-1 w-full h-full text-[10px] font-medium transition-colors ${
+                isActive ? "text-accent" : "text-muted hover:text-secondary"
+              }`
+            }
+          >
+            <NavIcon className="w-5 h-5" />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+      </nav>
     </header>
   );
 }

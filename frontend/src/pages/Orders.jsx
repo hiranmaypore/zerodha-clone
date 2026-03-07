@@ -167,16 +167,16 @@ export default function Orders() {
         {filtered.length > 0 ? (
           <>
             {/* Column headers */}
-            <div className="grid grid-cols-12 px-5 py-2.5 text-[10px] text-muted uppercase tracking-wide border-b border-edge font-medium">
-              <div className="col-span-1">Type</div>
-              <div className="col-span-2">Stock</div>
+            <div className="grid grid-cols-12 px-2 md:px-5 py-2.5 text-[10px] text-muted uppercase tracking-wide border-b border-edge font-medium">
+              <div className="col-span-2 md:col-span-1 text-center md:text-left">Type</div>
+              <div className="col-span-4 md:col-span-2">Stock</div>
               <div className="col-span-2 hidden md:block">Order Details</div>
               <div className="col-span-1 text-center hidden sm:block">Product</div>
-              <div className="col-span-1 text-right">Qty</div>
+              <div className="col-span-2 md:col-span-1 text-right">Qty</div>
               <div className="col-span-2 text-right">Price</div>
               <div className="col-span-1 text-right hidden sm:block">Total</div>
-              <div className="col-span-1 text-center">Status</div>
-              <div className="col-span-1 text-right">Time</div>
+              <div className="col-span-2 md:col-span-1 text-center">Status</div>
+              <div className="col-span-1 text-right hidden md:block">Time</div>
             </div>
 
             <div className="divide-y divide-edge">
@@ -188,26 +188,29 @@ export default function Orders() {
                 return (
                   <div
                     key={order._id}
-                    className="grid grid-cols-12 px-5 py-3.5 items-center hover:bg-surface/60 transition-colors group"
+                    className="grid grid-cols-12 px-2 md:px-5 py-3.5 items-center hover:bg-surface/60 transition-colors group"
                   >
                     {/* BUY/SELL badge */}
-                    <div className="col-span-1">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold
+                    <div className="col-span-2 md:col-span-1 flex items-center justify-center md:justify-start">
+                      <span className={`inline-flex items-center gap-1 px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold
                         ${isBuy ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
-                        {isBuy ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
+                        {isBuy ? <TrendingUp className="w-2 h-2 md:w-2.5 md:h-2.5" /> : <TrendingDown className="w-2 h-2 md:w-2.5 md:h-2.5" />}
                         {order.type}
                       </span>
                     </div>
 
                     {/* Stock */}
                     <div
-                      className="col-span-2 flex items-center gap-2.5 cursor-pointer"
+                      className="col-span-4 md:col-span-2 flex items-center gap-1.5 md:gap-2.5 cursor-pointer"
                       onClick={() => navigate(`/dashboard?stock=${order.stock}`)}
                     >
-                      <StockIcon symbol={order.stock} className="w-7 h-7" textSize="text-[10px]" />
-                      <div>
-                        <div className="font-semibold text-sm text-primary group-hover:text-accent transition-colors">
+                      <StockIcon symbol={order.stock} className="w-6 h-6 md:w-7 md:h-7" textSize="text-[8px] md:text-[10px]" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-xs md:text-sm text-primary group-hover:text-accent transition-colors truncate">
                           {order.stock}
+                        </div>
+                        <div className="md:hidden text-[8px] text-muted">
+                           {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </div>
@@ -250,13 +253,13 @@ export default function Orders() {
                     </div>
 
                     {/* Qty */}
-                    <div className="col-span-1 text-right font-mono text-sm text-primary">
+                    <div className="col-span-2 md:col-span-1 text-right font-mono text-xs md:text-sm text-primary pr-1">
                       {order.quantity}
                     </div>
 
                     {/* Price */}
                     <div className="col-span-2 text-right">
-                      <div className="font-mono font-semibold text-sm text-primary">
+                      <div className="font-mono font-semibold text-xs md:text-sm text-primary">
                         ₹{order.price?.toFixed(2)}
                       </div>
                     </div>
@@ -267,15 +270,15 @@ export default function Orders() {
                     </div>
 
                     {/* Status */}
-                    <div className="col-span-1 flex justify-center">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold ${cfg.color} ${cfg.bg}`}>
-                        {cfg.icon} {cfg.label}
+                    <div className="col-span-2 md:col-span-1 flex justify-center">
+                      <span className={`inline-flex items-center gap-1 px-1.5 md:px-2 py-1 rounded-full text-[8px] md:text-[10px] font-semibold flex-col md:flex-row text-center ${cfg.color} ${cfg.bg}`}>
+                        {cfg.icon} <span className="hidden md:inline">{cfg.label}</span>
                       </span>
                     </div>
 
                     {/* Time + Cancel */}
-                    <div className="col-span-1 text-right flex items-center justify-end gap-1">
-                      <div className="text-[10px] text-muted leading-tight text-right">
+                    <div className="col-span-12 md:col-span-1 text-right flex items-center justify-end gap-1 mt-2 md:mt-0">
+                      <div className="hidden md:block text-[10px] text-muted leading-tight text-right">
                         {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                         <br />
                         {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
@@ -285,11 +288,11 @@ export default function Orders() {
                           onClick={() => handleCancel(order._id)}
                           disabled={cancelling === order._id}
                           title="Cancel order"
-                          className="ml-1 p-1.5 rounded-lg text-muted hover:text-loss hover:bg-loss/10 transition-all disabled:opacity-40"
+                          className="w-full md:w-auto ml-1 p-1.5 rounded-lg text-loss hover:text-loss hover:bg-loss/10 transition-all disabled:opacity-40 border border-loss/20 md:border-transparent text-xs text-center flex justify-center items-center"
                         >
                           {cancelling === order._id
                             ? <div className="w-3.5 h-3.5 border border-current border-t-transparent rounded-full animate-spin" />
-                            : <X className="w-3.5 h-3.5" />}
+                            : <><X className="w-3.5 h-3.5" /> <span className="md:hidden">Cancel</span></>}
                         </button>
                       )}
                     </div>

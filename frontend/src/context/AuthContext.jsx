@@ -12,6 +12,18 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [preferences, setPreferences] = useState(() => {
+    const saved = localStorage.getItem('preferences');
+    return saved ? JSON.parse(saved) : { showAlgoSignals: true };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('preferences', JSON.stringify(preferences));
+  }, [preferences]);
+
+  const updatePreference = (key, value) => {
+    setPreferences(prev => ({ ...prev, [key]: value }));
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -28,7 +40,6 @@ export function AuthProvider({ children }) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
-
     }
     setLoading(false);
   }, []);
@@ -75,7 +86,7 @@ export function AuthProvider({ children }) {
 
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, preferences, updatePreference }}>
       {children}
     </AuthContext.Provider>
   );

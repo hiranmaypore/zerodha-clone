@@ -149,7 +149,12 @@ export default function Market() {
     if (!qty || qty <= 0) return;
     setPlacing(true);
     try {
-      const payload = { stockSymbol: modal.stock.symbol, quantity: parseInt(qty), orderType };
+      const payload = { 
+        stockSymbol: modal.stock.symbol, 
+        quantity: parseInt(qty), 
+        orderType,
+        quotedPrice: modal.stock.isOption ? modal.stock.price : undefined 
+      };
       if (orderType === 'LIMIT') payload.limitPrice = parseFloat(limitPx);
       modal.action === 'BUY' ? await buyOrder(payload) : await sellOrder(payload);
       showToast(`✅ ${modal.action} order placed for ${modal.stock.symbol}`, 'success');
@@ -311,23 +316,32 @@ export default function Market() {
 
       {/* ── Table OR Option Chain ── */}
       {tab === 'OPTIONS' ? (
-        <OptionChain spotPrice={(currentMarketAvg * 100) + 22000} />
+        <OptionChain 
+          spotPrice={(currentMarketAvg * 100) + 22000} 
+          onTrade={(symbol, price, side) => {
+            setModal({
+              action: side, 
+              stock: { symbol, name: `Options Contract (Lot size: 50)`, price, isOption: true }
+            });
+            setQty('50'); // Default 1 lot
+          }} 
+        />
       ) : (
         <div className="bg-card border border-edge rounded-xl overflow-hidden">
           {/* Headers */}
 
-        <div className="grid grid-cols-12 px-5 py-2.5 text-[10px] text-muted uppercase tracking-wide border-b border-edge font-medium">
-          <div className="col-span-4 cursor-pointer hover:text-primary select-none" onClick={() => toggleSort('symbol')}>
+        <div className="grid grid-cols-12 px-4 md:px-5 py-2.5 text-[10px] text-muted uppercase tracking-wide border-b border-edge font-medium">
+          <div className="col-span-7 md:col-span-4 cursor-pointer hover:text-primary select-none flex items-center" onClick={() => toggleSort('symbol')}>
             Stock <SortArrow col="symbol" />
           </div>
           <div className="col-span-2 hidden md:block text-center">Sector</div>
-          <div className="col-span-2 text-right cursor-pointer hover:text-primary select-none" onClick={() => toggleSort('price')}>
+          <div className="col-span-5 md:col-span-2 text-right cursor-pointer hover:text-primary select-none flex items-center justify-end" onClick={() => toggleSort('price')}>
             Price <SortArrow col="price" />
           </div>
-          <div className="col-span-2 text-right cursor-pointer hover:text-primary select-none" onClick={() => toggleSort('changePct')}>
+          <div className="col-span-2 hidden md:flex text-right cursor-pointer hover:text-primary select-none items-center justify-end" onClick={() => toggleSort('changePct')}>
             Change <SortArrow col="changePct" />
           </div>
-          <div className="col-span-2 text-right">Actions</div>
+          <div className="col-span-2 hidden md:block text-right">Actions</div>
         </div>
 
         {filtered.length > 0 ? (
@@ -335,17 +349,22 @@ export default function Market() {
             {filtered.map(stock => (
               <div
                 key={stock.symbol}
-                className="grid grid-cols-12 px-5 py-3 items-center hover:bg-surface/60 transition-colors group"
+                className="grid grid-cols-12 px-4 md:px-5 py-3 items-center hover:bg-surface/60 transition-colors group border-b border-edge last:border-b-0"
               >
                 {/* Stock name */}
                 <div
-                  className="col-span-4 flex items-center gap-2.5 cursor-pointer"
+                  className="col-span-7 md:col-span-4 flex items-center gap-2.5 cursor-pointer"
                   onClick={() => navigate(`/dashboard?stock=${stock.symbol}`)}
                 >
-                  <StockIcon symbol={stock.symbol} className="w-8 h-8" textSize="text-xs" />
+                  <StockIcon symbol={stock.symbol} className="w-8 h-8 md:w-8 md:h-8" textSize="text-[10px] md:text-xs" />
                   <div className="min-w-0">
-                    <div className="font-semibold text-sm text-primary group-hover:text-accent transition-colors">{stock.symbol}</div>
-                    <div className="text-[10px] text-muted truncate max-w-[130px]">{stock.name}</div>
+                    <div className="font-semibold text-[13px] md:text-sm text-primary group-hover:text-accent transition-colors flex items-center gap-1.5 break-all">
+                      {stock.symbol}
+                      <span className={`md:hidden shrink-0 text-[8px] px-1.5 py-0.5 rounded font-medium ${SECTOR_COLORS[stock.sector] || 'bg-surface text-muted'}`}>
+                        {stock.sector}
+                      </span>
+                    </div>
+                    <div className="text-[9px] md:text-[10px] text-muted truncate max-w-[110px] md:max-w-[130px]">{stock.name}</div>
                   </div>
                 </div>
 
@@ -356,39 +375,44 @@ export default function Market() {
                   </span>
                 </div>
 
-                {/* Price */}
-                <div className="col-span-2 text-right">
-                  <span className="font-mono font-semibold text-sm text-primary">
+                {/* Price (Mobile embeds change) */}
+                <div className="col-span-5 md:col-span-2 flex flex-col items-end justify-center">
+                  <span className="font-mono font-bold text-[13px] md:text-sm text-primary">
                     ₹{stock.price.toFixed(2)}
                   </span>
+                  <div className={`md:hidden flex items-center justify-end gap-0.5 text-[10px] font-mono font-semibold
+                    ${stock.isUp ? 'text-profit' : stock.isDown ? 'text-loss' : 'text-muted'}`}>
+                    {stock.isUp ? <ArrowUpRight className="w-3 h-3" /> : stock.isDown ? <ArrowDownRight className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                    {stock.changePct >= 0 ? '+' : ''}{stock.changePct.toFixed(2)}%
+                  </div>
                 </div>
 
-                {/* Change */}
-                <div className={`col-span-2 text-right flex items-center justify-end gap-1 text-xs font-mono font-semibold
+                {/* Change (Desktop) */}
+                <div className={`col-span-2 hidden md:flex items-center justify-end gap-1 text-xs font-mono font-semibold
                   ${stock.isUp ? 'text-profit' : stock.isDown ? 'text-loss' : 'text-muted'}`}>
                   {stock.isUp ? <ArrowUpRight className="w-3.5 h-3.5" /> : stock.isDown ? <ArrowDownRight className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
                   {stock.changePct >= 0 ? '+' : ''}{stock.changePct.toFixed(2)}%
                 </div>
 
                 {/* Actions */}
-                <div className="col-span-2 flex items-center justify-end gap-1">
+                <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-1 mt-3 md:mt-0 md:opacity-0 group-hover:opacity-100 transition-opacity">
                   {/* Watchlist star */}
                   <button
                     onClick={() => toggleWatch(stock.symbol)}
-                    className="p-1.5 rounded-lg hover:bg-surface transition-colors"
+                    className="p-1.5 rounded-lg border border-edge md:border-transparent hover:bg-surface transition-colors"
                     title={isWatched(stock.symbol) ? 'Remove from watchlist' : 'Add to watchlist'}
                   >
                     <Star className={`w-3.5 h-3.5 transition-colors ${isWatched(stock.symbol) ? 'text-warning fill-warning' : 'text-muted hover:text-warning'}`} />
                   </button>
                   <button
                     onClick={() => openModal(stock, 'BUY')}
-                    className="px-2.5 py-1 rounded-lg bg-profit/10 text-profit text-[10px] font-bold hover:bg-profit/20 transition-colors"
+                    className="flex-1 md:flex-none px-2.5 py-1.5 md:py-1 rounded-lg bg-profit/10 text-profit text-xs md:text-[10px] font-bold hover:bg-profit/20 transition-colors border border-profit/20 md:border-transparent"
                   >
                     BUY
                   </button>
                   <button
                     onClick={() => openModal(stock, 'SELL')}
-                    className="px-2.5 py-1 rounded-lg bg-loss/10 text-loss text-[10px] font-bold hover:bg-loss/20 transition-colors"
+                    className="flex-1 md:flex-none px-2.5 py-1.5 md:py-1 rounded-lg bg-loss/10 text-loss text-xs md:text-[10px] font-bold hover:bg-loss/20 transition-colors border border-loss/20 md:border-transparent"
                   >
                     SELL
                   </button>

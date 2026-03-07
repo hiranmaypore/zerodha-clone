@@ -9,7 +9,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
-  const { user, logout, refreshUser } = useAuth();
+  const { user, logout, refreshUser, preferences, updatePreference } = useAuth();
   const navigate = useNavigate();
 
   // ── Name edit ──────────────────────────────────────────────
@@ -266,7 +266,7 @@ export default function Profile() {
         </button>
       </div>
 
-      {/* ── Preferences (UI only) ── */}
+      {/* ── Preferences ── */}
       <div className="bg-card border border-edge rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <Bell className="w-4 h-4 text-accent" />
@@ -274,6 +274,7 @@ export default function Profile() {
         </div>
         <div className="space-y-3">
           {[
+            { label: 'AlgoBot Signal Feed',      sub: 'Show live BUY/SELL signals on dashboard', on: preferences.showAlgoSignals, key: 'showAlgoSignals' },
             { label: 'Order fill notifications', sub: 'Get notified when your orders execute', on: true },
             { label: 'Price alerts',             sub: 'Alerts when stocks hit target prices',  on: false },
             { label: 'Daily P&L summary',        sub: 'End-of-day portfolio performance email', on: true },
@@ -283,8 +284,11 @@ export default function Profile() {
                 <p className="text-sm text-primary">{p.label}</p>
                 <p className="text-[11px] text-muted">{p.sub}</p>
               </div>
-              {/* Toggle (UI only) */}
-              <div className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${p.on ? 'bg-accent' : 'bg-surface border border-edge'}`}>
+              {/* Toggle */}
+              <div 
+                onClick={() => p.key && updatePreference(p.key, !p.on)}
+                className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${p.on ? 'bg-accent' : 'bg-surface border border-edge'}`}
+              >
                 <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${p.on ? 'left-5' : 'left-0.5'}`} />
               </div>
             </div>

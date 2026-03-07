@@ -11,6 +11,7 @@ import Watchlist from './pages/Watchlist';
 import Funds from './pages/Funds';
 import Calculators from './pages/Calculators';
 import Profile from './pages/Profile';
+import { Toaster } from 'react-hot-toast';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -35,6 +36,7 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" reverseOrder={false} />
       <AuthProvider>
         <Routes>
           {/* Public Landing & Auth */}

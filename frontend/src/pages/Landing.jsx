@@ -97,14 +97,20 @@ export default function Landing() {
       </section>
 
       {/* ── Dashboard Preview (Abstract) ── */}
-      <section className="py-20 bg-dark relative z-10">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="rounded-2xl border border-edge/50 bg-card shadow-[0_0_60px_-15px_rgba(124,58,237,0.3)] overflow-hidden relative group">
+      <section className="relative z-10 w-full flex justify-center mt-[-30px] md:mt-[-50px] pb-20 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="rounded-xl md:rounded-2xl border border-edge/50 bg-card shadow-[0_0_80px_-20px_rgba(124,58,237,0.4)] overflow-hidden relative group transform perspective-1000">
+            <div className="absolute inset-0 bg-linear-to-t from-dark via-transparent to-transparent z-10 opacity-60"></div>
             <img 
-              src="/dashboard-preview.png" 
+              src="/dashboard.png" 
               alt="Trading Dashboard Preview" 
-              className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.02]" 
+              className="w-full h-auto object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.03]" 
             />
+            <div className="absolute bottom-6 left-0 right-0 z-20 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <Link to={user ? "/dashboard" : "/login"} className="px-6 py-2.5 bg-accent text-white font-semibold rounded-full shadow-lg shadow-accent/20 hover:bg-accent/90 transition-colors flex items-center gap-2 text-sm">
+                Explore Platform <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

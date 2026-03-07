@@ -10,14 +10,14 @@ export default function Layout() {
     <div className="h-screen flex flex-col bg-dark overflow-hidden">
       <Navbar />
       {isDashboard ? (
-        /* Dashboard: fills the remaining height exactly, no scroll */
-        <main className="flex-1 min-h-0 pt-14 overflow-hidden">
+        /* Dashboard: exactly fits on desktop, scrolls on mobile */
+        <main className="flex-1 min-h-0 pt-14 pb-16 md:pb-0 overflow-y-auto lg:overflow-hidden">
           <Outlet />
         </main>
       ) : (
         /* Other pages: normal scrollable layout */
-        <main className="flex-1 pt-24 overflow-y-auto">
-          <div className="px-6 pb-12 max-w-[1400px] mx-auto">
+        <main className="flex-1 pt-24 pb-16 md:pb-0 overflow-y-auto">
+          <div className="px-3 md:px-6 pb-12 max-w-[1400px] mx-auto">
             <Outlet />
           </div>
         </main>

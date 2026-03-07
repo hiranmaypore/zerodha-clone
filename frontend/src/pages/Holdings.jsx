@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StockIcon } from '../components/StockIcon';
-import { getHoldings, getPositions } from '../services/api';
+import { getHoldings, getPositions, downloadTaxStatement } from '../services/api';
+import toast from 'react-hot-toast';
 import { connectSocket } from '../services/socket';
 import {
   TrendingUp, TrendingDown, Briefcase, BarChart2,
-  ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Activity,
+  ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Activity, Download
 } from 'lucide-react';
 
 export default function Holdings() {
@@ -111,12 +112,35 @@ export default function Holdings() {
           <h1 className="text-2xl font-bold text-primary">Portfolio</h1>
           <p className="text-sm text-muted mt-0.5">Manage your investments and intraday trades</p>
         </div>
-        <button
-          onClick={load}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-edge text-xs text-secondary hover:text-primary transition-colors"
-        >
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              try {
+                const toastId = toast.loading('Generating tax statement...');
+                const res = await downloadTaxStatement();
+                const url = window.URL.createObjectURL(new Blob([res.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Tax_Statement_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                toast.success('Downloaded Tax Statement CSV', { id: toastId });
+              } catch {
+                toast.error('Failed to export tax data');
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-edge text-xs text-secondary hover:text-primary hover:bg-surface-hover transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" /> Statement
+          </button>
+          <button
+            onClick={load}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-edge text-xs text-secondary hover:text-primary hover:bg-surface-hover transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          </button>
+        </div>
       </div>
 
       {/* ── Tab bar ── */}
@@ -149,13 +173,13 @@ export default function Holdings() {
       {tab === 'positions' && (
         <>
           {positions.length > 0 ? (
-            <div className="bg-card border border-edge rounded-xl overflow-hidden">
-              <div className="px-5 py-3 border-b border-edge flex items-center gap-2">
+            <div className="bg-card border border-edge rounded-xl overflow-x-auto">
+              <div className="px-5 py-3 border-b border-edge flex items-center gap-2 min-w-[500px]">
                 <Activity className="w-4 h-4 text-warning" />
                 <span className="text-sm font-semibold text-primary">Today's Intraday Positions (MIS)</span>
                 <span className="text-xs text-warning/80 bg-warning/10 px-2 py-0.5 rounded-full ml-auto">Auto square-off at 3:20 PM</span>
               </div>
-              <table className="w-full text-sm">
+              <table className="w-full text-sm min-w-[500px] md:min-w-0">
                 <thead>
                   <tr className="border-b border-edge text-[10px] text-muted uppercase tracking-wide">
                     <th className="text-left px-5 py-3 font-medium">Stock</th>
@@ -281,8 +305,8 @@ export default function Holdings() {
           </div>
 
           {/* ── Holdings table ── */}
-          <div className="bg-card border border-edge rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-card border border-edge rounded-xl overflow-x-auto">
+            <table className="w-full text-sm min-w-[500px] md:min-w-0">
               <thead>
                 <tr className="border-b border-edge text-[10px] text-muted uppercase tracking-wide">
                   <th className="text-left px-5 py-3 font-medium">Stock</th>

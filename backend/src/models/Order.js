@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema({
   // Advanced Order Fields
   orderCategory: {
     type: String,
-    enum: ['REGULAR', 'STOPLOSS', 'BRACKET'],
+    enum: ['REGULAR', 'STOPLOSS', 'BRACKET', 'TARGET'],
     default: 'REGULAR'
   },
   stopLossPrice: { type: Number }, // For stop-loss & bracket
@@ -23,7 +23,8 @@ const orderSchema = new mongoose.Schema({
   parentOrderId: {                 // For bracket legs
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Order'
-  }
+  },
+  executedAt: { type: Date },      // Set when order is filled
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

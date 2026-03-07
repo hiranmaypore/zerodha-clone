@@ -3,6 +3,8 @@ const User = require('../models/User');
 const Order = require('../models/Order');
 const { getPrices } = require('../services/priceSimulator');
 const STOCKS = require('../config/stocks');
+const { parse } = require('json2csv');
+const logger = require('../utils/logger');
 
 function enrichHolding(h, prices) {
   const currentPrice = prices[h.stock] || 0;
@@ -143,3 +145,59 @@ exports.getDashboard = async (req, res) => {
     res.status(500).json({ message: 'Error fetching dashboard', error: error.message });
   }
 };
+
+// ─── Export Tax Statement (CSV) ──────────────────────────
+exports.downloadTaxStatement = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    let orders = [];
+
+    if (!global.dbConnected) {
+      // Memory Mode
+      for (const [id, order] of global.inMemoryDB.orders) {
+        if (order.user.toString() === userId.toString()) orders.push(order);
+      }
+    } else {
+      // DB Mode
+      orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+    }
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: 'No trading history found to export.' });
+    }
+
+    // Format Data for CSV
+    const csvData = orders.map(o => {
+      const execPrice = o.price || 0;
+      const amount = o.quantity * execPrice;
+      const type = o.type;
+      
+      return {
+        'Date': new Date(o.createdAt || new Date()).toISOString().split('T')[0],
+        'Time': new Date(o.createdAt || new Date()).toISOString().split('T')[1].substring(0, 8),
+        'Symbol': o.stock,
+        'Type': type,
+        'Quantity': o.quantity,
+        'Execution Price (₹)': execPrice.toFixed(2),
+        'Total Value (₹)': amount.toFixed(2),
+        'Status': o.status
+      };
+    });
+
+    // Options for json2csv
+    const fields = ['Date', 'Time', 'Symbol', 'Type', 'Quantity', 'Execution Price (₹)', 'Total Value (₹)', 'Status'];
+    const csv = parse(csvData, { fields });
+
+    logger.info(`📄 P&L Tax Statement generated for user ${userId}`);
+
+    // Set headers to trigger a browser download
+    res.header('Content-Type', 'text/csv');
+    res.attachment(`ZeroDha_Tax_Statement_${new Date().toISOString().split('T')[0]}.csv`);
+    return res.send(csv);
+
+  } catch (error) {
+    logger.error('Failed to generate Tax Statement:', error);
+    res.status(500).json({ message: 'Failed to generate tax statement' });
+  }
+};
+

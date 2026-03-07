@@ -37,7 +37,7 @@ function calcBS(optionType, S, K, T_days, volatility, riskFreeRate) {
   return { price, delta, gamma, theta };
 }
 
-export default function OptionChain({ spotPrice = 22000 }) {
+export default function OptionChain({ spotPrice = 22000, onTrade }) {
   const [expiry, setExpiry] = useState(7); // days
   const [iv, setIv] = useState(15); // volatility %
   
@@ -132,9 +132,13 @@ export default function OptionChain({ spotPrice = 22000 }) {
                   <div className={`col-span-1 p-2 border-r border-edge flex items-center justify-center font-mono ${isITM_Call ? 'bg-profit/5 text-secondary' : 'text-muted'}`}>
                       {call.gamma.toFixed(4)}
                   </div>
-                  <div className={`col-span-2 p-2 border-r border-edge flex items-center justify-center font-mono font-bold text-primary ${isITM_Call ? 'bg-profit/10' : ''} group-hover:text-profit transition-colors`}>
+                  <button 
+                    onClick={() => onTrade && onTrade(`NIFTY_${strike}_CE_${expiry}D`, call.price, 'BUY')}
+                    className={`col-span-2 p-2 border-r border-edge flex items-center justify-center font-mono font-bold text-primary cursor-pointer hover:bg-profit hover:text-white ${isITM_Call ? 'bg-profit/10' : ''} transition-all`}
+                    title="Click to BUY Call"
+                  >
                     ₹{call.price.toFixed(2)}
-                  </div>
+                  </button>
               </div>
               
               {/* STRIKE */}
@@ -145,9 +149,13 @@ export default function OptionChain({ spotPrice = 22000 }) {
               
               {/* PUTS */}
               <div className="col-span-5 grid grid-cols-5 bg-surface/10">
-                  <div className={`col-span-2 p-2 border-l border-edge flex items-center justify-center font-mono font-bold text-primary ${isITM_Put ? 'bg-loss/10' : ''} group-hover:text-loss transition-colors`}>
+                  <button 
+                    onClick={() => onTrade && onTrade(`NIFTY_${strike}_PE_${expiry}D`, put.price, 'BUY')}
+                    className={`col-span-2 p-2 border-l border-edge flex items-center justify-center font-mono font-bold text-primary cursor-pointer hover:bg-loss hover:text-white ${isITM_Put ? 'bg-loss/10' : ''} transition-all`}
+                    title="Click to BUY Put"
+                  >
                     ₹{put.price.toFixed(2)}
-                  </div>
+                  </button>
                   <div className={`col-span-1 p-2 border-l border-edge flex items-center justify-center font-mono ${isITM_Put ? 'bg-loss/5 text-secondary' : 'text-muted'}`}>
                       {put.gamma.toFixed(4)}
                   </div>

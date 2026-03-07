@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   getAllStocks, getOrders, getHoldings, getBalance,
   cancelOrder,
@@ -15,7 +16,7 @@ import AlertsPanel      from '../components/dashboard/AlertsPanel';
 import {
 
   TrendingUp, TrendingDown, DollarSign, Activity,
-  BarChart2, RefreshCw,
+  BarChart2, RefreshCw, Bot
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -28,6 +29,25 @@ export default function Dashboard() {
   const [holdings, setHoldings]           = useState([]);
   const [balance, setBalance]             = useState(0);
   const [refreshKey, setRefreshKey]       = useState(0);
+
+  const { preferences } = useAuth();
+  const [recentSignals, setRecentSignals] = useState([]);
+
+  // ── WebSocket live signals ────────────────────────────────────
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handler = (data) => {
+      setRecentSignals(prev => [
+        { ...data, id: Date.now() + Math.random() },
+        ...prev.slice(0, 4)
+      ]);
+    };
+
+    socket.on('algo_signal', handler);
+    return () => socket.off('algo_signal', handler);
+  }, []);
 
   // ── Fetch stocks ───────────────────────────────────────────────
   useEffect(() => {
@@ -111,13 +131,17 @@ export default function Dashboard() {
   };
 
 
-  // ── WebSocket live prices ──────────────────────────────────────
+    // ── WebSocket live prices ──────────────────────────────────────
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
-    const handler = (prices) => setLivePrices(prev => ({ ...prev, ...prices }));
-    socket.on('price_update', handler);
-    return () => socket.off('price_update', handler);
+    const priceHandler = (prices) => setLivePrices(prev => ({ ...prev, ...prices }));
+    
+    socket.on('price_update', priceHandler);
+    
+    return () => {
+      socket.off('price_update', priceHandler);
+    };
   }, []);
 
   const currentPrice = selectedStock
@@ -253,7 +277,36 @@ export default function Dashboard() {
         </div>
 
       </div>
-
+ 
+      {/* ── ALGOBOT LIVE FEED OVERLAY ── */}
+      {preferences.showAlgoSignals && recentSignals.length > 0 && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-100 flex flex-col items-center gap-2 max-w-[450px] w-full px-4 pointer-events-none select-none">
+          {recentSignals.map((sig, i) => (
+            <div 
+              key={sig.id} 
+              className={`flex items-start gap-3.5 bg-card/90 backdrop-blur-xl border border-edge rounded-2xl px-5 py-3 shadow-[0_25px_60px_rgba(0,0,0,0.6)] animate-in slide-in-from-top-6 duration-700 ring-1 ring-white/5
+                ${i > 0 ? 'opacity-20 scale-90 -translate-y-2' : 'ring-accent/30 border-accent/30 scale-105 mb-1'}
+              `}
+              style={{ transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)' }}
+            >
+              <div className={`mt-0.5 p-2 rounded-xl shrink-0 ${sig.trend === 'BULLISH' ? 'bg-profit/20' : 'bg-loss/20'}`}>
+                <Bot className={`w-4 h-4 ${sig.trend === 'BULLISH' ? 'text-profit' : 'text-loss'}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-bold text-primary truncate leading-none tracking-tight">AlgoBot [{sig.symbol}]</span>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${sig.trend === 'BULLISH' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
+                    {sig.trend === 'BULLISH' ? 'BUY' : 'SELL'} SIGNAL
+                  </span>
+                </div>
+                <p className={`text-[10px] leading-relaxed mt-2 ${i === 0 ? 'text-muted-foreground font-medium' : 'text-muted/40 line-clamp-1'}`}>
+                  {sig.trend === 'BULLISH' ? '🚀' : '🔻'} {sig.message}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

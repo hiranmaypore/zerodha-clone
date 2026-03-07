@@ -12,6 +12,7 @@ function startSimulation(io) {
   }, 1000);
 }
 
+
 function setInitialPrices(initialPrices) {
   prices = initialPrices;
 }
@@ -25,3 +26,4 @@ module.exports = {
   setInitialPrices,
   getPrices
 };
+

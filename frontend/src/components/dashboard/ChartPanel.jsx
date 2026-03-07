@@ -703,6 +703,8 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
         className="flex-1 relative min-h-0 select-none overflow-hidden"
         style={isFullscreen ? { background: 'var(--color-dark)' } : {}}
       >
+
+
         {/* Timeframes row stays visible inside fullscreen too */}
         {isFullscreen && (
           <div className="absolute top-0 left-0 right-0 z-20 flex items-center gap-1 px-3 py-1.5 border-b border-edge bg-card/95 backdrop-blur-sm">

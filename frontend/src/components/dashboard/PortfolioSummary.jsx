@@ -1,6 +1,8 @@
-import { TrendingUp, TrendingDown, Package } from 'lucide-react';
+import { TrendingUp, TrendingDown, Package, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { StockIcon } from '../StockIcon';
+import { downloadTaxStatement } from '../../services/api';
+import toast from 'react-hot-toast';
 
 export default function PortfolioSummary({ holdings = [], livePrices = {} }) {
   const navigate = useNavigate();
@@ -28,13 +30,37 @@ export default function PortfolioSummary({ holdings = [], livePrices = {} }) {
           <Package className="w-3 h-3 text-purple-400 shrink-0" />
           <span className="text-[10px] font-bold text-primary">Portfolio</span>
         </div>
-        {enriched.length > 0 && (
-          <span className={`text-[10px] font-bold font-mono ${totalPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-            {totalPnl >= 0 ? '+' : ''}₹{Math.abs(totalPnl) >= 1000
-              ? `${(Math.abs(totalPnl) / 1000).toFixed(1)}K`
-              : Math.abs(totalPnl).toFixed(0)}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {enriched.length > 0 && (
+            <span className={`text-[10px] font-bold font-mono ${totalPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+              {totalPnl >= 0 ? '+' : ''}₹{Math.abs(totalPnl) >= 1000
+                ? `${(Math.abs(totalPnl) / 1000).toFixed(1)}K`
+                : Math.abs(totalPnl).toFixed(0)}
+            </span>
+          )}
+          <button
+            onClick={async () => {
+              try {
+                const toastId = toast.loading('Generating tax statement...');
+                const res = await downloadTaxStatement();
+                const url = window.URL.createObjectURL(new Blob([res.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Tax_Statement_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                toast.success('Downloaded Tax Statement CSV', { id: toastId });
+              } catch {
+                toast.error('Failed to export tax data');
+              }
+            }}
+            title="Download Tax Statement (CSV)"
+            className="p-1 rounded bg-surface border border-edge hover:bg-surface-hover hover:text-primary text-muted transition-colors flex items-center"
+          >
+            <Download className="w-3 h-3" />
+          </button>
+        </div>
       </div>
 
       {/* Holdings list */}

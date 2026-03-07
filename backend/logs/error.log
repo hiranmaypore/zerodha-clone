@@ -1,0 +1,262 @@
+2026-03-07 01:10:14 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5017ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:16 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5017ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:18 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5017ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:18 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5017ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:18 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5017ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:20 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5012ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:22 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5012ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:23 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5012ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:24 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5012ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:26 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5012ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:28 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5012ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:30 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5012ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:32 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 11818ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:34 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 11818ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:36 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 11818ms (connectTimeoutMS: 5000)
+2026-03-07 01:10:38 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 11818ms (connectTimeoutMS: 5000)
+2026-03-07 01:11:06 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 16 to 159.41.196.47:27017 timed out"
+2026-03-07 01:11:06 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 16 to 159.41.196.47:27017 timed out"
+2026-03-07 01:11:06 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 16 to 159.41.196.47:27017 timed out"
+2026-03-07 01:11:06 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 16 to 159.41.196.47:27017 timed out"
+2026-03-07 01:11:06 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 16 to 159.41.196.47:27017 timed out"
+2026-03-07 01:11:06 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:11 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:11 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:11 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:11 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:11 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:11 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:11 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:11 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:11 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:12 [error]: Alert Engine Error: connection 16 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:34 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 21 to 159.41.196.47:27017 timed out"
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:39 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:41 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:43 [error]: Alert Engine Error: connection 21 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:48 [error]: Alert Engine Error: connection 22 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:48 [error]: Alert Engine Error: connection 22 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:49 [error]: Alert Engine Error: connection 22 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:51 [error]: Alert Engine Error: connection 22 to 159.41.196.47:27017 timed out
+2026-03-07 01:11:53 [error]: Alert Engine Error: connection 22 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:11 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 27 to 159.41.196.47:27017 timed out"
+2026-03-07 01:12:25 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 6725ms (connectTimeoutMS: 5000)
+2026-03-07 01:12:31 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 6866ms (connectTimeoutMS: 5000)
+2026-03-07 01:12:37 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 33 to 159.41.196.47:27017 timed out"
+2026-03-07 01:12:37 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 33 to 159.41.196.47:27017 timed out"
+2026-03-07 01:12:37 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 33 to 159.41.196.47:27017 timed out"
+2026-03-07 01:12:37 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 33 to 159.41.196.47:27017 timed out"
+2026-03-07 01:12:37 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 33 to 159.41.196.47:27017 timed out"
+2026-03-07 01:12:37 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 33 to 159.41.196.47:27017 timed out"
+2026-03-07 01:12:37 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 33 to 159.41.196.47:27017 timed out"
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:42 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:43 [error]: Alert Engine Error: connection 34 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:54 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 35 to 159.41.196.47:27017 timed out"
+2026-03-07 01:12:59 [error]: Alert Engine Error: connection 35 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:59 [error]: Alert Engine Error: connection 35 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:59 [error]: Alert Engine Error: connection 35 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:59 [error]: Alert Engine Error: connection 35 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:59 [error]: Alert Engine Error: connection 35 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:59 [error]: Alert Engine Error: connection 35 to 159.41.196.47:27017 timed out
+2026-03-07 01:12:59 [error]: Alert Engine Error: connection 35 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:01 [error]: Alert Engine Error: connection 35 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:03 [error]: Alert Engine Error: connection 35 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:18 [error]: Alert Engine Error: connection 39 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:18 [error]: Alert Engine Error: connection 39 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:18 [error]: Alert Engine Error: connection 39 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:18 [error]: Alert Engine Error: connection 39 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:18 [error]: Alert Engine Error: connection 39 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:18 [error]: Alert Engine Error: connection 39 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:18 [error]: Alert Engine Error: connection 39 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:19 [error]: Alert Engine Error: connection 39 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:21 [error]: Alert Engine Error: connection 39 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:39 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:39 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:39 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:39 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:39 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:39 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:39 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:39 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:39 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:13:41 [error]: Alert Engine Error: connection 42 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:18 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 50 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:18 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 50 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:18 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 50 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:30 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 6780ms (connectTimeoutMS: 5000)
+2026-03-07 01:14:37 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 6900ms (connectTimeoutMS: 5000)
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 56 to 159.41.196.47:27017 timed out"
+2026-03-07 01:14:45 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:50 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:14:51 [error]: Alert Engine Error: connection 56 to 159.41.196.47:27017 timed out
+2026-03-07 01:15:11 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 60 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:18 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5009ms (connectTimeoutMS: 5000)
+2026-03-07 01:15:30 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 7448ms (connectTimeoutMS: 5000)
+2026-03-07 01:15:32 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 67 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:32 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 67 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:32 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 67 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:32 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 67 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:32 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 67 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:32 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 67 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:32 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 67 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:32 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 67 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 69 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 69 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 69 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 69 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 69 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 69 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 69 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 69 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:45 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "connection 69 to 159.41.196.47:27017 timed out"
+2026-03-07 01:15:50 [error]: Alert Engine Error: connection 69 to 159.41.196.47:27017 timed out
+2026-03-07 01:15:50 [error]: Alert Engine Error: connection 69 to 159.41.196.47:27017 timed out
+2026-03-07 01:15:50 [error]: Alert Engine Error: connection 69 to 159.41.196.47:27017 timed out
+2026-03-07 01:15:50 [error]: Alert Engine Error: connection 69 to 159.41.196.47:27017 timed out
+2026-03-07 01:15:50 [error]: Alert Engine Error: connection 69 to 159.41.196.47:27017 timed out
+2026-03-07 01:15:50 [error]: Alert Engine Error: connection 69 to 159.41.196.47:27017 timed out
+2026-03-07 01:15:50 [error]: Alert Engine Error: connection 69 to 159.41.196.47:27017 timed out
+2026-03-07 01:15:51 [error]: Alert Engine Error: connection 69 to 159.41.196.47:27017 timed out
+2026-03-07 01:17:06 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "read ECONNRESET"
+2026-03-07 01:17:06 [error]: Alert Engine Error: Connection pool for cluster0-shard-00-02.wu94c.mongodb.net:27017 was cleared because another operation failed with: "read ECONNRESET"
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:11 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:12 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:14 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 closed
+2026-03-07 01:17:16 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:16 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:18 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:20 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:22 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:24 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 7416ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:26 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 7416ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:28 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 7416ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:30 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5003ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:32 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5003ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:34 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5003ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:36 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5003ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:38 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5003ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:40 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5003ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:42 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5003ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:44 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5003ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:46 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 5003ms (connectTimeoutMS: 5000)
+2026-03-07 01:17:48 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:50 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:52 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:54 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:56 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:17:58 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:18:00 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:18:02 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:18:04 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:18:06 [error]: Alert Engine Error: connection <monitor> to 159.41.196.47:27017 timed out
+2026-03-07 01:18:08 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 7672ms (connectTimeoutMS: 5000)
+2026-03-07 01:18:10 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 7672ms (connectTimeoutMS: 5000)
+2026-03-07 01:18:12 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 7672ms (connectTimeoutMS: 5000)
+2026-03-07 01:18:14 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 7672ms (connectTimeoutMS: 5000)
+2026-03-07 01:18:16 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 6114ms (connectTimeoutMS: 5000)
+2026-03-07 01:18:18 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 6114ms (connectTimeoutMS: 5000)
+2026-03-07 01:18:20 [error]: Alert Engine Error: Socket 'secureConnect' timed out after 6114ms (connectTimeoutMS: 5000)
+2026-03-07 23:20:41 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:20:46 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:20:46 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:20:57 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:28:20 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:28:20 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:28:20 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:28:20 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:28:39 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:28:39 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:41:55 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:41:55 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174
+2026-03-07 23:42:04 [error]: 🔥 GLOBAL ERROR HANDLER: CORS blocked: http://localhost:5174

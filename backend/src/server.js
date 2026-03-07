@@ -3,9 +3,13 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const morgan = require("morgan");
 const connectDB = require("./config/db");
+const logger = require("./utils/logger");
 
 // In-memory store for demo mode (when DB is down)
+
+
 const inMemoryDB = {
   users: new Map(),   // id -> user
   orders: new Map(),  // id -> order
@@ -41,14 +45,23 @@ const startMatchingEngine = require('./services/matchingEngine');
 const { startPriceHistoryService } = require('./services/priceHistoryService');
 const { startAutoSquareOffService } = require('./services/autoSquareOff');
 const { startAlertEngine } = require('./services/alertEngine');
+const { startAlgoBot } = require('./services/algoBot');
 
 const app = express();
+
 
 const server = http.createServer(app);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow all origins
+    callback(null, true);
+  },
+  credentials: true,
+}));
 app.use(express.json());
+app.use(morgan('tiny', { stream: logger.stream }));
 
 // API Routes
 app.use("/api/auth", authRoutes);
@@ -73,7 +86,7 @@ app.get("/api/health", (req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-    console.error('🔥 GLOBAL ERROR HANDLER:', err.message);
+    logger.error(`🔥 GLOBAL ERROR HANDLER: ${err.message}`);
     res.status(500).json({ message: err.message });
 });
 
@@ -88,7 +101,7 @@ const io = new Server(server, {
 // Initialize Price Engine
 async function initPrices() {
   const initialPrices = {};
-  console.log("⏳ Setting initial stock prices...");
+  logger.info("⏳ Setting initial stock prices...");
 
   await Promise.all(
     stocks.map(async (stock) => {
@@ -96,7 +109,7 @@ async function initPrices() {
     })
   );
 
-  console.log("✅ Initial Prices Set:", Object.keys(initialPrices).join(", "));
+  logger.info(`✅ Initial Prices Set: ${Object.keys(initialPrices).join(", ")}`);
   setInitialPrices(initialPrices);
 }
 
@@ -110,16 +123,18 @@ const PORT = process.env.PORT || 5000;
     global.dbConnected = !!dbOk;
 
     if (!dbOk) {
-      console.log("🟡 Demo Mode: Using in-memory store. Prices & WebSocket still work.");
+
+      logger.warn("🟡 Demo Mode: Using in-memory store. Prices & WebSocket still work.");
     }
+
 
     // Always start price engine
     await initPrices();
     startSimulation(io);
 
     // Always start these (they handle demo mode internally)
-    try { startMatchingEngine(); } catch(e) { console.warn('Matching engine warn:', e.message); }
-    try { startPriceHistoryService(); } catch(e) { console.warn('Price history warn:', e.message); }
+    try { startMatchingEngine(); } catch(e) { logger.warn(`Matching engine warn: ${e.message}`); }
+    try { startPriceHistoryService(); } catch(e) { logger.warn(`Price history warn: ${e.message}`); }
 
     priceSocket(io, getPrices);
 
@@ -128,33 +143,37 @@ const PORT = process.env.PORT || 5000;
       try {
         const { initializeNotifications } = require('./services/orderNotifications');
         initializeNotifications(io);
-      } catch(e) { console.warn('Notifications skipped:', e.message); }
+      } catch(e) { logger.warn(`Notifications skipped: ${e.message}`); }
     }
 
     // MIS Auto Square-Off — always start (handles both demo + DB)
-    try { startAutoSquareOffService(io); } catch(e) { console.warn('AutoSquareOff warn:', e.message); }
+    try { startAutoSquareOffService(io); } catch(e) { logger.warn(`AutoSquareOff warn: ${e.message}`); }
 
     // Alerts Engine
-    try { startAlertEngine(io); } catch(e) { console.warn('AlertEngine warn:', e.message); }
+    try { startAlertEngine(io); } catch(e) { logger.warn(`AlertEngine warn: ${e.message}`); }
+
+    // Algo Bot Engine
+    try { startAlgoBot(io); } catch(e) { logger.warn(`AlgoBot warn: ${e.message}`); }
 
     // User room management
 
+
     io.on('connection', (socket) => {
-      console.log(`Client connected: ${socket.id}`);
+      logger.info(`Client connected: ${socket.id}`);
       
       socket.on('join_user_room', (userId) => {
         socket.join(userId);
       });
       
       socket.on('disconnect', () => {
-        console.log(`Client disconnected: ${socket.id}`);
+        logger.info(`Client disconnected: ${socket.id}`);
       });
     });
 
     server.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT} (${global.dbConnected ? '🟢 Live DB' : '🟡 Demo Mode'})`);
+      logger.info(`🚀 Server running on port ${PORT} (${global.dbConnected ? '🟢 Live DB' : '🟡 Demo Mode'})`);
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    logger.error(`Failed to start server: ${error.message}`);
   }
 })();

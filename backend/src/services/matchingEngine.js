@@ -1,4 +1,6 @@
 const { getPrices } = require('./priceSimulator');
+const logger = require('../utils/logger');
+
 
 // In-memory matching engine for demo mode
 const memMatchingEngine = () => {
@@ -48,13 +50,14 @@ const dbMatchingEngine = () => {
   let notifications;
   try { notifications = require('./orderNotifications'); } catch(e) { notifications = {}; }
 
-  console.log('⚙️  Matching Engine Started (DB mode)...');
+  logger.info('⚙️  Matching Engine Started (DB mode)...');
 
   setInterval(async () => {
     try {
       const prices = getPrices();
       if (!prices) return;
       const pendingOrders = await Order.find({ status: 'PENDING' });
+
 
       for (const order of pendingOrders) {
         const currentPrice = prices[order.stock];

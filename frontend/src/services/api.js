@@ -1,9 +1,13 @@
 import axios from 'axios';
 
+const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: backendUrl,
   headers: { 'Content-Type': 'application/json' }
 });
+
 
 // Attach token to every request
 API.interceptors.request.use((config) => {
@@ -35,6 +39,7 @@ export const updateProfile = (data) => API.put('/auth/profile', data);
 
 // Stocks
 export const getAllStocks = () => API.get('/stocks');
+export const getSentiment = (symbol) => API.get(`/stocks/${symbol}/sentiment`);
 
 // Orders
 export const buyOrder = (data) => API.post('/orders/buy', data);
@@ -48,6 +53,7 @@ export const placeBracket = (data) => API.post('/orders/bracket', data);
 export const getHoldings = () => API.get('/holdings');
 export const getPositions = () => API.get('/holdings/positions');
 export const getDashboard = () => API.get('/holdings/dashboard');
+export const downloadTaxStatement = () => API.get('/holdings/export', { responseType: 'blob' });
 
 
 // Watchlist
