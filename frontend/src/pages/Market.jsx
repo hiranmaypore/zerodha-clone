@@ -390,24 +390,24 @@ export default function Market() {
                 </div>
 
                 {/* Actions */}
-                <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-1 mt-3 md:mt-0 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-1 mt-3 md:mt-0">
                   {/* Watchlist star */}
                   <button
                     onClick={() => toggleWatch(stock.symbol)}
-                    className="p-1.5 rounded-lg border border-edge md:border-transparent hover:bg-surface transition-colors"
+                    className="p-1.5 rounded-lg border border-edge md:border-transparent"
                     title={isWatched(stock.symbol) ? 'Remove from watchlist' : 'Add to watchlist'}
                   >
-                    <Star className={`w-3.5 h-3.5 transition-colors ${isWatched(stock.symbol) ? 'text-warning fill-warning' : 'text-muted hover:text-warning'}`} />
+                    <Star className={`w-3.5 h-3.5 ${isWatched(stock.symbol) ? 'text-warning fill-warning' : 'text-muted'}`} />
                   </button>
                   <button
                     onClick={() => openModal(stock, 'BUY')}
-                    className="flex-1 md:flex-none px-2.5 py-1.5 md:py-1 rounded-lg bg-profit/10 text-profit text-xs md:text-[10px] font-bold hover:bg-profit/20 transition-colors border border-profit/20 md:border-transparent"
+                    className="flex-1 md:flex-none px-2.5 py-1.5 md:py-1 rounded-lg bg-profit/10 text-profit text-xs md:text-[10px] font-bold border border-profit/20 md:border-transparent"
                   >
                     BUY
                   </button>
                   <button
                     onClick={() => openModal(stock, 'SELL')}
-                    className="flex-1 md:flex-none px-2.5 py-1.5 md:py-1 rounded-lg bg-loss/10 text-loss text-xs md:text-[10px] font-bold hover:bg-loss/20 transition-colors border border-loss/20 md:border-transparent"
+                    className="flex-1 md:flex-none px-2.5 py-1.5 md:py-1 rounded-lg bg-loss/10 text-loss text-xs md:text-[10px] font-bold border border-loss/20 md:border-transparent"
                   >
                     SELL
                   </button>
