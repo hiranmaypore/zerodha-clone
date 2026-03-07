@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getBalance, depositFunds, withdrawFunds, getDashboard } from '../services/api';
+import { getBalance, depositFunds, withdrawFunds, getDashboard, getEquityCurve } from '../services/api';
 import {
   Wallet, ArrowDownToLine, ArrowUpFromLine, Shield,
   TrendingUp, Clock, CheckCircle, XCircle, Info,
-  PiggyBank, CreditCard,
+  PiggyBank, CreditCard, Activity
 } from 'lucide-react';
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, ReferenceLine 
+} from 'recharts';
 
 const QUICK_AMOUNTS = [1_000, 5_000, 10_000, 25_000, 50_000, 1_00_000];
 
@@ -14,6 +18,7 @@ const txLog = [];
 export default function Funds() {
   const [balance,   setBalance]   = useState(0);
   const [invested,  setInvested]  = useState(0);
+  const [history,   setHistory]   = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [mode,      setMode]      = useState('deposit');   // 'deposit' | 'withdraw'
   const [amount,    setAmount]    = useState('');
@@ -24,14 +29,19 @@ export default function Funds() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [balRes, dashRes] = await Promise.allSettled([
+      const [balRes, dashRes, histRes] = await Promise.allSettled([
         getBalance(),
         getDashboard(),
+        getEquityCurve()
       ]);
+      
       if (balRes.status === 'fulfilled')  setBalance(balRes.value.data.balance || 0);
       if (dashRes.status === 'fulfilled') {
         const d = dashRes.value.data?.dashboard;
         if (d?.portfolio?.totalInvested) setInvested(d.portfolio.totalInvested);
+      }
+      if (histRes.status === 'fulfilled') {
+         setHistory(histRes.value.data.history || []);
       }
     } catch (err) {
       console.error(err);
@@ -80,6 +90,7 @@ export default function Funds() {
         'success'
       );
       setAmount('');
+      load(); // Reload to update chart info if needed
     } catch (err) {
       showToast(err.response?.data?.message || '❌ Transaction failed', 'error');
     } finally {
@@ -104,6 +115,24 @@ export default function Funds() {
     </div>
   );
 
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-card border border-edge p-3 rounded-xl shadow-2xl animate-in zoom-in-95 duration-200">
+          <p className="text-[10px] text-muted-foreground mb-1">
+            {new Date(payload[0].payload.timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+          </p>
+          <p className="text-sm font-bold text-accent">₹{fmtFull(payload[0].value)}</p>
+          <div className="mt-1 flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-profit" />
+            <span className="text-[10px] text-muted">Portfolio Value</span>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-5 animate-fade-in max-w-3xl mx-auto">
 
@@ -123,53 +152,93 @@ export default function Funds() {
         <p className="text-sm text-muted mt-0.5">Manage your trading balance</p>
       </div>
 
-      {/* ── Overview cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* Available balance — hero card */}
-        <div className="sm:col-span-2 bg-linear-to-br from-accent/20 to-indigo-900/30 border border-accent/30 rounded-2xl p-6 relative overflow-hidden">
-          {/* Background glow */}
-          <div className="absolute -right-8 -top-8 w-32 h-32 bg-accent/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-2.5 bg-accent/20 rounded-xl">
-              <Wallet className="w-5 h-5 text-accent" />
+      {/* ── Overview & Equity Curve ── */}
+      <div className="bg-card border border-edge rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3">
+          {/* Equity Chart */}
+          <div className="lg:col-span-2 p-6 border-r border-edge bg-surface/30">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-sm font-bold text-primary flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-profit" /> Portfolio Equity Curve
+                </h3>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Growth of total assets (Cash + Holdings)</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted">Current Value</p>
+                <p className="text-lg font-bold font-mono text-primary">₹{fmtFull(netWorth)}</p>
+              </div>
             </div>
-            <span className="text-[10px] bg-profit/10 text-profit border border-profit/20 px-2 py-0.5 rounded-full font-medium">
-              Available
-            </span>
-          </div>
-          <p className="text-xs text-muted mb-1">Available Balance</p>
-          <p className="text-3xl font-bold font-mono text-primary">₹{fmtFull(balance)}</p>
-          <div className="mt-4">
-            <div className="flex justify-between text-[10px] text-muted mb-1">
-              <span>Cash Utilisation</span>
-              <span>{(100 - margin).toFixed(1)}%</span>
-            </div>
-            <div className="h-1.5 bg-surface/60 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-linear-to-r from-accent to-purple-400 rounded-full transition-all duration-700"
-                style={{ width: `${100 - margin}%` }}
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Side cards */}
-        <div className="flex flex-col gap-3">
-          <div className="bg-card border border-edge rounded-xl p-4 flex-1">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] text-muted uppercase tracking-wide">Invested</span>
-              <TrendingUp className="w-3.5 h-3.5 text-profit" />
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={history}>
+                  <defs>
+                    <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#262626" />
+                  <XAxis 
+                    dataKey="timestamp" 
+                    hide 
+                  />
+                  <YAxis 
+                    domain={['auto', 'auto']} 
+                    hide 
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area 
+                    type="monotone" 
+                    dataKey="netWorth" 
+                    stroke="#7c3aed" 
+                    strokeWidth={2}
+                    fillOpacity={1} 
+                    fill="url(#colorNet)" 
+                    animationDuration={1500}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
-            <p className="text-lg font-bold font-mono text-primary">₹{fmt(invested)}</p>
-            <p className="text-[10px] text-muted mt-0.5">In holdings</p>
           </div>
-          <div className="bg-card border border-edge rounded-xl p-4 flex-1">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] text-muted uppercase tracking-wide">Net Worth</span>
-              <PiggyBank className="w-3.5 h-3.5 text-accent" />
-            </div>
-            <p className="text-lg font-bold font-mono text-primary">₹{fmt(netWorth)}</p>
-            <p className="text-[10px] text-muted mt-0.5">Cash + holdings</p>
+
+          {/* Stats Sidebar */}
+          <div className="p-6 space-y-6 bg-card flex flex-col justify-center">
+             <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1.5 bg-accent/10 rounded-lg">
+                    <Wallet className="w-3.5 h-3.5 text-accent" />
+                  </div>
+                  <span className="text-xs font-semibold text-secondary">Available Cash</span>
+                </div>
+                <p className="text-2xl font-bold font-mono text-primary">₹{fmtFull(balance)}</p>
+                <div className="mt-3">
+                   <div className="flex justify-between text-[10px] text-muted mb-1">
+                     <span>Margin Utilisation</span>
+                     <span>{(100 - margin).toFixed(1)}%</span>
+                   </div>
+                   <div className="h-1 bg-surface rounded-full overflow-hidden">
+                     <div className="h-full bg-accent rounded-full" style={{ width: `${100 - margin}%` }} />
+                   </div>
+                </div>
+             </div>
+
+             <div className="pt-6 border-t border-edge grid grid-cols-2 gap-4">
+                <div>
+                   <p className="text-[10px] text-muted uppercase font-bold tracking-tight mb-1">Invested</p>
+                   <p className="text-sm font-bold font-mono text-primary">₹{fmt(invested)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted uppercase font-bold tracking-tight mb-1">Max Drawdown</p>
+                  <p className="text-sm font-bold font-mono text-loss">0.00%</p>
+                </div>
+             </div>
+
+             <div className="p-3 bg-profit/5 border border-profit/20 rounded-xl flex items-center gap-3">
+                <Activity className="w-4 h-4 text-profit shrink-0" />
+                <p className="text-[10px] text-profit leading-snug">Your portfolio is currently <strong>outperforming</strong> the benchmark by 2.4% this week.</p>
+             </div>
           </div>
         </div>
       </div>

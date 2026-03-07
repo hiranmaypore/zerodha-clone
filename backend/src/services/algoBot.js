@@ -1,5 +1,22 @@
 const { getPrices } = require('./priceSimulator');
 const logger = require('../utils/logger');
+const Signal = require('../models/Signal');
+
+const saveSignal = async (data) => {
+  try {
+    const signal = new Signal({
+      symbol: data.symbol,
+      trend: data.trend,
+      price: data.price,
+      message: data.message,
+      strategy: data.strategy,
+      timestamp: new Date()
+    });
+    await signal.save();
+  } catch (err) {
+    logger.error('Failed to save signal:', err);
+  }
+};
 
 let botInterval = null;
 
@@ -72,7 +89,9 @@ const startAlgoBot = (io) => {
         if (prevEmaTrend && state.ema.trend !== prevEmaTrend) {
           const type = state.ema.trend === 'BULLISH' ? 'BUY' : 'SELL';
           const msg = `EMA Crossover (9/21): Fast EMA crossed ${state.ema.trend === 'BULLISH' ? 'ABOVE' : 'BELOW'} Slow EMA.`;
-          if (io) io.emit('algo_signal', { symbol, trend: state.ema.trend, price: currentPrice, message: msg, strategy: 'EMA' });
+          const signalData = { symbol, trend: state.ema.trend, price: currentPrice, message: msg, strategy: 'EMA' };
+          if (io) io.emit('algo_signal', signalData);
+          saveSignal(signalData);
           logger.info(`🤖 [${symbol}] EMA Signal: ${type} at ₹${currentPrice}`);
         }
 
@@ -86,7 +105,9 @@ const startAlgoBot = (io) => {
           if (rsiTrend && state.rsi.trend !== rsiTrend) {
             const type = rsiTrend === 'BULLISH' ? 'BUY' : 'SELL';
             const msg = `RSI Strategy: Market is ${rsiTrend === 'BULLISH' ? 'Oversold' : 'Overbought'} (RSI: ${rsiVal.toFixed(1)}).`;
-            if (io) io.emit('algo_signal', { symbol, trend: rsiTrend, price: currentPrice, message: msg, strategy: 'RSI' });
+            const signalData = { symbol, trend: rsiTrend, price: currentPrice, message: msg, strategy: 'RSI' };
+            if (io) io.emit('algo_signal', signalData);
+            saveSignal(signalData);
             logger.info(`🤖 [${symbol}] RSI Signal: ${type} at ₹${currentPrice}`);
           }
           state.rsi.trend = rsiTrend;

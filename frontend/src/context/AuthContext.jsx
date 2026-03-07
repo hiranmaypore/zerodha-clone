@@ -13,8 +13,25 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [preferences, setPreferences] = useState(() => {
+    const defaults = {
+      showAlgoSignals: true,
+      selectedStrategy: 'ALL',
+      desktopNotifications: false,
+      orderNotifications: true,
+      priceAlerts: true,
+      // Custom Algo Architect settings
+      fastEMA: 9,
+      slowEMA: 21,
+      defaultSL: 2,     // 2% default stop loss
+      defaultTarget: 5  // 5% default target
+    };
     const saved = localStorage.getItem('preferences');
-    return saved ? JSON.parse(saved) : { showAlgoSignals: true };
+    if (!saved) return defaults;
+    try {
+      return { ...defaults, ...JSON.parse(saved) };
+    } catch {
+      return defaults;
+    }
   });
 
   useEffect(() => {

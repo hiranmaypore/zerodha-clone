@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   getAllStocks, getOrders, getHoldings, getBalance,
-  cancelOrder,
+  cancelOrder, getSignals
 } from '../services/api';
 import { getSocket } from '../services/socket';
 import OrderBook        from '../components/dashboard/OrderBook';
@@ -16,7 +16,7 @@ import AlertsPanel      from '../components/dashboard/AlertsPanel';
 import {
 
   TrendingUp, TrendingDown, DollarSign, Activity,
-  BarChart2, RefreshCw, Bot
+  BarChart2, RefreshCw, Bot, Copy
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -28,7 +28,8 @@ export default function Dashboard() {
   const [orders, setOrders]               = useState([]);
   const [holdings, setHoldings]           = useState([]);
   const [balance, setBalance]             = useState(0);
-  const [refreshKey, setRefreshKey]       = useState(0);
+  const [refreshKey, setRefreshKey]       = useState(k => k || 0);
+  const [tradeCommand, setTradeCommand]   = useState(null);
 
   const { preferences } = useAuth();
   const [recentSignals, setRecentSignals] = useState([]);
@@ -39,14 +40,39 @@ export default function Dashboard() {
     if (!socket) return;
 
     const handler = (data) => {
+      // 1. Filter by strategy preference
+      if (preferences.selectedStrategy !== 'ALL' && data.strategy !== preferences.selectedStrategy) return;
+
       setRecentSignals(prev => [
         { ...data, id: Date.now() + Math.random() },
         ...prev.slice(0, 4)
       ]);
+
+      // 2. Desktop Notification
+      if (preferences.desktopNotifications) {
+        new Notification(`AlgoBot [${data.symbol}]`, {
+          body: `${data.trend === 'BULLISH' ? '📈 BUY' : '📉 SELL'} SIGNAL: ${data.message}`,
+          icon: '/favicon.ico'
+        });
+      }
     };
 
     socket.on('algo_signal', handler);
     return () => socket.off('algo_signal', handler);
+  }, [preferences.selectedStrategy, preferences.desktopNotifications]);
+
+  // Load signal history on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getSignals(5);
+        if (res.data.success) {
+          setRecentSignals(res.data.signals.map(s => ({ ...s, id: s._id })));
+        }
+      } catch (err) {
+        console.error('Failed to load signals:', err);
+      }
+    })();
   }, []);
 
   // ── Fetch stocks ───────────────────────────────────────────────
@@ -247,6 +273,7 @@ export default function Dashboard() {
           <PortfolioSummary
             holdings={holdings}
             livePrices={livePrices}
+            tradeCommand={tradeCommand}
           />
         </div>
 
@@ -284,7 +311,7 @@ export default function Dashboard() {
           {recentSignals.map((sig, i) => (
             <div 
               key={sig.id} 
-              className={`flex items-start gap-3.5 bg-card/90 backdrop-blur-xl border border-edge rounded-2xl px-5 py-3 shadow-[0_25px_60px_rgba(0,0,0,0.6)] animate-in slide-in-from-top-6 duration-700 ring-1 ring-white/5
+              className={`group flex items-start gap-3.5 bg-card/90 backdrop-blur-xl border border-edge rounded-2xl px-5 py-3 shadow-[0_25px_60px_rgba(0,0,0,0.6)] animate-in slide-in-from-top-6 duration-700 ring-1 ring-white/5
                 ${i > 0 ? 'opacity-20 scale-90 -translate-y-2' : 'ring-accent/30 border-accent/30 scale-105 mb-1'}
               `}
               style={{ transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)' }}
@@ -295,13 +322,29 @@ export default function Dashboard() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-xs font-bold text-primary truncate leading-none tracking-tight">AlgoBot [{sig.symbol}]</span>
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${sig.trend === 'BULLISH' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
-                    {sig.trend === 'BULLISH' ? 'BUY' : 'SELL'} SIGNAL
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {i === 0 && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedStock(stocks.find(s => s.symbol === sig.symbol) || selectedStock);
+                          setTradeCommand(sig);
+                          setTimeout(() => setTradeCommand(null), 500);
+                        }}
+                        className="pointer-events-auto flex items-center gap-1 px-2 py-0.5 bg-accent text-white rounded text-[8px] font-bold hover:bg-accent/80 transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <Copy className="w-2.5 h-2.5" /> COPY TRADE
+                      </button>
+                    )}
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${sig.trend === 'BULLISH' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
+                      {sig.trend === 'BULLISH' ? 'BUY' : 'SELL'}
+                    </span>
+                  </div>
                 </div>
                 <p className={`text-[10px] leading-relaxed mt-2 ${i === 0 ? 'text-muted-foreground font-medium' : 'text-muted/40 line-clamp-1'}`}>
                   {sig.trend === 'BULLISH' ? '🚀' : '🔻'} {sig.message}
                 </p>
+                <div className="text-[8px] text-muted-foreground/40 mt-1 uppercase font-mono tracking-widest">{sig.strategy} STRATEGY</div>
               </div>
             </div>
           ))}

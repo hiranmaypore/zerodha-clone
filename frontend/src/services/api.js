@@ -65,6 +65,7 @@ export const removeFromWatchlist = (symbol) => API.delete(`/watchlist/${symbol}`
 export const getBalance = () => API.get('/funds');
 export const depositFunds = (amount) => API.post('/funds/deposit', { amount });
 export const withdrawFunds = (amount) => API.post('/funds/withdraw', { amount });
+export const getEquityCurve = () => API.get('/funds/equity');
 
 // Prices
 export const getPrice = (symbol) => API.get(`/prices/${symbol}`);
@@ -86,6 +87,9 @@ export const calcBlackScholes = (data) => API.post('/calculators/black-scholes',
 export const getAlerts = () => API.get('/alerts');
 export const createAlert = (data) => API.post('/alerts', data);
 export const deleteAlert = (id) => API.delete(`/alerts/${id}`);
+
+// Signals
+export const getSignals = (limit) => API.get(`/signals?limit=${limit || 20}`);
 
 export default API;
 

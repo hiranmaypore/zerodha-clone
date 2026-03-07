@@ -1,6 +1,7 @@
 const randomWalk = require("../utils/randomWalk");
 
 let prices = {};
+let openingPrices = {};
 
 function startSimulation(io) {
   setInterval(() => {
@@ -14,16 +15,22 @@ function startSimulation(io) {
 
 
 function setInitialPrices(initialPrices) {
-  prices = initialPrices;
+  prices = { ...initialPrices };
+  openingPrices = { ...initialPrices }; // Set baseline for "Day Change"
 }
 
 function getPrices() {
   return prices;
 }
 
+function getOpeningPrices() {
+  return openingPrices;
+}
+
 module.exports = {
   startSimulation,
   setInitialPrices,
-  getPrices
+  getPrices,
+  getOpeningPrices
 };
 

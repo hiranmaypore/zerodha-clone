@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { buyOrder, sellOrder, placeBracket } from '../../services/api';
 import { AlertCircle, CheckCircle, Minus, Plus, Shield, Target } from 'lucide-react';
 
-export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderPlaced, userBalance }) {
-  const { user } = useAuth();
+export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderPlaced, userBalance, tradeCommand }) {
+  const { user, preferences } = useAuth();
   const balance = userBalance ?? user?.balance ?? 0;
 
   const [tab, setTab]           = useState('buy');          // 'buy' | 'sell'
@@ -17,6 +17,37 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
   const [target, setTarget]     = useState('');
   const [loading, setLoading]   = useState(false);
   const [msg, setMsg]           = useState(null);
+
+  // Auto-fill from external command (Copy Trade)
+  useEffect(() => {
+    if (tradeCommand && tradeCommand.symbol === selectedStock?.symbol) {
+      setTab(tradeCommand.trend === 'BULLISH' ? 'buy' : 'sell');
+      setOT('LIMIT');
+      setLP(tradeCommand.price.toFixed(2));
+      setQty(Math.max(1, Math.floor(balance * 0.1 / tradeCommand.price))); // default 10% exposure
+      
+      // Apply Custom Algo Architect Preferences
+      if (preferences.defaultSL || preferences.defaultTarget) {
+        setBM(true); // Enable Bracket Mode
+        const price = tradeCommand.price;
+        const isBull = tradeCommand.trend === 'BULLISH';
+        
+        // Calculate absolute prices based on % preferences
+        const slFactor = preferences.defaultSL / 100;
+        const tgtFactor = preferences.defaultTarget / 100;
+        
+        if (isBull) {
+          setSL((price * (1 - slFactor)).toFixed(2));
+          setTarget((price * (1 + tgtFactor)).toFixed(2));
+        } else {
+          setSL((price * (1 + slFactor)).toFixed(2));
+          setTarget((price * (1 - tgtFactor)).toFixed(2));
+        }
+      }
+
+      showMsg('success', `AI Signal for ${tradeCommand.symbol} copied with your custom risk settings!`);
+    }
+  }, [tradeCommand, selectedStock?.symbol, balance, preferences.defaultSL, preferences.defaultTarget]);
 
   const q           = Math.max(0, parseInt(qty) || 0);
   const execPrice   = orderType === 'LIMIT' ? (parseFloat(limitPrice) || currentPrice) : currentPrice;

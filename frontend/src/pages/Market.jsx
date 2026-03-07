@@ -10,18 +10,9 @@ import {
   BarChart2, Activity, Zap, RefreshCw,
 } from 'lucide-react';
 import OptionChain from '../components/market/OptionChain';
+import SectorHeatmap from '../components/market/SectorHeatmap';
 
-// Sector mapping
-const SECTORS = {
-  TCS: 'IT', INFY: 'IT', HCLTECH: 'IT', WIPRO: 'IT',
-  RELIANCE: 'Energy', BHARTIARTL: 'Telecom',
-  HDFC: 'Banking', ICICI: 'Banking', SBIN: 'Banking', KOTAKBANK: 'Banking', AXISBANK: 'Banking',
-  ITC: 'FMCG', SUNPHARMA: 'Pharma',
-  LT: 'Infra', BAJFINANCE: 'Finance',
-  MARUTI: 'Auto', TATAMOTORS: 'Auto',
-  TITAN: 'Consumer', ASIANPAINT: 'Consumer', ULTRACEMCO: 'Cement',
-};
-
+// Sector colors (mapping remains for styling)
 const SECTOR_COLORS = {
   IT: 'bg-blue-500/15 text-blue-300',
   Banking: 'bg-purple-500/15 text-purple-300',
@@ -59,11 +50,7 @@ export default function Market() {
     load();
     const socket = connectSocket();
     socket.on('price_update', (incoming) => {
-
-      setPrices(currentPrices => {
-        setPrevPrices(p => ({ ...p, ...currentPrices }));
-        return { ...currentPrices, ...incoming };
-      });
+      setPrices(currentPrices => ({ ...currentPrices, ...incoming }));
     });
     return () => socket.off('price_update');
   }, []);
@@ -76,9 +63,13 @@ export default function Market() {
       const list = res.data.stocks || [];
       setStocks(list);
       const seed = {};
-      list.forEach(s => { if (s.price) seed[s.symbol] = s.price; });
+      const opens = {};
+      list.forEach(s => { 
+        if (s.price) seed[s.symbol] = s.price; 
+        if (s.openingPrice) opens[s.symbol] = s.openingPrice;
+      });
       setPrices(seed);
-      setPrevPrices(seed);
+      setPrevPrices(opens); // Backend-driven baseline
     } catch (err) {
       console.error(err);
     } finally {
@@ -89,15 +80,16 @@ export default function Market() {
   // ── Enrich ──────────────────────────────────────────────────
   const enriched = useMemo(() => stocks.map(s => {
     const price  = prices[s.symbol] || s.price || 0;
-    const prev   = prevPrices[s.symbol] || price;
-    const change = price - prev;
-    const changePct = prev > 0 ? (change / prev) * 100 : 0;
+    const open   = prevPrices[s.symbol] || price;
+    const change = price - open;
+    const changePct = open > 0 ? (change / open) * 100 : 0;
     return {
       ...s,
       price,
+      open,
       change,
       changePct,
-      sector: SECTORS[s.symbol] || 'Other',
+      sector: s.sector || 'Other',
       isUp:   changePct >  0.01,
       isDown: changePct < -0.01,
     };
@@ -229,6 +221,9 @@ export default function Market() {
           </button>
         </div>
       </div>
+
+      {/* ── Sector Heatmap ── */}
+      <SectorHeatmap stocks={enriched} />
 
       {/* ── Market Summary cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

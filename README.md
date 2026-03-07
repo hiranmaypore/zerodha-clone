@@ -6,72 +6,50 @@ A professional-grade virtual trading platform built with **React + Vite** (front
 
 ---
 
-## ✨ What's New (Advanced Premium Trading Features)
+## ✨ What's New (Advanced AI & Quant Trading)
 
-### 📈 Technical Indicators (SMA/EMA) on Canvas Engine
+### 🤖 AlgoBot — Quantitative Trading Engine
 
-- **Mathematical overlays:** Dynamically calculates and renders **50-SMA (Orange Line)** and **20-EMA (Blue Line)** directly onto our custom `<canvas>` context window.
-- **Interactive Toggles:** Added an robust "Indicators" toggle next to the timeframe selection that mathematically slices and recalculates the visible panning boundary natively on the client using the underlying OHLC `candles` state array seamlessly with the native 30-sec updates.
-- **Full-Screen Support:** Fully works in full-screen charting modes too.
+- **Dual-Strategy Core:** A high-performance background engine running two concurrent quantitative strategies:
+  - **EMA Crossover (9/21):** Detects momentum shifts using the 9-period Fast and 21-period Slow Exponential Moving Averages.
+  - **RSI Mean Reversion:** Identifies "Oversold" (<30) and "Overbought" (>70) conditions using the 14-period Relative Strength Index.
+- 📊 **Portfolio Equity Curve**: Visualize your net worth growth over time with interactive charts.
+- 🔥 **Market Heatmap**: Real-time sector analysis to identify industrial rotations and momentum.
+- ⚙️ **Custom Algo Architect**: Tune EMA periods and risk parameters (SL/Target) for your bot.
+- 🏆 **Trader Ranks & Milestones**: Gamified progress system tracking your career profits.
+- 🚀 **One-Click Copy Trading**: Execute AI signals instantly with pre-filled orders.
+- **Top-Middle Live Feed:** New signals are broadcasted via WebSockets and displayed in a premium, top-center floating overlay with strategy-specific "BUY" and "SELL" badges.
 
-### ⚡ Live Option Chain (F&O Matrix)
+### ⚡ One-Click Copy Trading
 
-- **Zero-Backend Option Chain:** Created a brand new `<OptionChain />` engine entirely rendered on the frontend to avoid hammering backend servers.
-- **Dynamic Strikes:** Generates NIFTY strikes with standard 50-point jumps rounded up from the simulated index average.
-- **Black-Scholes Options Engine:** Embedded a pure Javascript translation of the Black-Scholes formula in the table to dynamically calculate **Delta, Gamma, Theta, and Premium Options LTP** on the fly.
-- **Interactive IV / DTE:** Features interactive inputs to let you simulate "Days to Expiry (DTE)" and control the "Implied Volatility (IV)" slider, live updating the Option premiums instantly!
+- **Instant Execution:** Every AI signal features a "COPY TRADE" button.
+- **Auto-Fill Logic:** Clicking it instantly pre-fills the Buy/Sell Panel with the correct ticker, side (Buy/Sell), current price as a Limit, and calculates a 10% portfolio exposure quantity automatically.
 
-### 🔔 Server-Side Price Alerts Engine
+### 📊 Local Quant Backtesting Module
 
-- **Background Matching:** Built an asynchronous background engine (`alertEngine.js`) running on a 2-second interval, checking `ABOVE` and `BELOW` conditions.
-- **WebSockets Push:** Once a condition is hit, it automatically triggers a WebSockets payload to securely push notifications directly to the existing UI Notification Bell!
-- **Alerts Panel:** Built a new `AlertsPanel.jsx` strictly for `Dashboard.jsx`. You can select a stock, pick condition (Above/Below), enter target price, and track your active, triggered lists smoothly.
+- **Historical Performance:** Added a brand new `BacktestPanel` that analyzes the last 24 hours of 1-minute tick data locally.
+- **Instant ROI:** Calculates Total Trades, Win Rate, and Net P&L (₹) for any stock before you commit capital to an AI strategy.
 
-### 🛡️ Bracket Orders & Stop-Loss UI
+### 🔔 Contextual AI Preferences
 
-- **Bracket Order mode** added to the Buy/Sell Panel — toggle "Enable Bracket (SL + Target)" on any BUY
-- Enter **Entry Price**, **Stop-Loss Price**, and **Target Price** in a dedicated risk panel
-
-- Live **Max Loss** and **Max Gain** calculations shown before you place the order
-- Orders sent to the backend with all 3 legs; engine auto-spawns child SL+Target sell orders upon entry fill
-
-### ⚡ CNC vs MIS Product Types (Delivery vs Intraday)
-
-- Every order is now tagged as:
-  - 🏦 **CNC** — Carry & Deliver (long-term holdings)
-  - ⚡ **MIS** — Margin Intraday Square-off (intraday positions, auto square-off at 3:20 PM)
-- Toggle cleanly visible in the Buy/Sell panel above the order type
-
-### 📊 Portfolio Page — Holdings + Positions Tabs
-
-- The `/holdings` page is now a **Portfolio hub** with two tabs:
-  - **Holdings tab** — Shows CNC long-term stocks with full P&L, allocation bar, and totals
-  - **Positions tab** — Shows today's MIS intraday trades only, with amber "MIS" badge and auto square-off warning
-
-### ⚙️ Enhanced Order Matching Engine
-
-- Bracket entry fill → **automatically spawns** Stop-Loss + Target child orders
-- When Target is hit → **sibling SL order is auto-cancelled** (One Cancels Other / OCO)
-- All holdings keyed by `productType + tradeDate` to prevent MIS bleeding into CNC holdings
-
-### 🌐 Routing & Navigation Fixes
-
-- **Landing Page** (`/`) publicly accessible
-- **Unauthenticated** users bounced back to Landing page, not login
-- **Logout** redirects to Landing page
-- `PublicRoute` on `/login` — logged in users go to `/dashboard`
-
-### 🎨 Theme & UI
-
-- Pure **True Dark Black** theme (`#000000` background, `#0a0a0a` cards)
-- **Vibrant Purple** accent (`#7c3aed`)
-- Calculators accessible from the Navbar and embedded in the Landing page
-- Stock chart state preserved across stock switches (no snap-back)
-- Nested `<button>` hydration error in Chart dropdown resolved
+- **Strategy Filtering:** Choose to see All signals, or filter strictly for EMA or RSI strategies in your Profile settings.
+- **Desktop Push Notifications:** Integrated browser-level `Notification API` alerts so you never miss a crossover while multi-tasking.
 
 ---
 
 ## 🎯 Full Feature List
+
+### AI & Quant Suite
+
+| Feature                                   | Status |
+| ----------------------------------------- | ------ |
+| **EMA Crossover (9/21) Engine**           | ✅ NEW |
+| **RSI Overbought/Oversold Engine**        | ✅ NEW |
+| **Top-Middle Live Signal Feed**           | ✅ NEW |
+| **One-Click Copy Trading (Auto-Fill)**    | ✅ NEW |
+| **Historical Quant Backtester**           | ✅ NEW |
+| **Browser Push Notifications**            | ✅ NEW |
+| **Strategy Filtering (Profile Settings)** | ✅ NEW |
 
 ### Trading System
 
@@ -79,10 +57,10 @@ A professional-grade virtual trading platform built with **React + Vite** (front
 | ------------------------------------------ | ------ |
 | Market Orders (instant execution)          | ✅     |
 | Limit Orders (pending engine)              | ✅     |
-| **CNC / MIS product type per order**       | ✅ NEW |
+| **CNC / MIS product type per order**       | ✅     |
 | Stop-Loss Orders (trigger price auto-sell) | ✅     |
-| **Bracket Orders (Entry + SL + Target)**   | ✅ NEW |
-| **OCO — Target fill auto-cancels SL leg**  | ✅ NEW |
+| **Bracket Orders (Entry + SL + Target)**   | ✅     |
+| **OCO — Target fill auto-cancels SL leg**  | ✅     |
 | Short Selling                              | ✅     |
 | Order Cancellation + Auto Refund           | ✅     |
 | Background Matching Engine (2s interval)   | ✅     |
@@ -92,8 +70,8 @@ A professional-grade virtual trading platform built with **React + Vite** (front
 
 | Feature                                    | Status |
 | ------------------------------------------ | ------ |
-| **Holdings tab (CNC long-term only)**      | ✅ NEW |
-| **Positions tab (MIS intraday only)**      | ✅ NEW |
+| **Holdings tab (CNC long-term only)**      | ✅     |
+| **Positions tab (MIS intraday only)**      | ✅     |
 | Real-time P&L with live prices via Socket  | ✅     |
 | Portfolio allocation bar chart             | ✅     |
 | Sort by P&L, invested, quantity            | ✅     |
@@ -101,17 +79,19 @@ A professional-grade virtual trading platform built with **React + Vite** (front
 
 ### Dashboard
 
-| Feature                                    | Status   |
-| ------------------------------------------ | -------- |
-| Canvas candlestick chart with zoom/pan     | ✅       |
-| Live stock ticker + order book             | ✅       |
-| **Technical Indicators (SMA/EMA)**         | ✅ NEW   |
-| AI Prediction card                         | ✅       |
-| Active orders with cancel button           | ✅       |
-| **Server-Side Price Alerts Panel UI**      | ✅ NEW   |
-| **Chart state preserved on stock switch**  | ✅ FIXED |
-| **Bracket Order panel + SL/Target inputs** | ✅ NEW   |
-| **Max Loss / Max Gain estimator**          | ✅ NEW   |
+| Feature                                    | Status |
+| ------------------------------------------ | ------ |
+| Canvas candlestick chart with zoom/pan     | ✅     |
+| Live stock ticker + order book             | ✅     |
+| **Technical Indicators (SMA/EMA)**         | ✅     |
+| **Global AlgoBot Signal Feed**             | ✅ NEW |
+| **One-Click Copy Trade System**            | ✅ NEW |
+| **Backtesting Simulation Module**          | ✅ NEW |
+| Active orders with cancel button           | ✅     |
+| **Server-Side Price Alerts Panel UI**      | ✅     |
+| **Chart state preserved on stock switch**  | ✅     |
+| **Bracket Order panel + SL/Target inputs** | ✅     |
+| **Max Loss / Max Gain estimator**          | ✅     |
 
 ### Financial Calculators (10 Tools)
 
@@ -130,18 +110,18 @@ A professional-grade virtual trading platform built with **React + Vite** (front
 
 ### Pages
 
-| Page                             | Description                                                   |
-| -------------------------------- | ------------------------------------------------------------- |
-| **Landing** (`/`)                | Marketing hero page, calculator preview, dashboard screenshot |
-| **Login/Signup** (`/login`)      | Auth forms                                                    |
-| **Dashboard** (`/dashboard`)     | Full trading terminal                                         |
-| **Portfolio** (`/holdings`)      | Holdings + Positions tabs                                     |
-| **Market** (`/market`)           | All stocks, Sector filters, **Live Option Chain (New)**       |
-| **Orders** (`/orders`)           | Full order history                                            |
-| **Watchlist** (`/watchlist`)     | Saved stocks                                                  |
-| **Funds** (`/funds`)             | Deposit / Withdraw / Net Worth                                |
-| **Calculators** (`/calculators`) | All 10 financial tools                                        |
-| **Profile** (`/profile`)         | Name, password, avatar                                        |
+| Page                             | Description                                                               |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| **Landing** (`/`)                | Marketing hero page, calculator preview, dashboard screenshot             |
+| **Login/Signup** (`/login`)      | Auth forms                                                                |
+| **Dashboard** (`/dashboard`)     | Full trading terminal + **AlgoBot Signals** + **Backtest Module**         |
+| **Portfolio** (`/holdings`)      | Holdings + Positions tabs                                                 |
+| **Market** (`/market`)           | All stocks, Sector filters, **Live Option Chain (New)**                   |
+| **Orders** (`/orders`)           | Full order history                                                        |
+| **Watchlist** (`/watchlist`)     | Saved stocks                                                              |
+| **Funds** (`/funds`)             | Deposit / Withdraw / Net Worth                                            |
+| **Calculators** (`/calculators`) | All 10 financial tools                                                    |
+| **Profile** (`/profile`)         | Account settings + **Algo Strategy Selection** + **Notification Toggles** |
 
 ---
 

@@ -30,6 +30,7 @@ const priceRoutes = require("./routes/priceRoutes");
 const fundsRoutes = require("./routes/fundsRoutes");
 const stockRoutes = require("./routes/stockRoutes");
 const alertRoutes = require("./routes/alertRoutes");
+const signalRoutes = require("./routes/signalRoutes");
 
 
 // Price Engine
@@ -46,6 +47,7 @@ const { startPriceHistoryService } = require('./services/priceHistoryService');
 const { startAutoSquareOffService } = require('./services/autoSquareOff');
 const { startAlertEngine } = require('./services/alertEngine');
 const { startAlgoBot } = require('./services/algoBot');
+const startEquityService = require('./services/equityService');
 
 const app = express();
 
@@ -73,6 +75,7 @@ app.use("/api/prices", priceRoutes);
 app.use("/api/funds", fundsRoutes);
 app.use("/api/stocks", stockRoutes);
 app.use("/api/alerts", alertRoutes);
+app.use("/api/signals", signalRoutes);
 
 
 // Health check
@@ -154,6 +157,11 @@ const PORT = process.env.PORT || 5000;
 
     // Algo Bot Engine
     try { startAlgoBot(io); } catch(e) { logger.warn(`AlgoBot warn: ${e.message}`); }
+
+    // Equity Service (Equity Curve tracking)
+    if (dbOk) {
+      try { startEquityService(); } catch(e) { logger.warn(`EquityService warn: ${e.message}`); }
+    }
 
     // User room management
 

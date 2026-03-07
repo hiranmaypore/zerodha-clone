@@ -5,6 +5,7 @@ import {
   User, Mail, Lock, Save, Shield, LogOut,
   CheckCircle, Eye, EyeOff, Camera, Bell,
   TrendingUp, Wallet, BarChart2,
+  Trophy, Medal, Target as TargetIcon, Settings2, Zap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -71,7 +72,46 @@ export default function Profile() {
 
   const handleLogout = () => { logout(); navigate('/'); };
 
+  const requestNotificationPermission = async () => {
+    if (!('Notification' in window)) {
+      showToast('❌ Browser does not support notifications', 'error');
+      return;
+    }
+
+    // If already denied, we can't request again via API
+    if (Notification.permission === 'denied') {
+      showToast('❌ Notifications blocked. Please enable them in browser settings.', 'error');
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        updatePreference('desktopNotifications', true);
+        showToast('✅ Desktop Notifications Enabled');
+      } else {
+        showToast('⚠️ Notification permission was not granted', 'error');
+        updatePreference('desktopNotifications', false);
+      }
+    } catch (err) {
+      console.error('Notification error:', err);
+      showToast('❌ Failed to request permission', 'error');
+    }
+  };
+
   const initials = (user?.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+  const totalProfit = (user?.balance || 0) - 100000;
+  
+  const getRank = (profit) => {
+    if (profit >= 50000) return { title: 'Quant Master', desc: 'Elite algorithmic execution', icon: Trophy };
+    if (profit >= 25000) return { title: 'Scalping Specialist', desc: 'Master of momentum', icon: Medal };
+    if (profit >= 10000) return { title: 'Pro Trader', desc: 'Consistent market edge', icon: Zap };
+    if (profit >= 5000)  return { title: 'Active Investor', desc: 'Building serious wealth', icon: TrendingUp };
+    return { title: 'Novice Learner', desc: 'Starting your market journey', icon: User };
+  };
+
+  const rank = getRank(totalProfit);
 
   // Password strength
   const pwdStrength = newPwd.length === 0 ? null
@@ -81,6 +121,29 @@ export default function Profile() {
 
   return (
     <div className="space-y-5 animate-fade-in max-w-2xl mx-auto">
+
+      {/* ── Achievement Banner ── */}
+      <div className="bg-linear-to-r from-accent/20 to-indigo-500/10 border border-accent/30 rounded-2xl p-4 flex items-center justify-between overflow-hidden relative group">
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="p-3 bg-accent rounded-xl shadow-[0_0_20px_rgba(124,58,237,0.4)]">
+            <Trophy className="w-5 h-5 text-white animate-bounce" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-primary flex items-center gap-2">
+              Current Rank: <span className="text-accent underline decoration-accent/30 underline-offset-4">{rank.title}</span>
+            </h3>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{rank.desc}</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end relative z-10">
+          <div className="text-[10px] text-muted uppercase font-bold tracking-widest mb-1">Total Career Profit</div>
+          <div className={`text-xl font-mono font-bold ${totalProfit >= 0 ? 'text-profit' : 'text-loss'}`}>
+            {totalProfit >= 0 ? '+' : ''}₹{totalProfit.toLocaleString()}
+          </div>
+        </div>
+        {/* Decorative background logo */}
+        <Trophy className="absolute -right-4 -bottom-4 w-32 h-32 opacity-[0.03] rotate-12 group-hover:rotate-0 transition-transform duration-700" />
+      </div>
 
       {/* ── Toast ── */}
       {toast && (
@@ -273,11 +336,46 @@ export default function Profile() {
           <h2 className="text-sm font-semibold text-primary">Preferences</h2>
         </div>
         <div className="space-y-3">
+          {/* Strategy Selection */}
+          <div className="py-2 border-b border-edge">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-sm text-primary font-medium">Algo Strategy</p>
+                <p className="text-[11px] text-muted text-pretty">Filter which algorithm logic generates your feed</p>
+              </div>
+            </div>
+            <div className="flex gap-2 p-1 bg-surface border border-edge rounded-xl w-fit">
+              {['ALL', 'EMA', 'RSI'].map(s => (
+                <button
+                  key={s}
+                  onClick={() => updatePreference('selectedStrategy', s)}
+                  className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all ${
+                    preferences.selectedStrategy === s ? 'bg-accent text-white shadow-lg' : 'text-muted hover:text-primary'
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {[
             { label: 'AlgoBot Signal Feed',      sub: 'Show live BUY/SELL signals on dashboard', on: preferences.showAlgoSignals, key: 'showAlgoSignals' },
-            { label: 'Order fill notifications', sub: 'Get notified when your orders execute', on: true },
-            { label: 'Price alerts',             sub: 'Alerts when stocks hit target prices',  on: false },
-            { label: 'Daily P&L summary',        sub: 'End-of-day portfolio performance email', on: true },
+            { 
+              label: 'Desktop Notifications',  
+              sub: 'Get browser alerts for AI signals',        
+              on: preferences.desktopNotifications, 
+              key: 'desktopNotifications',
+              toggle: (on) => {
+                if (!on) {
+                  requestNotificationPermission();
+                } else {
+                  updatePreference('desktopNotifications', false);
+                }
+              }
+            },
+            { label: 'Order fill notifications', sub: 'Get notified when your orders execute', on: preferences.orderNotifications, key: 'orderNotifications' },
+            { label: 'Price alerts',             sub: 'Alerts when stocks hit target prices',  on: preferences.priceAlerts, key: 'priceAlerts' },
           ].map(p => (
             <div key={p.label} className="flex items-center justify-between py-2 border-b border-edge last:border-0">
               <div>
@@ -286,13 +384,102 @@ export default function Profile() {
               </div>
               {/* Toggle */}
               <div 
-                onClick={() => p.key && updatePreference(p.key, !p.on)}
+                onClick={() => p.toggle ? p.toggle(p.on) : p.key && updatePreference(p.key, !p.on)}
                 className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${p.on ? 'bg-accent' : 'bg-surface border border-edge'}`}
               >
                 <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${p.on ? 'left-5' : 'left-0.5'}`} />
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* ── Custom Algo Architect ── */}
+      <div className="bg-card border border-edge rounded-2xl p-6 space-y-6">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Settings2 className="w-4 h-4 text-accent" />
+            <h2 className="text-sm font-semibold text-primary">Algo Architect</h2>
+          </div>
+          <span className="text-[9px] font-bold px-2 py-0.5 bg-accent/10 text-accent rounded-full">BETA PRO</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* EMA Settings */}
+          <div className="space-y-4">
+            <h3 className="text-[11px] font-bold text-muted uppercase tracking-widest flex items-center gap-2">
+              <Zap className="w-3 h-3" /> Indicator Tuner
+            </h3>
+            
+            <div className="space-y-5">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <label className="text-xs text-secondary font-medium">Fast EMA (Period)</label>
+                  <span className="text-xs font-bold text-accent font-mono">{preferences.fastEMA}</span>
+                </div>
+                <input 
+                  type="range" min="3" max="50" 
+                  value={preferences.fastEMA} 
+                  onChange={(e) => updatePreference('fastEMA', parseInt(e.target.value))}
+                  className="w-full accent-accent h-1.5 bg-surface rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-2">
+                  <label className="text-xs text-secondary font-medium">Slow EMA (Period)</label>
+                  <span className="text-xs font-bold text-accent font-mono">{preferences.slowEMA}</span>
+                </div>
+                <input 
+                  type="range" min="10" max="200" 
+                  value={preferences.slowEMA} 
+                  onChange={(e) => updatePreference('slowEMA', parseInt(e.target.value))}
+                  className="w-full accent-accent h-1.5 bg-surface rounded-lg cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Risk settings */}
+          <div className="space-y-4">
+            <h3 className="text-[11px] font-bold text-muted uppercase tracking-widest flex items-center gap-2">
+              <TargetIcon className="w-3 h-3" /> Risk Controller
+            </h3>
+
+            <div className="space-y-5">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <label className="text-xs text-secondary font-medium">Default Stop Loss (%)</label>
+                  <span className="text-xs font-bold text-loss font-mono">{preferences.defaultSL}%</span>
+                </div>
+                <input 
+                  type="range" min="0.5" max="10" step="0.5"
+                  value={preferences.defaultSL} 
+                  onChange={(e) => updatePreference('defaultSL', parseFloat(e.target.value))}
+                  className="w-full accent-loss h-1.5 bg-surface rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-2">
+                  <label className="text-xs text-secondary font-medium">Auto-Target (%)</label>
+                  <span className="text-xs font-bold text-profit font-mono">{preferences.defaultTarget}%</span>
+                </div>
+                <input 
+                  type="range" min="1" max="50" step="1"
+                  value={preferences.defaultTarget} 
+                  onChange={(e) => updatePreference('defaultTarget', parseFloat(e.target.value))}
+                  className="w-full accent-profit h-1.5 bg-surface rounded-lg cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-3 bg-surface border border-edge rounded-xl">
+           <p className="text-[10px] text-muted-foreground leading-relaxed">
+             💡 These parameters will be used to automatically set <strong>Stop-Loss</strong> and <strong>Target</strong> legs when you click <strong>"Copy Trade"</strong> on any AI Signal. Adjust them to match your risk appetite.
+           </p>
         </div>
       </div>
 

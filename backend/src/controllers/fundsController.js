@@ -56,3 +56,34 @@ exports.getBalance = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+const NetWorth = require('../models/NetWorth');
+
+exports.getEquityCurve = async (req, res) => {
+  const userId = req.user._id || req.user.id;
+  
+  if (!global.dbConnected) {
+    // Generate some mock historical data for demo mode
+    const mockData = [];
+    const now = new Date();
+    let val = 100000;
+    for (let i = 10; i >= 0; i--) {
+      val += (Math.random() - 0.45) * 2000; // slight upward bias
+      mockData.push({
+        timestamp: new Date(now.getTime() - i * 3600000), // hourly
+        netWorth: parseFloat(val.toFixed(2)),
+        cash: 50000,
+        holdingsValue: val - 50000
+      });
+    }
+    return res.json({ success: true, history: mockData });
+  }
+
+  try {
+    const history = await NetWorth.find({ userId })
+      .sort({ timestamp: 1 })
+      .limit(100);
+    res.json({ success: true, history });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
