@@ -4,14 +4,42 @@ const logger = require('../utils/logger');
 let botInterval = null;
 
 // O(1) Memory State Tracker for all stocks
-const emaState = {};
+const botState = {};
 const FAST_PERIOD = 9;
 const SLOW_PERIOD = 21;
+const RSI_PERIOD = 14;
 
 const calculateEMA = (currentPrice, previousEma, period) => {
-  if (previousEma === null) return currentPrice; // Initialize with first price
+  if (previousEma === null || previousEma === undefined) return currentPrice;
   const alpha = 2 / (period + 1);
   return (currentPrice * alpha) + (previousEma * (1 - alpha));
+};
+
+const calculateRSI = (currentPrice, state) => {
+  if (!state.prevPrice) {
+    state.prevPrice = currentPrice;
+    return null;
+  }
+
+  const diff = currentPrice - state.prevPrice;
+  state.prevPrice = currentPrice;
+
+  const gain = Math.max(0, diff);
+  const loss = Math.max(0, -diff);
+
+  // Smooth Average Gain/Loss (Wilder's Smoothing)
+  if (state.avgGain === null || state.avgGain === undefined) {
+    state.avgGain = gain;
+    state.avgLoss = loss;
+    return null;
+  }
+
+  state.avgGain = (state.avgGain * (RSI_PERIOD - 1) + gain) / RSI_PERIOD;
+  state.avgLoss = (state.avgLoss * (RSI_PERIOD - 1) + loss) / RSI_PERIOD;
+
+  if (state.avgLoss === 0) return 100;
+  const rs = state.avgGain / state.avgLoss;
+  return 100 - (100 / (1 + rs));
 };
 
 const startAlgoBot = (io) => {
@@ -25,45 +53,44 @@ const startAlgoBot = (io) => {
       if (!prices || Object.keys(prices).length === 0) return;
       
       for (const [symbol, currentPrice] of Object.entries(prices)) {
-        // Initialize state for new symbols
-        if (!emaState[symbol]) {
-          emaState[symbol] = {
-            fastEma: null,
-            slowEma: null,
-            currentTrend: null // 'BULLISH' | 'BEARISH'
+        if (!botState[symbol]) {
+          botState[symbol] = {
+            ema: { fast: null, slow: null, trend: null },
+            rsi: { avgGain: null, avgLoss: null, prevPrice: null, trend: null }
           };
         }
 
-        const state = emaState[symbol];
+        const state = botState[symbol];
 
-        // Calculate new EMAs
-        state.fastEma = calculateEMA(currentPrice, state.fastEma, FAST_PERIOD);
-        state.slowEma = calculateEMA(currentPrice, state.slowEma, SLOW_PERIOD);
-
-        // Detect Crossovers
-        let newTrend = state.currentTrend;
+        // 1. EMA Strategy
+        const prevEmaTrend = state.ema.trend;
+        state.ema.fast = calculateEMA(currentPrice, state.ema.fast, FAST_PERIOD);
+        state.ema.slow = calculateEMA(currentPrice, state.ema.slow, SLOW_PERIOD);
         
-        if (state.fastEma > state.slowEma) {
-          newTrend = 'BULLISH';
-        } else if (state.fastEma < state.slowEma) {
-          newTrend = 'BEARISH';
+        state.ema.trend = state.ema.fast > state.ema.slow ? 'BULLISH' : 'BEARISH';
+
+        if (prevEmaTrend && state.ema.trend !== prevEmaTrend) {
+          const type = state.ema.trend === 'BULLISH' ? 'BUY' : 'SELL';
+          const msg = `EMA Crossover (9/21): Fast EMA crossed ${state.ema.trend === 'BULLISH' ? 'ABOVE' : 'BELOW'} Slow EMA.`;
+          if (io) io.emit('algo_signal', { symbol, trend: state.ema.trend, price: currentPrice, message: msg, strategy: 'EMA' });
+          logger.info(`🤖 [${symbol}] EMA Signal: ${type} at ₹${currentPrice}`);
         }
 
-        // Trigger signal ONLY on the exact crossover moment
-        if (state.currentTrend !== null && newTrend !== state.currentTrend) {
-          if (newTrend === 'BULLISH') {
-            const msg = `Fast EMA crossed ABOVE Slow EMA at ₹${currentPrice.toFixed(2)}. Generating BUY Signal!`;
-            logger.info(`📈 AlgoBot [${symbol}]: ${msg}`);
-            if (io) io.emit('algo_signal', { symbol, trend: 'BULLISH', price: currentPrice, message: msg });
-          } else if (newTrend === 'BEARISH') {
-            const msg = `Fast EMA crossed BELOW Slow EMA at ₹${currentPrice.toFixed(2)}. Generating SELL Signal!`;
-            logger.warn(`📉 AlgoBot [${symbol}]: ${msg}`);
-            if (io) io.emit('algo_signal', { symbol, trend: 'BEARISH', price: currentPrice, message: msg });
+        // 2. RSI Strategy
+        const rsiVal = calculateRSI(currentPrice, state.rsi);
+        if (rsiVal !== null) {
+          let rsiTrend = null;
+          if (rsiVal < 30) rsiTrend = 'BULLISH'; // Oversold -> Potential Buy
+          else if (rsiVal > 70) rsiTrend = 'BEARISH'; // Overbought -> Potential Sell
+          
+          if (rsiTrend && state.rsi.trend !== rsiTrend) {
+            const type = rsiTrend === 'BULLISH' ? 'BUY' : 'SELL';
+            const msg = `RSI Strategy: Market is ${rsiTrend === 'BULLISH' ? 'Oversold' : 'Overbought'} (RSI: ${rsiVal.toFixed(1)}).`;
+            if (io) io.emit('algo_signal', { symbol, trend: rsiTrend, price: currentPrice, message: msg, strategy: 'RSI' });
+            logger.info(`🤖 [${symbol}] RSI Signal: ${type} at ₹${currentPrice}`);
           }
+          state.rsi.trend = rsiTrend;
         }
-
-        // Save new state
-        state.currentTrend = newTrend;
       }
       
     } catch (e) {
