@@ -32,9 +32,27 @@ A high-fidelity, professional-grade virtual trading platform built with the **ME
 - **Interactive Recharts**: A professional Area Chart on the Funds page to visualize your performance over time like a fund manager.
 - **Theme-Aware Scaling**: Chart grids and labels automatically adjust for maximum legibility in light and dark modes.
 
+### 📜 Professional Trade Journaling
+
+- **Win-Rate Tracker**: Institutional-grade analytics showing your profit percentage and current winning streaks.
+- **Daily Heatmap**: Visualize which days of the week you are most profitable using high-fidelity Recharts heatmaps.
+- **Avg. Holding Time**: Track how long you stay in trades across CNC and MIS products to refine your strategy.
+
+### � Alpha Leaderboards
+
+- **Global Rankings**: Compare your ROI against every other trader on the net worth growth leaderboard.
+- **Badges of Honor**: Earn titles like "The Wizard" (50%+ ROI) or "Scalping Specialist" (50+ trades) based on your performance.
+- **Competitive Edge**: Real-time rank updates as balance and portfolio values fluctuate.
+
+### 📈 Interactive Chart Drawing Tools
+
+- **Professional Analysis**: Add trendlines, horizontal support/resistance levels, and Fibonacci retracement directly on the canvas.
+- **Scale Invariant**: Drawings remain perfectly aligned with price action during real-time zoom and pan operations.
+- **Quick Controls**: Specialized toolbar for switching tools or clearing all analysis with one click.
+
 ---
 
-## 🎯 Core Features
+## �🎯 Core Features
 
 ### 🧠 AI & Quant Suite
 
@@ -62,6 +80,9 @@ A high-fidelity, professional-grade virtual trading platform built with the **ME
 ### 🏠 Trading Dashboard
 
 - **Canvas Candlestick Chart**: Custom-built high-performance chart with zoom, pan, and SMA/EMA overlays.
+- **Interactive Drawing**: Trendlines, H-Lines, and Fibonacci tools built directly into the custom canvas engine.
+- **Performance Journal**: Dedicated stats page with win-rate, streaks, and day-of-week heatmaps.
+- **Global Leaderboard**: ROI-based rankings with professional achievement badges.
 - **Live Order Book**: Simulated real-time Bid/Ask depth for all 20 stocks.
 - **Stat Cards**: Real-time tracking of Balance, Invested Capital, and live Day P&L.
 - **Price Alerts UI**: Set and manage target price notifications.

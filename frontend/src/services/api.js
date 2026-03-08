@@ -53,6 +53,8 @@ export const placeBracket = (data) => API.post('/orders/bracket', data);
 export const getHoldings = () => API.get('/holdings');
 export const getPositions = () => API.get('/holdings/positions');
 export const getDashboard = () => API.get('/holdings/dashboard');
+export const getLeaderboard = () => API.get('/holdings/leaderboard');
+export const getJournal = () => API.get('/holdings/journal');
 export const downloadTaxStatement = () => API.get('/holdings/export', { responseType: 'blob' });
 
 

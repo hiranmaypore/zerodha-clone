@@ -11,6 +11,8 @@ import Watchlist from './pages/Watchlist';
 import Funds from './pages/Funds';
 import Calculators from './pages/Calculators';
 import Profile from './pages/Profile';
+import Journal from './pages/Journal';
+import Leaderboard from './pages/Leaderboard';
 import { Toaster } from 'react-hot-toast';
 
 function ProtectedRoute({ children }) {
@@ -51,6 +53,8 @@ export default function App() {
             <Route path="/holdings" element={<Holdings />} />
             <Route path="/watchlist" element={<Watchlist />} />
             <Route path="/funds" element={<Funds />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/calculators" element={<Calculators />} />
             <Route path="/profile" element={<Profile />} />
           </Route>

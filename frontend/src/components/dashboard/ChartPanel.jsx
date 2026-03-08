@@ -3,7 +3,8 @@ import { getPriceHistory } from '../../services/api';
 import { useWatchlist } from '../../hooks/useWatchlist';
 import { StockIcon } from '../StockIcon';
 import {
-  ZoomIn, ZoomOut, RotateCcw, Expand, Shrink, ChevronDown, MoveHorizontal, Star, Activity
+  ZoomIn, ZoomOut, RotateCcw, Expand, Shrink, ChevronDown, MoveHorizontal, Star, Activity,
+  Type, MousePointer2, Minus, TrendingUp as TrendIcon, Layout
 } from 'lucide-react';
 
 
@@ -103,8 +104,12 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
   const [crosshair, setCrosshair]       = useState(null);
   const [isDragging, setIsDragging]     = useState(false);
   const [showIndicators, setShowIndicators] = useState(false);
-  // visibleCount is mirrored as state so JSX can read it safely (refs must not be read during render)
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE);
+  
+  // ── Drawing Tools State ──
+  const [drawingTool, setDrawingTool] = useState(null); // 'LINE', 'HLINE', 'FIB', 'TEXT'
+  const [drawings, setDrawings] = useState([]);         // scale-independent (time, price)
+  const [activeDrawing, setActiveDrawing] = useState(null);
 
 
   const { isWatched, toggle: toggleWatch } = useWatchlist();
@@ -461,10 +466,48 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
       }
     }
 
+    // ── Render Drawings ──────────────────────────────────────────────
+    drawings.concat(activeDrawing ? [activeDrawing] : []).forEach(d => {
+      ctx.setLineDash([]);
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#8B5CF6'; // purple-500
+
+      if (d.type === 'LINE') {
+        const x1 = toX(slice.findIndex(c => c.time >= d.p1.time));
+        const x2 = toX(slice.findIndex(c => c.time >= d.p2.time));
+        const y1 = toY(d.p1.price);
+        const y2 = toY(d.p2.price);
+        if (x1 >= 0 && x2 >= 0) {
+           ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+           // Handles for active
+           if (activeDrawing === d) {
+             ctx.fillStyle = '#fff'; ctx.fillRect(x1-3, y1-3, 6, 6); ctx.fillRect(x2-3, y2-3, 6, 6);
+           }
+        }
+      } else if (d.type === 'HLINE') {
+        const y = toY(d.price);
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+      } else if (d.type === 'FIB') {
+        const x1 = toX(slice.findIndex(c => c.time >= d.p1.time));
+        const x2 = toX(slice.findIndex(c => c.time >= d.p2.time));
+        if (x1 >= 0 && x2 >= 0) {
+          const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+          const range = d.p2.price - d.p1.price;
+          levels.forEach(l => {
+            const ply = toY(d.p1.price + range * l);
+            ctx.strokeStyle = `rgba(139, 92, 246, ${1 - l*0.5})`;
+            ctx.beginPath(); ctx.moveTo(Math.min(x1, x2), ply); ctx.lineTo(Math.max(x1, x2), ply); ctx.stroke();
+            ctx.fillStyle = '#6E7681'; ctx.font = '8px Inter'; ctx.fillText(l.toString(), Math.max(x1, x2) + 4, ply + 3);
+          });
+        }
+      }
+    });
+
     // Store slice info for mouse calculations
     canvas._chartMeta = { pad, chartW, chartH, W, H, gap, slice, minP, priceRange };
 
-  }, [candles, drawTick, crosshair, currentPrice, showIndicators]);
+  }, [candles, drawTick, crosshair, currentPrice, showIndicators, drawings, activeDrawing]);
 
 
 
@@ -478,9 +521,30 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
   }, [redraw]);
 
   const handleMouseDown = useCallback(e => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const meta = canvas._chartMeta;
+    
+    if (drawingTool && meta) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const price = meta.minP + meta.priceRange * (1 - (my - meta.pad.top) / meta.chartH);
+      const ci = Math.round((mx - meta.pad.left) / meta.gap - 0.5);
+      const time = meta.slice[Math.max(0, Math.min(ci, meta.slice.length - 1))]?.time;
+
+      if (drawingTool === 'HLINE') {
+        setDrawings(prev => [...prev, { type: 'HLINE', price, id: Date.now() }]);
+        setDrawingTool(null);
+      } else {
+        setActiveDrawing({ type: drawingTool, p1: { time, price }, p2: { time, price }, id: Date.now() });
+      }
+      return;
+    }
+
     dragRef.current = { active: true, startX: e.clientX, startOffset: panOffsetRef.current };
     setIsDragging(true);
-  }, []);
+  }, [drawingTool]);
 
 
   const handleMouseMove = useCallback(e => {
@@ -519,9 +583,14 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
   }, [redraw]);
 
   const handleMouseUp = useCallback(() => {
+    if (activeDrawing) {
+      setDrawings(prev => [...prev, activeDrawing]);
+      setActiveDrawing(null);
+      setDrawingTool(null);
+    }
     dragRef.current.active = false;
     setIsDragging(false);
-  }, []);
+  }, [activeDrawing]);
 
 
   const handleMouseLeave = useCallback(() => {
@@ -767,8 +836,59 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
             <div className="text-[9px] text-muted/30">Scroll to zoom · Drag to pan</div>
           </div>
         )}
+
+        {/* ── Vertical Drawing Toolbar ── */}
+        <div className="absolute left-2 top-1/2 -translate-y-1/2 w-10 flex flex-col gap-1 bg-card/80 backdrop-blur-md border border-edge rounded-full p-1 z-30 shadow-2xl">
+           <ToolbarBtn 
+             active={!drawingTool} 
+             onClick={() => setDrawingTool(null)} 
+             icon={<MousePointer2 className="w-4 h-4" />} 
+             label="Select" 
+           />
+           <div className="h-px bg-edge mx-2 my-1" />
+           <ToolbarBtn 
+             active={drawingTool === 'LINE'} 
+             onClick={() => setDrawingTool('LINE')} 
+             icon={<TrendIcon className="w-4 h-4" />} 
+             label="Trendline" 
+           />
+           <ToolbarBtn 
+             active={drawingTool === 'HLINE'} 
+             onClick={() => setDrawingTool('HLINE')} 
+             icon={<Minus className="w-4 h-4" />} 
+             label="Horizontal Line" 
+           />
+           <ToolbarBtn 
+             active={drawingTool === 'FIB'} 
+             onClick={() => setDrawingTool('FIB')} 
+             icon={<Layout className="w-4 h-4" />} 
+             label="Fibonacci" 
+           />
+           <div className="h-px bg-edge mx-2 my-1" />
+           <ToolbarBtn 
+             onClick={() => setDrawings([])} 
+             icon={<RotateCcw className="w-4 h-4" />} 
+             label="Clear Drawings" 
+           />
+        </div>
       </div>
     </div>
+  );
+}
+
+function ToolbarBtn({ active, onClick, icon, label }) {
+  return (
+    <button
+      onClick={onClick}
+      title={label}
+      className={`p-2 rounded-full transition-all flex items-center justify-center hover:scale-110 active:scale-95 ${
+        active 
+          ? 'bg-accent text-white shadow-lg' 
+          : 'text-muted hover:text-primary hover:bg-surface'
+      }`}
+    >
+      {icon}
+    </button>
   );
 }
 
