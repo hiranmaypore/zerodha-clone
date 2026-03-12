@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { getPriceHistory } from '../../services/api';
+import { useAuth }        from '../../context/AuthContext';
 import { useWatchlist } from '../../hooks/useWatchlist';
 import { StockIcon } from '../StockIcon';
 import {
@@ -23,9 +24,34 @@ const TIMEFRAME_BAR_MS = {
   '1W':  7  * 24 * 60 * 60_000,
 };
 
-const MIN_VISIBLE = 10;   // most zoomed-in  (10 candles)
-const MAX_VISIBLE = 120;  // most zoomed-out (120 candles)
-const DEFAULT_VISIBLE = 60;
+const MIN_VISIBLE = 5;    // most zoomed-in
+const MAX_VISIBLE = 300;  // most zoomed-out
+const DEFAULT_VISIBLE = 70;
+
+const THEMES = {
+  dark: {
+    bull: '#00b061',
+    bear: '#ff5722',
+    bg: '#131722',
+    grid: 'rgba(43, 49, 67, 0.5)',
+    text: '#d1d4dc',
+    crosshair: 'rgba(157, 160, 168, 0.8)',
+    watermark: 'rgba(255, 255, 255, 0.03)',
+    tagBg: '#333'
+  },
+  light: {
+    bull: '#00b061',
+    bear: '#ff5722',
+    bg: '#ffffff',
+    grid: 'rgba(230, 233, 240, 1)',
+    text: '#707a8a',
+    crosshair: 'rgba(0, 0, 0, 0.2)',
+    watermark: 'rgba(0, 0, 0, 0.03)',
+    tagBg: '#f0f3f8'
+  }
+};
+
+const ACCENT = '#2196f3';
 
 const CHART_CACHE = {};
 const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 hours
@@ -97,7 +123,10 @@ function calcEMA(data, period) {
 }
 
 export default function ChartPanel({ selectedStock, stocks = [], onStockChange, currentPrice, livePrices = {} }) {
-  const [activeTimeframe, setActiveTimeframe] = useState('1h');
+  const { preferences } = useAuth();
+  const COLORS = useMemo(() => THEMES[preferences.theme] || THEMES.dark, [preferences.theme]);
+
+  const [activeTimeframe, setActiveTimeframe] = useState('1W');
   const [candles, setCandles]           = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery]   = useState('');
@@ -285,18 +314,22 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
 
     const W = rect.width;
     const H = rect.height;
-    const pad = { top: 20, right: 68, bottom: 30, left: 4 };
+    const pad = { top: 30, right: 75, bottom: 25, left: 0 };
     const chartW = W - pad.left - pad.right;
     const chartH = H - pad.top  - pad.bottom;
 
     ctx.clearRect(0, 0, W, H);
+    
+    // Background
+    ctx.fillStyle = COLORS.bg;
+    ctx.fillRect(0, 0, W, H);
 
     // Compute viewport slice
     const total    = candles.length;
     const visible  = Math.min(visibleCountRef.current, total);
     const offset   = Math.min(panOffsetRef.current, total - visible);
     const startIdx = Math.max(0, total - visible - offset);
-    const endIdx   = Math.max(visible, total - offset);
+    const endIdx   = total - offset;
     const slice    = candles.slice(startIdx, endIdx);
 
     // Indicators
@@ -310,6 +343,16 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
 
     if (slice.length === 0) return;
 
+    // Watermark
+    ctx.save();
+    ctx.translate(W / 2, H / 2);
+    ctx.rotate(-Math.PI / 12);
+    ctx.fillStyle = COLORS.watermark;
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 80px Inter';
+    ctx.fillText(selectedStock?.symbol || 'RELIANCE', 0, 0);
+    ctx.restore();
+
     let maxP = Math.max(...slice.map(c => c.high));
     let minP = Math.min(...slice.map(c => c.low));
 
@@ -318,59 +361,65 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
       sliceEma.forEach(v => { if (v !== null) { maxP = Math.max(maxP, v); minP = Math.min(minP, v); }});
     }
 
-    maxP *= 1.003;
-    minP *= 0.997;
+    // Padding (10% top/bottom)
+    const rawRange = maxP - minP || 1;
+    maxP += rawRange * 0.1;
+    minP -= rawRange * 0.1;
     const priceRange = maxP - minP || 1;
 
 
-    const gap  = chartW / slice.length;
-    const cw   = Math.max(1, gap * 0.7);
+    const gap  = chartW / Math.max(1, slice.length);
+    const cw   = Math.max(2, gap * 0.8);
 
     const toY = p  => pad.top + chartH * (1 - (p - minP) / priceRange);
     const toX = i  => pad.left + gap * i + gap / 2;
 
     // ── Grid ──────────────────────────────────────────────────────────
-    ctx.strokeStyle = 'rgba(48,54,61,0.35)';
-    ctx.lineWidth   = 0.5;
-    for (let g = 0; g <= 6; g++) {
-      const y = pad.top + (chartH / 6) * g;
+    ctx.strokeStyle = COLORS.grid;
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([]);
+    
+    // Horizontal lines
+    for (let g = 0; g <= 8; g++) {
+      const y = pad.top + (chartH / 8) * g;
       ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
-      const p = maxP - (priceRange / 6) * g;
-      ctx.fillStyle  = '#6E7681';
-      ctx.font       = '9.5px Inter,sans-serif';
+      const p = maxP - (priceRange / 8) * g;
+      ctx.fillStyle  = COLORS.text;
+      ctx.font       = '11px Inter,sans-serif';
       ctx.textAlign  = 'left';
-      ctx.fillText(p.toFixed(2), W - pad.right + 6, y + 3);
+      ctx.fillText(p.toFixed(2), W - pad.right + 8, y + 4);
     }
     // Vertical time lines every ~10 candles
+    // Vertical time lines
     const step = Math.max(1, Math.round(slice.length / 8));
     for (let i = 0; i < slice.length; i += step) {
       const x  = toX(i);
       const ts = new Date(slice[i].time);
       const label = ts.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-      ctx.strokeStyle = 'rgba(48,54,61,0.25)';
+      ctx.strokeStyle = COLORS.grid;
       ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + chartH); ctx.stroke();
-      ctx.fillStyle  = '#6E7681';
-      ctx.font       = '8px Inter,sans-serif';
+      ctx.fillStyle  = COLORS.text;
+      ctx.font       = '10px Inter,sans-serif';
       ctx.textAlign  = 'center';
-      ctx.fillText(label, x, H - 6);
+      ctx.fillText(label, x, H - 7);
     }
 
-    // ── Volume bars ──────────────────────────────────────────────────
+    // ── Volume bars (20% H) ──────────────────────────────────────────
     const maxVol = Math.max(...slice.map(c => c.volume)) || 1;
-    const volH   = chartH * 0.12;
+    const volH   = chartH * 0.18;
     slice.forEach((c, i) => {
       const x    = toX(i);
       const barH = (c.volume / maxVol) * volH;
       ctx.fillStyle = c.close >= c.open
-        ? 'rgba(38,166,65,0.2)' : 'rgba(248,81,73,0.2)';
-      ctx.fillRect(x - cw / 2, pad.top + chartH - barH, cw, barH);
+        ? 'rgba(0, 176, 97, 0.15)' : 'rgba(255, 87, 34, 0.15)'; // Subtler colors
+      ctx.fillRect(x - cw / 2 + 0.5, pad.top + chartH - barH, cw - 1, barH);
     });
 
     // ── Candles ───────────────────────────────────────────────────────
     slice.forEach((c, i) => {
       const x    = toX(i);
       const bull = c.close >= c.open;
-      const color = bull ? '#26A641' : '#F85149';
+      const color = bull ? COLORS.bull : COLORS.bear;
 
       // Wick
       ctx.strokeStyle = color;
@@ -425,44 +474,68 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
     const priceBull = liveP >= last.open;
 
     ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = priceBull ? 'rgba(38,166,65,0.6)' : 'rgba(248,81,73,0.6)';
+    ctx.strokeStyle = priceBull ? COLORS.bull : COLORS.bear;
     ctx.lineWidth   = 1;
     ctx.beginPath(); ctx.moveTo(pad.left, livePy); ctx.lineTo(W - pad.right, livePy); ctx.stroke();
     ctx.setLineDash([]);
 
-    const tagColor = priceBull ? '#26A641' : '#F85149';
+    const tagColor = priceBull ? COLORS.bull : COLORS.bear;
     ctx.fillStyle  = tagColor;
-    roundRect(ctx, W - pad.right, livePy - 10, 66, 20, 3); ctx.fill();
+    roundRect(ctx, W - pad.right, livePy - 11, 75, 22, 2); ctx.fill();
     ctx.fillStyle  = '#fff';
-    ctx.font       = 'bold 10px Inter,sans-serif';
+    ctx.font       = 'bold 12px "Roboto Mono", monospace';
     ctx.textAlign  = 'center';
-    ctx.fillText('₹' + liveP.toFixed(2), W - pad.right + 33, livePy + 4);
+    ctx.fillText(liveP.toFixed(2), W - pad.right + 38, livePy + 4);
+
+    // ── OHLC Overlay ──────────────────────────────────────────────────
+    const hoverC = crosshair ? slice[Math.round((crosshair.x - pad.left) / gap - 0.5)] : last;
+    if (hoverC) {
+      const ox = pad.left + 15, oy = pad.top + 15;
+      ctx.font = '11px Inter';
+      ctx.textAlign = 'left';
+      
+      const drawInfo = (label, val, col, x) => {
+        ctx.fillStyle = COLORS.text;
+        ctx.fillText(label, x, oy);
+        ctx.fillStyle = col;
+        ctx.fillText(val, x + 12, oy);
+      };
+
+      const cBull = hoverC.close >= hoverC.open;
+      const cCol  = cBull ? COLORS.bull : COLORS.bear;
+      
+      drawInfo('O', hoverC.open.toFixed(2),  cCol, ox);
+      drawInfo('H', hoverC.high.toFixed(2),  cCol, ox + 65);
+      drawInfo('L', hoverC.low.toFixed(2),   cCol, ox + 130);
+      drawInfo('C', hoverC.close.toFixed(2), cCol, ox + 195);
+      drawInfo('V', hoverC.volume.toLocaleString(), ACCENT, ox + 265);
+    }
 
     // ── Crosshair ─────────────────────────────────────────────────────
     if (crosshair) {
-      ctx.strokeStyle = 'rgba(88,166,255,0.5)';
-      ctx.lineWidth   = 0.7;
-      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = COLORS.crosshair;
+      ctx.lineWidth   = 1;
+      ctx.setLineDash([3, 3]);
       ctx.beginPath(); ctx.moveTo(crosshair.x, pad.top); ctx.lineTo(crosshair.x, pad.top + chartH); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(pad.left, crosshair.y); ctx.lineTo(W - pad.right, crosshair.y); ctx.stroke();
       ctx.setLineDash([]);
 
       // Price label on right axis
-      ctx.fillStyle = 'rgba(88,166,255,0.9)';
-      roundRect(ctx, W - pad.right, crosshair.y - 10, 66, 20, 3); ctx.fill();
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 10px Inter,sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('₹' + crosshair.price.toFixed(2), W - pad.right + 33, crosshair.y + 4);
+      ctx.fillStyle = COLORS.tagBg;
+      roundRect(ctx, W - pad.right, crosshair.y - 11, 75, 22, 2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 11px Inter,sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('₹' + crosshair.price.toFixed(2), W - pad.right + 38, crosshair.y + 4);
 
       // Date label on x axis
       if (crosshair.time) {
         const dtLabel = new Date(crosshair.time).toLocaleString('en-IN', {
           month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
-        const lw = Math.min(130, dtLabel.length * 6.5 + 12);
-        ctx.fillStyle = 'rgba(88,166,255,0.9)';
-        roundRect(ctx, crosshair.x - lw / 2, H - pad.bottom + 2, lw, 16, 3); ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.font = '9px Inter,sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(dtLabel, crosshair.x, H - pad.bottom + 13);
+        const lw = dtLabel.length * 7 + 16;
+        ctx.fillStyle = COLORS.tagBg;
+        roundRect(ctx, crosshair.x - lw / 2, H - pad.bottom, lw, 20, 2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px Inter,sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(dtLabel, crosshair.x, H - pad.bottom + 14);
       }
     }
 
@@ -507,18 +580,48 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
     // Store slice info for mouse calculations
     canvas._chartMeta = { pad, chartW, chartH, W, H, gap, slice, minP, priceRange };
 
-  }, [candles, drawTick, crosshair, currentPrice, showIndicators, drawings, activeDrawing]);
+  }, [candles, drawTick, crosshair, currentPrice, showIndicators, drawings, activeDrawing, COLORS, selectedStock?.symbol]);
 
 
 
-  // ── Mouse: wheel = zoom, drag = pan, move = crosshair ────────────────
+  // ── Mouse: wheel = zoom-towards-mouse, drag = pan, move = crosshair ─
   const handleWheel = useCallback(e => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? 1 : -1; // scroll down = zoom out
-    const step  = Math.max(1, Math.round(visibleCountRef.current * 0.1));
-    visibleCountRef.current = Math.min(MAX_VISIBLE, Math.max(MIN_VISIBLE, visibleCountRef.current + delta * step));
+    const canvas = canvasRef.current;
+    if (!canvas || !canvas._chartMeta) return;
+
+    const { pad, left, gap, slice } = canvas._chartMeta;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    
+    // 1. Identify index relative to slice
+    const relativeIdx = (mouseX - pad.left) / gap;
+    
+    // 2. Compute total-relative index (from the right end)
+    const total = candles.length;
+    const currentVisible = visibleCountRef.current;
+    const currentOffset = panOffsetRef.current;
+    
+    // index from right: offset + (slice.length - relativeIdx)
+    const idxFromRight = currentOffset + (slice.length - relativeIdx);
+
+    // 3. Zoom
+    const delta = e.deltaY > 0 ? 1 : -1;
+    const step = Math.max(1, Math.round(currentVisible * 0.1));
+    const nextVisible = Math.min(MAX_VISIBLE, Math.max(MIN_VISIBLE, currentVisible + delta * step));
+    
+    if (nextVisible === currentVisible) return;
+
+    // 4. Calculate new offset to keep the point under mouse
+    // Formula: nextOffset = idxFromRight - (nextVisible * (relativeIdx / slice.length))
+    // We want: relativeIdx / nextSlice.length to be roughly the same ratio
+    const ratio = relativeIdx / slice.length;
+    const nextOffset = Math.max(0, idxFromRight - (nextVisible * (1 - ratio)));
+    
+    visibleCountRef.current = nextVisible;
+    panOffsetRef.current = nextOffset;
     redraw();
-  }, [redraw]);
+  }, [candles.length, redraw]);
 
   const handleMouseDown = useCallback(e => {
     const canvas = canvasRef.current;

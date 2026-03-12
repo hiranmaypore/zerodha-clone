@@ -4,18 +4,19 @@ import { getOrders, cancelOrder } from '../services/api';
 import {
   ShoppingCart, X, Clock, CheckCircle, XCircle,
   RefreshCw, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
-  AlertCircle,
+  AlertCircle, Zap
 } from 'lucide-react';
 import { StockIcon } from '../components/StockIcon';
 
-const FILTERS = ['ALL', 'PENDING', 'COMPLETED', 'CANCELLED'];
+const FILTERS = ['ALL', 'PENDING', 'GTT', 'COMPLETED', 'CANCELLED'];
 
 const STATUS_CFG = {
-  COMPLETED: { icon: <CheckCircle className="w-3.5 h-3.5" />, color: 'text-profit',   bg: 'bg-profit/10',   label: 'Completed' },
-  PENDING:   { icon: <Clock       className="w-3.5 h-3.5" />, color: 'text-warning',  bg: 'bg-warning/10',  label: 'Pending'   },
-  CANCELLED: { icon: <XCircle     className="w-3.5 h-3.5" />, color: 'text-loss',     bg: 'bg-loss/10',     label: 'Cancelled' },
-  FAILED:    { icon: <AlertCircle className="w-3.5 h-3.5" />, color: 'text-muted',    bg: 'bg-surface',     label: 'Failed'    },
-  REJECTED:  { icon: <XCircle     className="w-3.5 h-3.5" />, color: 'text-muted',    bg: 'bg-surface',     label: 'Rejected'  },
+  COMPLETED:  { icon: <CheckCircle className="w-3.5 h-3.5" />, color: 'text-profit',   bg: 'bg-profit/10',   label: 'Completed' },
+  PENDING:    { icon: <Clock       className="w-3.5 h-3.5" />, color: 'text-warning',  bg: 'bg-warning/10',  label: 'Pending'   },
+  GTT_ACTIVE: { icon: <Zap         className="w-3.5 h-3.5" />, color: 'text-accent',   bg: 'bg-accent/10',   label: 'GTT Active' },
+  CANCELLED:  { icon: <XCircle     className="w-3.5 h-3.5" />, color: 'text-loss',     bg: 'bg-loss/10',     label: 'Cancelled' },
+  FAILED:     { icon: <AlertCircle className="w-3.5 h-3.5" />, color: 'text-muted',    bg: 'bg-surface',     label: 'Failed'    },
+  REJECTED:   { icon: <XCircle     className="w-3.5 h-3.5" />, color: 'text-muted',    bg: 'bg-surface',     label: 'Rejected'  },
 };
 
 const PRODUCT_CFG = {
@@ -69,14 +70,18 @@ export default function Orders() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const filtered = filter === 'ALL' ? orders : orders.filter(o => o.status === filter);
+  const filtered = filter === 'ALL' 
+    ? orders 
+    : filter === 'GTT' 
+      ? orders.filter(o => o.isGTT)
+      : orders.filter(o => o.status === filter && !o.isGTT);
 
   // ── Stats ──────────────────────────────────────────────────
   const total     = orders.length;
   const completed = orders.filter(o => o.status === 'COMPLETED').length;
   const pending   = orders.filter(o => o.status === 'PENDING').length;
+  const gtt       = orders.filter(o => o.isGTT).length;
   const cancelled = orders.filter(o => o.status === 'CANCELLED').length;
-  const buys      = orders.filter(o => o.type === 'BUY').length;
   const totalVolume = orders
     .filter(o => o.status === 'COMPLETED')
     .reduce((s, o) => s + (o.price * o.quantity), 0);
@@ -109,7 +114,7 @@ export default function Orders() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-primary">Orders</h1>
-          <p className="text-sm text-muted mt-0.5">{total} total · {pending} pending</p>
+          <p className="text-sm text-muted mt-0.5">{total} total · {pending} pending · {gtt} GTT</p>
         </div>
         <button
           onClick={load}
@@ -125,8 +130,8 @@ export default function Orders() {
           { label: 'Total',     value: total,         color: 'text-primary',  icon: <ShoppingCart className="w-4 h-4"/> },
           { label: 'Completed', value: completed,     color: 'text-profit',   icon: <CheckCircle  className="w-4 h-4"/> },
           { label: 'Pending',   value: pending,       color: 'text-warning',  icon: <Clock        className="w-4 h-4"/> },
+          { label: 'GTT Triggers', value: gtt,        color: 'text-accent',   icon: <Zap          className="w-4 h-4"/> },
           { label: 'Cancelled', value: cancelled,     color: 'text-loss',     icon: <XCircle      className="w-4 h-4"/> },
-          { label: 'Buys',      value: buys,          color: 'text-profit',   icon: <TrendingUp   className="w-4 h-4"/> },
           { label: 'Volume',    value: fmt(totalVolume), color: 'text-accent', icon: <ArrowUpRight className="w-4 h-4"/> },
         ].map(c => (
           <div key={c.label} className="bg-card border border-edge rounded-xl p-3.5">
@@ -142,7 +147,9 @@ export default function Orders() {
       {/* ── Filter pills ── */}
       <div className="flex items-center gap-2 flex-wrap">
         {FILTERS.map(f => {
-          const cnt = f === 'ALL' ? total : orders.filter(o => o.status === f).length;
+          const cnt = f === 'ALL' ? total 
+            : f === 'GTT' ? gtt
+            : orders.filter(o => o.status === f && !o.isGTT).length;
           return (
             <button
               key={f}
@@ -218,14 +225,21 @@ export default function Orders() {
                     {/* Order details: type + category + prices + cancel reason */}
                     <div className="col-span-2 hidden md:block space-y-0.5">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-xs text-muted">{order.orderType || 'MARKET'}</span>
+                        <span className="text-xs text-muted">{order.isGTT ? 'GTT Trigger' : order.orderType || 'MARKET'}</span>
                         {CATEGORY_CFG[order.orderCategory] && (
                           <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${CATEGORY_CFG[order.orderCategory].cls}`}>
                             {CATEGORY_CFG[order.orderCategory].label}
                           </span>
                         )}
+                        {order.isGTT && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-warning/10 text-warning">
+                                📋 GTT
+                            </span>
+                        )}
                       </div>
-                      {order.limitPrice && (
+                      {order.isGTT ? (
+                          <div className="text-[10px] text-warning font-mono font-bold">Trigger @ ₹{order.triggerPrice}</div>
+                      ) : order.limitPrice && (
                         <div className="text-[10px] text-secondary font-mono">@ ₹{order.limitPrice}</div>
                       )}
                       {order.stopLossPrice && (
@@ -238,6 +252,11 @@ export default function Orders() {
                         <div className="text-[9px] text-muted/60 truncate max-w-[140px]" title={order.cancelReason}>
                           {order.cancelReason}
                         </div>
+                      )}
+                      {order.isGTT && !order.cancelReason && order.expiryDate && (
+                          <div className="text-[8px] text-muted italic">
+                              Expires {new Date(order.expiryDate).toLocaleDateString()}
+                          </div>
                       )}
                     </div>
 
@@ -283,7 +302,7 @@ export default function Orders() {
                         <br />
                         {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                       </div>
-                      {order.status === 'PENDING' && (
+                      {(order.status === 'PENDING' || order.status === 'GTT_ACTIVE') && (
                         <button
                           onClick={() => handleCancel(order._id)}
                           disabled={cancelling === order._id}

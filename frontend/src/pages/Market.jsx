@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import OptionChain from '../components/market/OptionChain';
 import SectorHeatmap from '../components/market/SectorHeatmap';
+import PayoffAnalyzer from '../components/market/PayoffAnalyzer';
 
 // Sector colors (mapping remains for styling)
 const SECTOR_COLORS = {
@@ -43,6 +44,7 @@ export default function Market() {
   const [limitPx, setLimitPx] = useState('');
   const [placing, setPlacing] = useState(false);
   const [toast,   setToast]   = useState(null);
+  const [strategyLegs, setStrategyLegs] = useState([]);
 
   const { isWatched, toggle: toggleWatch } = useWatchlist();
 
@@ -204,6 +206,12 @@ export default function Market() {
         <div>
           <h1 className="text-2xl font-bold text-primary">Markets</h1>
           <p className="text-sm text-muted mt-0.5">{stocks.length} stocks · Live prices</p>
+          <button 
+            onClick={() => navigate('/pulse')}
+            className="flex items-center gap-1.5 text-[10px] font-bold text-accent mt-2 hover:underline bg-accent/5 px-2 py-1 rounded-md border border-accent/10"
+          >
+            <Activity className="w-3 h-3" /> Advanced Technical Scanner
+          </button>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -309,18 +317,29 @@ export default function Market() {
         </div>
       </div>
 
-      {/* ── Table OR Option Chain ── */}
+      {/* ── Table OR Option Chain + Analyzer ── */}
       {tab === 'OPTIONS' ? (
-        <OptionChain 
-          spotPrice={(currentMarketAvg * 100) + 22000} 
-          onTrade={(symbol, price, side) => {
-            setModal({
-              action: side, 
-              stock: { symbol, name: `Options Contract (Lot size: 50)`, price, isOption: true }
-            });
-            setQty('50'); // Default 1 lot
-          }} 
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div className="lg:col-span-8">
+            <OptionChain 
+              spotPrice={(currentMarketAvg * 100) + 22000} 
+              onTrade={(symbol, price, side) => {
+                setModal({
+                  action: side, 
+                  stock: { symbol, name: `Options Contract (Lot size: 50)`, price, isOption: true }
+                });
+                setQty('50'); // Default 1 lot
+              }}
+              onAnalyze={(legs) => setStrategyLegs(legs)}
+            />
+          </div>
+          <div className="lg:col-span-4 lg:sticky lg:top-5 h-[500px]">
+            <PayoffAnalyzer 
+              legs={strategyLegs} 
+              spotPrice={(currentMarketAvg * 100) + 22000} 
+            />
+          </div>
+        </div>
       ) : (
         <div className="bg-card border border-edge rounded-xl overflow-hidden">
           {/* Headers */}

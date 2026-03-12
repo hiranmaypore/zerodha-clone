@@ -14,7 +14,6 @@ import PortfolioSummary from '../components/dashboard/PortfolioSummary';
 import AIPredictionCard from '../components/dashboard/AIPredictionCard';
 import AlertsPanel      from '../components/dashboard/AlertsPanel';
 import {
-
   TrendingUp, TrendingDown, DollarSign, Activity,
   BarChart2, RefreshCw, Bot, Copy
 } from 'lucide-react';
@@ -230,20 +229,11 @@ export default function Dashboard() {
           } />
       </div>
 
-      {/* ── Main Row: OrderBook | Chart | BuySell ── */}
+      {/* ── Main Row: Chart | BuySell ── */}
       <div className="min-h-0 grid grid-cols-12 gap-2 items-stretch" style={{ flex: '72 72 0' }}>
 
-        {/* Order Book — 2 cols */}
-        <div className="col-span-12 lg:col-span-2 min-w-0 min-h-0 h-full">
-          <OrderBook
-            selectedStock={selectedStock}
-            livePrices={livePrices}
-            orders={orders}
-          />
-        </div>
-
-        {/* Chart Panel — 8 cols */}
-        <div className="col-span-12 lg:col-span-8 min-w-0 min-h-0 h-full">
+        {/* Chart Panel — 10 cols */}
+        <div className="col-span-12 lg:col-span-10 min-w-0 min-h-0 h-full">
           <ChartPanel
             selectedStock={selectedStock}
             stocks={stocks}
@@ -265,7 +255,7 @@ export default function Dashboard() {
 
       </div>
 
-      {/* ── Bottom Row: Portfolio | Orders | AI Card ── */}
+      {/* ── Bottom Row: Portfolio | Orders | OrderBook | Alerts | AI Card ── */}
       <div className="min-h-0 grid grid-cols-12 gap-2 items-stretch" style={{ flex: '28 28 0' }}>
 
         {/* Portfolio — 2 cols */}
@@ -277,11 +267,20 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Active Orders — 6 cols */}
-        <div className="col-span-12 md:col-span-6 min-w-0 min-h-0 h-full">
+        {/* Active Orders — 4 cols */}
+        <div className="col-span-12 md:col-span-4 min-w-0 min-h-0 h-full">
           <ActiveOrders
             orders={orders}
             onCancel={handleCancelOrder}
+          />
+        </div>
+
+        {/* Order Book — 2 cols */}
+        <div className="col-span-12 md:col-span-2 min-w-0 min-h-0 h-full">
+          <OrderBook
+            selectedStock={selectedStock}
+            livePrices={livePrices}
+            orders={orders}
           />
         </div>
 

@@ -66,6 +66,20 @@ const dbMatchingEngine = () => {
         const today = new Date().toISOString().slice(0, 10);
         const pType = order.productType || 'CNC';
 
+        // ── GTT Trigger Logic ─────────────────────────────────────────
+        if (order.isGTT && order.status === 'GTT_ACTIVE') {
+          let triggered = false;
+          if (order.type === 'BUY' && currentPrice <= order.triggerPrice) triggered = true;
+          if (order.type === 'SELL' && currentPrice >= order.triggerPrice) triggered = true;
+          
+          if (triggered) {
+            order.status = 'PENDING'; // Convert to active pending order
+            await order.save();
+            if (notifications.notifyOrderTriggered) await notifications.notifyOrderTriggered(order);
+            continue; // Will be processed in next tick as PENDING
+          }
+        }
+
         // ── Stop-Loss trigger ─────────────────────────────────────────
         if (order.orderCategory === 'STOPLOSS' && order.type === 'SELL' && currentPrice <= order.stopLossPrice) {
           executed = true;

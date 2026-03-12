@@ -13,6 +13,9 @@ import Calculators from './pages/Calculators';
 import Profile from './pages/Profile';
 import Journal from './pages/Journal';
 import Leaderboard from './pages/Leaderboard';
+import AlgoLab from './pages/AlgoLab';
+import Pulse from './pages/Pulse';
+import Bids from './pages/Bids';
 import { Toaster } from 'react-hot-toast';
 
 function ProtectedRoute({ children }) {
@@ -55,6 +58,9 @@ export default function App() {
             <Route path="/funds" element={<Funds />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/algolab" element={<AlgoLab />} />
+            <Route path="/pulse" element={<Pulse />} />
+            <Route path="/bids" element={<Bids />} />
             <Route path="/calculators" element={<Calculators />} />
             <Route path="/profile" element={<Profile />} />
           </Route>

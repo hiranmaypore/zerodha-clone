@@ -4,8 +4,8 @@ import {
   Search, Bell, ChevronDown, LogOut, Settings, X,
   CheckCircle, XCircle, TrendingUp, TrendingDown,
   AlertTriangle, Zap, Trash2, CheckCheck, ShieldAlert, Clock,
-  LayoutDashboard, LineChart, ActivitySquare, Briefcase, Bookmark,
-  Trophy, Calendar
+  LayoutDashboard, LineChart, ListChecks, Briefcase, Bookmark,
+  Trophy, Calendar, FlaskRound, Activity, Coins
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -40,10 +40,13 @@ const ALL_STOCKS = [
 const navItems = [
   { path: "/dashboard",  label: "Live",       icon: LayoutDashboard },
   { path: "/market",     label: "Market",     icon: LineChart },
-  { path: "/orders",     label: "Orders",     icon: ActivitySquare },
+  { path: "/orders",     label: "Orders",     icon: ListChecks },
   { path: "/holdings",   label: "Portfolio",  icon: Briefcase },
   { path: "/leaderboard",label: "Hall of Fame",icon: Trophy },
   { path: "/journal",    label: "Journal",    icon: Calendar },
+  { path: "/bids",       label: "Bids",       icon: Coins },
+  { path: "/algolab",    label: "Algo Lab",   icon: FlaskRound },
+  { path: "/pulse",      label: "Pulse",      icon: Activity },
   { path: "/watchlist",  label: "Watchlist",  icon: Bookmark },
   { path: "/funds",      label: "Funds",      icon: null },
   { path: "/calculators",label: "Calculators",icon: null },

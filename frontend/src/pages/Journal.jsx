@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { getJournal } from '../services/api';
 import { 
   TrendingUp, TrendingDown, Clock, Calendar, 
-  BarChart2, Award, Zap, ChevronRight 
+  BarChart2, Award, Zap, ChevronRight, Download
 } from 'lucide-react';
+import { downloadTaxStatement } from '../services/api';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
@@ -11,6 +12,7 @@ import {
 export default function Journal() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -46,6 +48,32 @@ export default function Journal() {
           </h1>
           <p className="text-sm text-muted mt-1">Institutional-grade performance analytics</p>
         </div>
+        <button 
+          onClick={async () => {
+            setExporting(true);
+            try {
+              const res = await downloadTaxStatement();
+              const url = window.URL.createObjectURL(new Blob([res.data]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', 'Zerodha_Clone_Tax_Statement.pdf');
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+            } catch (err) {
+              console.error('Export failed', err);
+            } finally {
+              setExporting(false);
+            }
+          }}
+          disabled={exporting}
+          className="flex items-center gap-2 px-6 py-2.5 bg-accent text-white rounded-xl text-sm font-bold hover:bg-accent/80 transition-all shadow-lg shadow-accent/20 disabled:opacity-50"
+        >
+          {exporting ? (
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : <Download className="w-4 h-4" />}
+          {exporting ? 'Generating...' : 'Download Statement'}
+        </button>
       </div>
 
       {/* ── Metric Cards ── */}

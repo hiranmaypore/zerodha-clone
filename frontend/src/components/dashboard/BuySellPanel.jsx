@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { buyOrder, sellOrder, placeBracket } from '../../services/api';
-import { AlertCircle, CheckCircle, Minus, Plus, Shield, Target } from 'lucide-react';
+import { AlertCircle, CheckCircle, Minus, Plus, Shield, Target, Clock } from 'lucide-react';
 
 export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderPlaced, userBalance, tradeCommand }) {
   const { user, preferences } = useAuth();
@@ -13,6 +13,8 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
   const [productType, setPT]    = useState('CNC');           // 'CNC' | 'MIS'
   const [limitPrice, setLP]     = useState('');
   const [bracketMode, setBM]    = useState(false);
+  const [gttMode, setGTT]        = useState(false);
+  const [triggerPrice, setTP]   = useState('');
   const [stopLoss, setSL]       = useState('');
   const [target, setTarget]     = useState('');
   const [loading, setLoading]   = useState(false);
@@ -68,8 +70,16 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
   const handleSubmit = async () => {
     if (!selectedStock)   return showMsg('error', 'Select a stock first');
     if (q <= 0)           return showMsg('error', 'Enter a valid quantity');
-    if (orderType === 'LIMIT' && (!limitPrice || parseFloat(limitPrice) <= 0))
-      return showMsg('error', 'Enter a valid limit price');
+    
+    // GTT Validation
+    if (gttMode) {
+      if (!triggerPrice || parseFloat(triggerPrice) <= 0) return showMsg('error', 'Enter a valid trigger price');
+      if (orderType === 'LIMIT' && (!limitPrice || parseFloat(limitPrice) <= 0)) return showMsg('error', 'Enter a valid limit price');
+    } else {
+      if (orderType === 'LIMIT' && (!limitPrice || parseFloat(limitPrice) <= 0))
+        return showMsg('error', 'Enter a valid limit price');
+    }
+
     if (insufficient)     return showMsg('error', 'Insufficient balance');
 
     // Bracket order validation
@@ -103,12 +113,19 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
           orderType,
           productType,
           ...(orderType === 'LIMIT' && { limitPrice: parseFloat(limitPrice) }),
+          // GTT Fields
+          isGTT: gttMode,
+          ...(gttMode && { 
+            triggerPrice: parseFloat(triggerPrice),
+            status: 'GTT_ACTIVE',
+            expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year default
+          })
         };
         if (tab === 'buy') await buyOrder(payload);
         else               await sellOrder(payload);
-        showMsg('success', `${tab === 'buy' ? 'Buy' : 'Sell'} order placed! (${productType})`);
+        showMsg('success', `${gttMode ? 'GTT' : tab === 'buy' ? 'Buy' : 'Sell'} order placed!`);
       }
-      setQty(1); setLP(''); setSL(''); setTarget('');
+      setQty(1); setLP(''); setSL(''); setTarget(''); setTP('');
       onOrderPlaced?.();
     } catch (e) {
       showMsg('error', e.response?.data?.message || 'Order failed. Try again.');
@@ -174,9 +191,6 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
               </button>
             ))}
           </div>
-          <div className="text-[8px] text-muted/60 mt-0.5">
-            {productType === 'CNC' ? 'Long-term delivery' : 'Intraday position (auto SQ-off)'}
-          </div>
         </div>
 
         {/* ── Order Type ── */}
@@ -197,6 +211,37 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
           </div>
         </div>
 
+        {/* ── GTT Toggle ── */}
+        <div>
+          <button
+            onClick={() => { setGTT(!gttMode); if(!gttMode) setBM(false); }}
+            className={`w-full py-1 rounded flex items-center justify-center gap-1.5 text-[9px] font-semibold transition-all border ${
+              gttMode
+                ? 'bg-warning/20 border-warning/40 text-warning'
+                : 'bg-surface border-edge text-muted hover:text-primary'
+            }`}
+          >
+            <Clock className="w-3 h-3" />
+            {gttMode ? 'GTT Order (ON)' : 'Enable GTT (Trigger)'}
+          </button>
+        </div>
+
+        {/* ── GTT Fields ── */}
+        {gttMode && (
+          <div className="bg-surface/60 border border-edge/50 rounded-lg p-2 space-y-1.5 animate-in slide-in-from-top-2 duration-300">
+             <div className="text-[9px] text-warning font-semibold mb-1">GTT Parameters</div>
+             <div>
+                <div className="text-[8px] text-muted mb-0.5">Trigger Price (₹)</div>
+                <input
+                  type="number" min="0" step="0.05"
+                  value={triggerPrice} onChange={e => setTP(e.target.value)}
+                  placeholder="Trigger when price hits..."
+                  className="w-full bg-dark border border-edge rounded px-2 py-1 text-[10px] text-primary focus:border-warning outline-none"
+                />
+             </div>
+          </div>
+        )}
+
         {/* ── Limit Price (only for LIMIT) ── */}
         {orderType === 'LIMIT' && (
           <div>
@@ -205,7 +250,7 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
               type="number" min="0" step="0.05"
               value={limitPrice} onChange={e => setLP(e.target.value)}
               placeholder={currentPrice.toFixed(2)}
-              className="w-full bg-surface border border-edge rounded px-2 py-1 text-xs text-primary placeholder-muted focus:border-accent outline-none"
+              className="w-full bg-surface border border-edge rounded px-2 py-1 text-xs text-primary placeholder-muted focus:border-accent outline-none transition-all"
             />
           </div>
         )}
@@ -234,8 +279,8 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
           </div>
         </div>
 
-        {/* ── Bracket Order Toggle (only for BUY + LIMIT) ── */}
-        {isBuy && (
+        {/* ── Bracket Order Toggle (only for BUY + LIMIT + NOT GTT) ── */}
+        {isBuy && !gttMode && (
           <div>
             <button
               onClick={() => setBM(b => !b)}
@@ -253,7 +298,7 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
 
         {/* ── Bracket Order Fields ── */}
         {bracketMode && isBuy && (
-          <div className="bg-surface/60 border border-edge/50 rounded-lg p-2 space-y-1.5">
+          <div className="bg-surface/60 border border-edge/50 rounded-lg p-2 space-y-1.5 animate-in slide-in-from-top-2 duration-300">
             <div className="text-[9px] text-purple-300 font-semibold mb-1 flex items-center gap-1">
               <Shield className="w-3 h-3" /> Bracket Parameters
             </div>
@@ -285,18 +330,6 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
                 className="w-full bg-dark border border-profit/30 rounded px-2 py-1 text-[10px] text-primary placeholder-muted/40 focus:border-profit outline-none"
               />
             </div>
-            {limitPrice && stopLoss && target && (
-              <div className="text-[8px] text-muted space-y-0.5 pt-1 border-t border-edge">
-                <div className="flex justify-between">
-                  <span className="text-loss">Max Loss:</span>
-                  <span className="font-mono text-loss">₹{((parseFloat(limitPrice || 0) - parseFloat(stopLoss || 0)) * q).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-profit">Max Gain:</span>
-                  <span className="font-mono text-profit">₹{((parseFloat(target || 0) - parseFloat(limitPrice || 0)) * q).toFixed(2)}</span>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -334,15 +367,17 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
         <button
           onClick={handleSubmit}
           disabled={loading || q <= 0 || insufficient}
-          className={`w-full py-2 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all disabled:opacity-40 ${
+          className={`w-full py-2 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all disabled:opacity-40 shadow-lg ${
             bracketMode
-              ? 'bg-purple-600 hover:bg-purple-500 text-white'
-              : isBuy
-                ? 'bg-profit hover:bg-profit/80 text-dark'
-                : 'bg-loss hover:bg-loss/80 text-white'
+              ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-500/20'
+              : gttMode
+                ? 'bg-warning hover:bg-warning/80 text-dark shadow-warning/20'
+                : isBuy
+                  ? 'bg-profit hover:bg-profit/80 text-dark shadow-profit/20'
+                  : 'bg-loss hover:bg-loss/80 text-white shadow-loss/20'
           }`}
         >
-          {loading ? '⏳ Placing...' : bracketMode ? '🛡 Place Bracket' : `${isBuy ? 'BUY' : 'SELL'} ${productType}`}
+          {loading ? '⏳ Placing...' : bracketMode ? '🛡 Place Bracket' : gttMode ? '📋 Place GTT Trigger' : `${isBuy ? 'BUY' : 'SELL'} ${productType}`}
         </button>
 
       </div>

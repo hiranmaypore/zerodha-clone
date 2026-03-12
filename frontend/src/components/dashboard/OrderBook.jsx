@@ -7,8 +7,8 @@ function buildLevels(basePrice, count, side) {
   return Array.from({ length: count }, (_, i) => {
     const tick   = basePrice * 0.0005 * (i + 1) * (side === 'ask' ? 1 : -1);
     const price  = +(basePrice + tick).toFixed(2);
-    const qty    = Math.floor(Math.random() * 500 + 80);
-    return { price, qty, orders: Math.floor(Math.random() * 8 + 1) };
+    const qty    = Math.floor(Math.random() * 800 + 100) + (i * 150); // Volume often increases at deeper levels
+    return { price, qty, orders: Math.floor(Math.random() * 15 + 1) };
   });
 }
 
@@ -33,8 +33,8 @@ export default function OrderBook({ selectedStock, livePrices = {}, orders = [] 
   // Build fresh levels only when stock changes
   useEffect(() => {
     if (!price) return;
-    askRef.current = buildLevels(price, 7, 'ask');
-    bidRef.current = buildLevels(price, 7, 'bid');
+    askRef.current = buildLevels(price, 15, 'ask'); // Level 2: More depth
+    bidRef.current = buildLevels(price, 15, 'bid');
     setAsks(addDepth([...askRef.current]));
     setBids(addDepth([...bidRef.current]));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,7 +79,7 @@ export default function OrderBook({ selectedStock, livePrices = {}, orders = [] 
           <span className="text-xs font-bold text-primary">{symbol}</span>
         </div>
         <div className="flex items-center gap-0.5">
-          {[['book', 'Book'], ['trades', 'Trades']].map(([id, label]) => (
+          {[['book', 'Book'], ['depth', 'Depth'], ['trades', 'Trades']].map(([id, label]) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
@@ -155,6 +155,54 @@ export default function OrderBook({ selectedStock, livePrices = {}, orders = [] 
               </div>
             </div>
           </div>
+        </div>
+      ) : activeTab === 'depth' ? (
+        /* ── Market Depth Chart ── */
+        <div className="flex-1 flex flex-col p-2 space-y-4 overflow-hidden">
+           <div className="text-[10px] text-muted flex justify-between font-bold uppercase tracking-widest px-1">
+              <span>Bids (Buy)</span>
+              <span>Asks (Sell)</span>
+           </div>
+           
+           <div className="flex-1 min-h-0 flex gap-1">
+              {/* Bids Wall */}
+              <div className="flex-1 h-full flex flex-col justify-end gap-px">
+                 {bids.map((b, i) => (
+                    <div key={i} className="flex-1 flex flex-row-reverse items-center gap-2 group">
+                       <div 
+                         className="h-full bg-profit/30 border-r border-profit/20 transition-all duration-500 rounded-l-[1px]" 
+                         style={{ width: `${b.pct}%` }} 
+                       />
+                    </div>
+                 ))}
+              </div>
+              {/* Asks Wall */}
+              <div className="flex-1 h-full flex flex-col justify-end gap-px">
+                 {[...asks].reverse().map((a, i) => (
+                    <div key={i} className="flex-1 flex items-center gap-2 group">
+                       <div 
+                         className="h-full bg-loss/30 border-l border-loss/20 transition-all duration-500 rounded-r-[1px]" 
+                         style={{ width: `${a.pct}%` }} 
+                       />
+                    </div>
+                 ))}
+              </div>
+           </div>
+
+           <div className="bg-surface/40 p-2 rounded-lg border border-edge">
+              <div className="flex justify-between text-[10px] mb-1">
+                 <span className="text-muted italic">Volume Imbalance</span>
+                 <span className={bids.reduce((s,r)=>s+r.qty,0) > asks.reduce((s,r)=>s+r.qty,0) ? 'text-profit' : 'text-loss'}>
+                   {((bids.reduce((s,r)=>s+r.qty,0) / (asks.reduce((s,r)=>s+r.qty,0) + bids.reduce((s,r)=>s+r.qty,0))) * 100).toFixed(1)}% Buy
+                 </span>
+              </div>
+              <div className="h-1.5 w-full bg-loss/20 rounded-full overflow-hidden flex">
+                 <div 
+                   className="h-full bg-profit transition-all duration-700" 
+                   style={{ width: `${(bids.reduce((s,r)=>s+r.qty,0) / (asks.reduce((s,r)=>s+r.qty,0) + bids.reduce((s,r)=>s+r.qty,0))) * 100}%` }} 
+                 />
+              </div>
+           </div>
         </div>
       ) : (
         /* ── Trades tab ── */
