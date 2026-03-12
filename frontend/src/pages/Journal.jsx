@@ -12,15 +12,21 @@ import {
 export default function Journal() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
       try {
         const res = await getJournal();
-        setStats(res.data.stats);
+        if (res.data && res.data.stats) {
+          setStats(res.data.stats);
+        } else {
+          setError('Invalid data received from server');
+        }
       } catch (err) {
         console.error('Failed to fetch journal', err);
+        setError('Failed to load journal analytics');
       } finally {
         setLoading(false);
       }
@@ -34,7 +40,23 @@ export default function Journal() {
     </div>
   );
 
-  const profitData = Object.entries(stats.profitByDay).map(([day, val]) => ({
+  if (error || !stats) return (
+    <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4">
+      <div className="w-16 h-16 bg-loss/10 rounded-full flex items-center justify-center mb-4">
+        <TrendingDown className="w-8 h-8 text-loss" />
+      </div>
+      <h2 className="text-xl font-bold text-primary">Journal Unavailable</h2>
+      <p className="text-muted mt-2 max-w-md">{error || 'Unable to load your trading analytics at this time.'}</p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="mt-6 px-6 py-2 bg-accent text-white rounded-xl text-sm font-bold hover:bg-accent/80 transition-all"
+      >
+        Retry
+      </button>
+    </div>
+  );
+
+  const profitData = Object.entries(stats.profitByDay || {}).map(([day, val]) => ({
     name: day,
     profit: val
   }));
@@ -53,13 +75,14 @@ export default function Journal() {
             setExporting(true);
             try {
               const res = await downloadTaxStatement();
-              const url = window.URL.createObjectURL(new Blob([res.data]));
+              const url = window.URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', 'Zerodha_Clone_Tax_Statement.pdf');
+              link.setAttribute('download', `Zerodha_Clone_Tax_Statement_${new Date().toISOString().split('T')[0]}.csv`);
               document.body.appendChild(link);
               link.click();
               link.remove();
+              window.URL.revokeObjectURL(url);
             } catch (err) {
               console.error('Export failed', err);
             } finally {

@@ -590,7 +590,7 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
     const canvas = canvasRef.current;
     if (!canvas || !canvas._chartMeta) return;
 
-    const { pad, left, gap, slice } = canvas._chartMeta;
+    const { pad, gap, slice } = canvas._chartMeta;
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     
@@ -598,7 +598,6 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
     const relativeIdx = (mouseX - pad.left) / gap;
     
     // 2. Compute total-relative index (from the right end)
-    const total = candles.length;
     const currentVisible = visibleCountRef.current;
     const currentOffset = panOffsetRef.current;
     
@@ -621,7 +620,7 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
     visibleCountRef.current = nextVisible;
     panOffsetRef.current = nextOffset;
     redraw();
-  }, [candles.length, redraw]);
+  }, [redraw]);
 
   const handleMouseDown = useCallback(e => {
     const canvas = canvasRef.current;

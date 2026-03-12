@@ -92,6 +92,12 @@ const NOTIF_CFG = {
     body:  (d) => d.message || `${d.stock} squared off at ₹${d.price?.toFixed(2)}`,
     dot: 'bg-loss',
   },
+  price_alert: {
+    icon: () => <Bell className="w-4 h-4 text-accent" />,
+    title: (d) => d.title || 'Price Alert',
+    body:  (d) => d.message || 'A price target has been reached',
+    dot: 'bg-accent',
+  },
 };
 
 function timeAgo(date) {

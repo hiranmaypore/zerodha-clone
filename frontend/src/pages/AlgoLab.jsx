@@ -1,332 +1,309 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { getSignals, buyOrder } from '../services/api';
 import { 
-  Zap, Plus, Trash2, Play, Activity, 
-  Settings2, Target, ShieldCheck, TrendingUp,
-  LineChart, MousePointer2, Info
+  Zap, Activity, ShieldCheck, TrendingUp,
+  LineChart, CheckCircle, Crosshair, ArrowRight, XCircle, Info
 } from 'lucide-react';
 import { 
   ResponsiveContainer, AreaChart, Area, 
-  XAxis, YAxis, CartesianGrid, Tooltip 
+  CartesianGrid, Tooltip, BarChart, Bar, Cell
 } from 'recharts';
 
-const INDICATORS = [
-  { id: 'RSI', name: 'RSI', params: ['Period'], defaultParams: [14], range: [0, 100] },
-  { id: 'EMA', name: 'EMA', params: ['Period'], defaultParams: [20] },
-  { id: 'SMA', name: 'SMA', params: ['Period'], defaultParams: [50] },
-  { id: 'PRICE', name: 'Close Price', params: [], defaultParams: [] },
-  { id: 'VOLUME', name: 'Volume', params: [], defaultParams: [] }
-];
-
-const OPERATORS = [
-  { id: 'GT', label: '>', desc: 'Greater than' },
-  { id: 'LT', label: '<', desc: 'Less than' },
-  { id: 'CROSS_ABOVE', label: 'Crosses Above', desc: 'Price or Line breaks upward' },
-  { id: 'CROSS_BELOW', label: 'Crosses Below', desc: 'Price or Line breaks downward' }
-];
-
 export default function AlgoLab() {
-  const [conditions, setConditions] = useState([
-    { id: 1, left: 'RSI', leftParam: 14, op: 'LT', right: 'VALUE', rightValue: 30 }
-  ]);
-  const [backtestRunning, setBacktestRunning] = useState(false);
-  const [results, setResults] = useState(null);
+  const [signals, setSignals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedSignal, setSelectedSignal] = useState(null);
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [msg, setMsg] = useState(null);
 
-  const addCondition = () => {
-    setConditions([...conditions, { 
-      id: Date.now(), left: 'EMA', leftParam: 20, op: 'GT', right: 'SMA', rightParam: 50 
-    }]);
+  const fetchSignals = useCallback(async () => {
+    try {
+      const { data } = await getSignals(50);
+      setSignals(data.signals || []);
+      if (data.signals?.length > 0 && !selectedSignal) {
+        setSelectedSignal(data.signals[0]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch signals', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedSignal]);
+
+  useEffect(() => {
+    fetchSignals();
+    const interval = setInterval(fetchSignals, 60000); // refresh every minute
+    return () => clearInterval(interval);
+  }, [fetchSignals]);
+
+  const handleCopyTrade = async (signal) => {
+    setPlacingOrder(true);
+    try {
+      // Execute as Market Order for simplicity in the Lab directly
+      const payload = {
+        stockSymbol: signal.symbol,
+        quantity: 1, // Default minimal exposure
+        orderType: 'MARKET',
+        productType: 'MIS',
+      };
+      // For this demo, we assume buyOrder handles both sides or we restrict to Bulls
+      // Usually, SELL requires holding in CNC, but works in MIS for intraday.
+      // Let's assume the user has a separate Buy/Sell, we'll route it based on trend:
+      if (signal.trend === 'BULLISH') {
+        await buyOrder(payload);
+        setMsg({ type: 'success', text: `Successfully copied BUY order for ${signal.symbol}` });
+      } else {
+        setMsg({ type: 'error', text: `Short selling (MIS) not implemented via Lab yet` });
+      }
+    } catch (e) {
+      setMsg({ type: 'error', text: e.response?.data?.message || 'Failed to place order' });
+    } finally {
+      setPlacingOrder(false);
+      setTimeout(() => setMsg(null), 3000);
+    }
   };
 
-  const removeCondition = (id) => {
-    if (conditions.length > 1) setConditions(conditions.filter(c => c.id !== id));
+  // Generate mock equity curve based on strength for visual
+  const generateEquityCurve = (strength) => {
+    const base = 100000;
+    let current = base;
+    return Array.from({ length: 30 }, (_, i) => {
+      // use strength to bias the random walk
+      const bias = (strength / 100) * 200 - 100; 
+      current += bias + (Math.random() * 500 - 250);
+      return { day: i, equity: current };
+    });
   };
 
-  const updateCondition = (id, key, val) => {
-    setConditions(conditions.map(c => c.id === id ? { ...c, [key]: val } : c));
-  };
-
-  const runBacktest = () => {
-    setBacktestRunning(true);
-    setResults(null);
-    
-    // Simulate backtest calculation
-    setTimeout(() => {
-      const mockData = Array.from({ length: 30 }, (_, i) => ({
-        time: i,
-        equity: 100000 + Math.random() * 20000 * (i / 15) - 5000
-      }));
-      setResults({
-        equityCurve: mockData,
-        winRate: (65 + Math.random() * 10).toFixed(1),
-        trades: Math.floor(40 + Math.random() * 20),
-        pnl: '+₹14,240',
-        pnlPct: '+14.24%',
-        maxDD: '-4.2%'
-      });
-      setBacktestRunning(false);
-    }, 1500);
-  };
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 opacity-50 space-y-4">
+        <Zap className="w-12 h-12 text-accent animate-pulse" />
+        <p className="text-muted font-bold tracking-widest uppercase text-xs">Loading Algo Core...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto animate-fade-in p-4 lg:p-6">
+    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in p-4 lg:p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
-            <Zap className="w-8 h-8 text-accent fill-accent/20" /> Algo Lab
+            <Zap className="w-8 h-8 text-accent fill-accent/20" /> Algo Lab Hub
           </h1>
           <p className="text-sm text-muted mt-1.5 flex items-center gap-2">
-            Professional Strategy Builder & Backtesting Engine <span className="bg-accent/10 text-accent px-1.5 py-0.5 rounded text-[10px] font-bold">BETA</span>
+            Real-time AI generated signals & backtest analytics 
+            <span className="bg-accent/10 text-accent px-1.5 py-0.5 rounded text-[10px] font-bold">PRO</span>
           </p>
         </div>
-        <div className="flex gap-2">
-           <button 
-             onClick={runBacktest}
-             disabled={backtestRunning}
-             className="flex items-center gap-2 px-6 py-3 bg-profit text-dark font-bold rounded-xl hover:bg-profit/90 transition-all disabled:opacity-50 shadow-lg shadow-profit/20"
-           >
-             {backtestRunning ? (
-               <div className="w-4 h-4 border-2 border-dark/30 border-t-dark rounded-full animate-spin" />
-             ) : <Play className="w-4 h-4 fill-current" />}
-             {backtestRunning ? 'Backtesting...' : 'Run Analysis'}
-           </button>
-        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         
-        {/* ── Builder Section ── */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-card border border-edge rounded-3xl p-6 shadow-xl relative overflow-hidden">
-             {/* Header */}
-             <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-2.5">
-                   <div className="p-2 bg-accent/10 rounded-xl">
-                      <Settings2 className="w-5 h-5 text-accent" />
-                   </div>
-                   <h2 className="text-lg font-bold text-primary">Entry Logic</h2>
+        {/* ── Active Signals List (Left) ── */}
+        <div className="xl:col-span-5 space-y-4">
+          <div className="bg-card border border-edge rounded-3xl p-6 shadow-xl relative overflow-hidden h-[calc(100vh-200px)] flex flex-col">
+            <div className="flex items-center justify-between mb-6 shrink-0">
+               <h2 className="text-lg font-bold text-primary flex items-center gap-2.5">
+                  <Activity className="w-5 h-5 text-accent" /> Live Signals
+               </h2>
+               <div className="text-[10px] font-black tracking-widest uppercase bg-surface px-2 py-1 rounded-lg text-muted">
+                 {signals.length} Active
+               </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
+              {signals.length === 0 ? (
+                <div className="text-center p-8 opacity-50">
+                  <LineChart className="w-12 h-12 mx-auto mb-3" />
+                  <p>No active signals currently.</p>
                 </div>
-                <button 
-                  onClick={addCondition}
-                  className="p-2 bg-surface hover:bg-surface/80 text-accent rounded-xl border border-edge transition-all flex items-center gap-2 text-xs font-bold"
-                >
-                  <Plus className="w-4 h-4" /> Add Rule
-                </button>
-             </div>
-
-             {/* Conditions List */}
-             <div className="space-y-4 relative z-10">
-                {conditions.map((cond, idx) => (
-                  <div key={cond.id} className="group relative flex flex-col md:flex-row items-center gap-3 bg-surface/40 p-4 rounded-2xl border border-edge/60 hover:border-accent/40 transition-all">
-                    {idx > 0 && (
-                      <div className="absolute -top-3 left-8 bg-card border border-edge px-3 py-0.5 rounded-full text-[10px] font-black text-muted uppercase tracking-tighter">
-                        AND
-                      </div>
-                    )}
-
-                    {/* Left Side */}
-                    <div className="flex gap-2 flex-1 w-full">
-                       <select 
-                         value={cond.left}
-                         onChange={(e) => updateCondition(cond.id, 'left', e.target.value)}
-                         className="flex-1 bg-card border border-edge rounded-xl px-3 py-2 text-sm text-primary outline-none focus:border-accent"
-                       >
-                         {INDICATORS.map(ind => <option key={ind.id} value={ind.id}>{ind.name}</option>)}
-                       </select>
-                       {INDICATORS.find(i => i.id === cond.left)?.params.length > 0 && (
-                         <input 
-                           type="number"
-                           value={cond.leftParam}
-                           onChange={(e) => updateCondition(cond.id, 'leftParam', e.target.value)}
-                           className="w-16 bg-card border border-edge rounded-xl px-2 py-2 text-xs text-center text-accent font-bold outline-none"
-                         />
-                       )}
+              ) : (
+                signals.map(s => (
+                  <button 
+                    key={s._id}
+                    onClick={() => setSelectedSignal(s)}
+                    className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                      selectedSignal?._id === s._id 
+                        ? 'bg-accent/10 border-accent/40 shadow-lg shadow-accent/5' 
+                        : 'bg-surface/50 border-edge hover:border-accent/40 hover:bg-surface'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                       <div className="flex items-center gap-2">
+                         <span className={`px-2 py-0.5 rounded text-[10px] font-black tracking-wider ${
+                           s.trend === 'BULLISH' ? 'bg-profit/20 text-profit' : 'bg-loss/20 text-loss'
+                         }`}>
+                           {s.trend}
+                         </span>
+                         <span className="font-bold text-primary">{s.symbol}</span>
+                       </div>
+                       <span className="text-xs font-mono text-muted">₹{s.price.toFixed(2)}</span>
                     </div>
 
-                    {/* Operator */}
-                    <select 
-                       value={cond.op}
-                       onChange={(e) => updateCondition(cond.id, 'op', e.target.value)}
-                       className="w-full md:w-32 bg-accent text-white border-none rounded-xl px-3 py-2 text-xs font-bold text-center appearance-none cursor-pointer hover:bg-accent/80 transition-colors"
-                    >
-                      {OPERATORS.map(op => <option key={op.id} value={op.id}>{op.label}</option>)}
-                    </select>
-
-                    {/* Right Side */}
-                    <div className="flex gap-2 flex-1 w-full">
-                       <select 
-                         value={cond.right === 'VALUE' ? 'VALUE' : cond.right}
-                         onChange={(e) => updateCondition(cond.id, 'right', e.target.value)}
-                         className="flex-1 bg-card border border-edge rounded-xl px-3 py-2 text-sm text-primary outline-none focus:border-accent"
-                       >
-                         <option value="VALUE">Fixed Value</option>
-                         {INDICATORS.map(ind => <option key={ind.id} value={ind.id}>{ind.name}</option>)}
-                       </select>
-                       {cond.right === 'VALUE' ? (
-                         <input 
-                           type="number"
-                           value={cond.rightValue}
-                           onChange={(e) => updateCondition(cond.id, 'rightValue', e.target.value)}
-                           className="w-20 bg-card border border-edge rounded-xl px-2 py-2 text-xs text-center text-accent font-bold outline-none"
-                         />
-                       ) : (
-                         INDICATORS.find(i => i.id === cond.right)?.params.length > 0 && (
-                           <input 
-                             type="number"
-                             value={cond.rightParam}
-                             onChange={(e) => updateCondition(cond.id, 'rightParam', e.target.value)}
-                             className="w-16 bg-card border border-edge rounded-xl px-2 py-2 text-xs text-center text-accent font-bold outline-none"
+                    <div className="flex items-center justify-between mt-3">
+                       <span className="text-[10px] font-bold text-muted-foreground uppercase">{s.strategy}</span>
+                       <div className="flex items-center gap-1">
+                         <div className="w-16 h-1.5 bg-dark rounded-full overflow-hidden">
+                           <div 
+                             className={`h-full ${s.strength > 75 ? 'bg-profit' : s.strength > 50 ? 'bg-warning' : 'bg-loss'}`}
+                             style={{ width: `${s.strength}%` }}
                            />
-                         )
-                       )}
+                         </div>
+                         <span className="text-[10px] font-mono text-muted">{s.strength}%</span>
+                       </div>
                     </div>
+                  </button>
+                ))
+              )}
+            </div>
+            
+            <div className="absolute -top-24 -left-24 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+          </div>
+        </div>
 
-                    <button 
-                      onClick={() => removeCondition(cond.id)}
-                      className="p-2 text-muted hover:text-loss transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+        {/* ── Deep Analytics (Right) ── */}
+        <div className="xl:col-span-7 h-full">
+          {selectedSignal ? (
+            <div className="bg-card border border-edge rounded-3xl p-6 shadow-xl space-y-6">
+              
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-edge/50 pb-6">
+                 <div>
+                    <h2 className="text-2xl font-black text-primary tracking-tight">{selectedSignal.symbol}</h2>
+                    <p className="text-sm text-muted mt-1 font-medium">{selectedSignal.name || selectedSignal.strategy}</p>
+                 </div>
+                 <div className="text-right">
+                    <div className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Generated At</div>
+                    <div className="text-xs text-primary bg-surface px-3 py-1.5 rounded-lg border border-edge">
+                      {new Date(selectedSignal.timestamp).toLocaleString()}
+                    </div>
+                 </div>
+              </div>
+
+              {/* Stat Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-surface/50 p-4 rounded-2xl border border-edge">
+                     <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">AI Confidence</p>
+                     <p className="text-2xl font-black text-primary font-mono">{selectedSignal.strength}%</p>
                   </div>
-                ))}
-             </div>
+                  <div className="bg-surface/50 p-4 rounded-2xl border border-edge">
+                     <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">Target Entry</p>
+                     <p className="text-2xl font-black text-primary font-mono">{selectedSignal.price.toFixed(1)}</p>
+                  </div>
+                  <div className="bg-surface/50 p-4 rounded-2xl border border-edge">
+                     <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">RSI Level</p>
+                     <p className={`text-2xl font-black font-mono ${selectedSignal.indicators?.rsi < 30 ? 'text-profit' : selectedSignal.indicators?.rsi > 70 ? 'text-loss' : 'text-primary'}`}>
+                       {selectedSignal.indicators?.rsi?.toFixed(1) || 'N/A'}
+                     </p>
+                  </div>
+                  <div className="bg-surface/50 p-4 rounded-2xl border border-edge">
+                     <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">Trend Setup</p>
+                     <p className={`text-lg font-black mt-1 ${selectedSignal.trend === 'BULLISH' ? 'text-profit' : 'text-loss'}`}>
+                       {selectedSignal.trend}
+                     </p>
+                  </div>
+              </div>
 
-             <div className="mt-8 flex items-center justify-between p-4 bg-muted/5 rounded-2xl border border-dashed border-edge">
-                <div className="flex items-center gap-3">
-                   <div className="p-2 bg-profit/10 rounded-full">
-                      <Target className="w-4 h-4 text-profit" />
+              {/* Indicator Analysis */}
+              {selectedSignal.indicators && (
+                <div className="bg-dark/30 rounded-2xl p-5 border border-edge space-y-4">
+                   <div className="flex items-center gap-2 text-sm font-bold text-primary mb-2">
+                     <Crosshair className="w-4 h-4 text-accent" /> Algorithmic Payload
                    </div>
-                   <p className="text-xs text-muted-foreground">Action: <span className="text-profit font-bold">OPEN BUY POSITION</span></p>
-                </div>
-                <div className="text-[10px] text-muted-foreground">Last updated: Just now</div>
-             </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      
+                      {/* EMA Crossover Graphic */}
+                      <div className="space-y-4 relative">
+                         <div className="text-xs text-muted-foreground font-medium">Moving Averages (Fast vs Slow)</div>
+                         <div className="flex items-center justify-between px-4 py-3 bg-surface rounded-xl border border-edge">
+                             <div>
+                               <div className="text-[9px] text-muted uppercase">Fast EMA</div>
+                               <div className="font-mono text-primary font-bold">{selectedSignal.indicators.fastEMA?.toFixed(2) || '—'}</div>
+                             </div>
+                             <ArrowRight className="w-4 h-4 text-muted/50" />
+                             <div className="text-right">
+                               <div className="text-[9px] text-muted uppercase">Slow EMA</div>
+                               <div className="font-mono text-primary font-bold">{selectedSignal.indicators.slowEMA?.toFixed(2) || '—'}</div>
+                             </div>
+                         </div>
+                      </div>
 
-             {/* Background Decoration */}
-             <div className="absolute -top-24 -right-24 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
-          </div>
+                      {/* Strategy Explanation */}
+                      <div className="space-y-2">
+                         <div className="text-xs text-muted-foreground font-medium">Logic Interpretation</div>
+                         <p className="text-[11px] leading-relaxed text-muted bg-surface/50 p-3 rounded-xl border border-edge">
+                           {selectedSignal.trend === 'BULLISH' 
+                             ? `The fast moving average has crossed above the slow moving average concurrently with an RSI of ${selectedSignal.indicators.rsi?.toFixed(1) || 'N/A'}, indicating strong bullish momentum and a high-probability breakout setup.`
+                             : `The fast moving average has crossed below the slow moving average, signaling bearish divergence. Extreme caution is advised for long positions.`}
+                         </p>
+                      </div>
 
-          <div className="bg-card border border-edge rounded-3xl p-6 shadow-xl space-y-4">
-             <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-loss/10 rounded-xl">
-                   <ShieldCheck className="w-5 h-5 text-loss" />
-                </div>
-                <h2 className="text-lg font-bold text-primary">Exit & Risk Control</h2>
-             </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                   <label className="text-xs font-bold text-muted uppercase">Target Profit</label>
-                   <div className="relative">
-                      <input type="number" defaultValue="5" className="w-full bg-surface border border-edge rounded-2xl px-4 py-3 text-sm text-profit font-bold outline-none" />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted font-bold">%</span>
                    </div>
                 </div>
-                <div className="space-y-3">
-                   <label className="text-xs font-bold text-muted uppercase">Stop Loss</label>
-                   <div className="relative">
-                      <input type="number" defaultValue="2" className="w-full bg-surface border border-edge rounded-2xl px-4 py-3 text-sm text-loss font-bold outline-none" />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted font-bold">%</span>
-                   </div>
+              )}
+
+              {/* Equity Curve Preview */}
+              <div className="h-48 bg-dark/20 rounded-2xl p-4 border border-edge relative">
+                 <div className="absolute top-4 left-4 text-[10px] font-bold text-muted-foreground/60 z-10 flex items-center gap-1">
+                   <TrendingUp className="w-3 h-3 text-profit" /> HISTORICAL BACKTEST 
+                 </div>
+                 <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={generateEquityCurve(selectedSignal.strength)}>
+                       <defs>
+                          <linearGradient id="eqColor" x1="0" y1="0" x2="0" y2="1">
+                             <stop offset="5%" stopColor={selectedSignal.trend === 'BULLISH' ? '#22c55e' : '#ef4444'} stopOpacity={0.3}/>
+                             <stop offset="95%" stopColor={selectedSignal.trend === 'BULLISH' ? '#22c55e' : '#ef4444'} stopOpacity={0}/>
+                          </linearGradient>
+                       </defs>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                       <Area 
+                          type="monotone" 
+                          dataKey="equity" 
+                          stroke={selectedSignal.trend === 'BULLISH' ? '#22c55e' : '#ef4444'} 
+                          strokeWidth={2}
+                          fill="url(#eqColor)" 
+                       />
+                    </AreaChart>
+                 </ResponsiveContainer>
+              </div>
+
+              {msg && (
+                <div className={`p-3 rounded-xl flex items-center gap-2 text-xs font-bold ${msg.type === 'success' ? 'bg-profit/10 text-profit' : 'bg-loss/10 text-loss'}`}>
+                  {msg.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                  {msg.text}
                 </div>
-             </div>
-          </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-4">
+                 <button 
+                   onClick={() => handleCopyTrade(selectedSignal)}
+                   disabled={placingOrder}
+                   className={`flex-1 py-4 font-bold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 ${
+                     selectedSignal.trend === 'BULLISH' 
+                       ? 'bg-profit hover:bg-profit/90 text-dark shadow-profit/20' 
+                       : 'bg-loss/50 cursor-not-allowed text-white' // Locked shorts for demo unless implemented
+                   }`}
+                 >
+                   {placingOrder ? '⏳ Executing...' : selectedSignal.trend === 'BULLISH' ? '1-Click Copy Trade (BUY)' : 'Short Entry Required'}
+                 </button>
+                 <button className="px-6 py-4 bg-surface hover:bg-surface/80 border border-edge text-primary font-bold rounded-2xl transition-all">
+                   Save Strategy
+                 </button>
+              </div>
+
+            </div>
+          ) : (
+            <div className="bg-card border border-edge rounded-3xl p-6 h-full flex items-center justify-center">
+              <div className="text-center opacity-40">
+                 <ShieldCheck className="w-16 h-16 mx-auto mb-4" />
+                 <h3 className="font-bold text-lg text-primary">Select a Signal</h3>
+                 <p className="text-xs text-muted mt-2">Click on any active signal to view deep analytics.</p>
+              </div>
+            </div>
+          )}
         </div>
-
-        {/* ── Results Sidebar ── */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-card border border-edge rounded-3xl p-6 shadow-xl h-full flex flex-col min-h-[500px]">
-             <div className="flex items-center justify-between mb-8">
-                <h2 className="text-lg font-bold text-primary flex items-center gap-2">
-                   <Activity className="w-5 h-5 text-accent" /> Performance Analysis
-                </h2>
-                {results && (
-                  <span className="px-2 py-1 bg-profit/10 text-profit text-[10px] font-bold rounded-full">OPTIMIZED</span>
-                )}
-             </div>
-
-             {results ? (
-                <div className="flex-1 flex flex-col space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                   {/* Summary Stats */}
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-surface/50 p-4 rounded-2xl border border-edge">
-                         <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">Win Rate</p>
-                         <p className="text-2xl font-black text-profit font-mono">{results.winRate}%</p>
-                      </div>
-                      <div className="bg-surface/50 p-4 rounded-2xl border border-edge">
-                         <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">Net P&L</p>
-                         <p className="text-2xl font-black text-profit font-mono">{results.pnl}</p>
-                      </div>
-                      <div className="bg-surface/50 p-4 rounded-2xl border border-edge">
-                         <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">Total Trades</p>
-                         <p className="text-2xl font-black text-primary font-mono">{results.trades}</p>
-                      </div>
-                      <div className="bg-surface/50 p-4 rounded-2xl border border-edge">
-                         <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">Max Drawdown</p>
-                         <p className="text-2xl font-black text-loss font-mono">{results.maxDD}</p>
-                      </div>
-                   </div>
-
-                   {/* Mini Equity Curve */}
-                   <div className="flex-1 min-h-[200px] bg-dark/20 rounded-2xl p-4 border border-edge relative">
-                      <div className="absolute top-4 left-4 text-[10px] font-bold text-muted-foreground/60 z-10 flex items-center gap-1">
-                        <TrendingUp className="w-3 h-3 text-profit" /> EQUITY GROWTH CURVE
-                      </div>
-                      <ResponsiveContainer width="100%" height="100%">
-                         <AreaChart data={results.equityCurve}>
-                            <defs>
-                               <linearGradient id="eqColor" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                               </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
-                            <Tooltip 
-                               contentStyle={{ backgroundColor: '#131722', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                               labelStyle={{ display: 'none' }}
-                            />
-                            <Area 
-                               type="monotone" 
-                               dataKey="equity" 
-                               stroke="#22c55e" 
-                               strokeWidth={3}
-                               fillOpacity={1} 
-                               fill="url(#eqColor)" 
-                            />
-                         </AreaChart>
-                      </ResponsiveContainer>
-                   </div>
-
-                   <button className="w-full py-4 bg-accent hover:bg-accent/80 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-accent/20">
-                      <Zap className="w-4 h-4 fill-current" /> Deploy to AlgoBot
-                   </button>
-                </div>
-             ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 px-8 opacity-40">
-                   <LineChart className="w-16 h-16 text-muted mb-2" />
-                   <h3 className="font-bold text-primary">No Data Yet</h3>
-                   <p className="text-xs text-muted leading-relaxed">
-                     Configure your strategy logic on the left and click <b>"Run Analysis"</b> to generate performance metrics.
-                   </p>
-                   <div className="flex gap-4 pt-4">
-                      <div className="flex items-center gap-1 text-[10px] font-bold"><MousePointer2 className="w-3 h-3" /> Select Indicators</div>
-                      <div className="flex items-center gap-1 text-[10px] font-bold"><Zap className="w-3 h-3" /> Set Rules</div>
-                   </div>
-                </div>
-             )}
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-card border border-edge rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6">
-         <div className="p-4 bg-accent/10 rounded-2xl">
-            <Info className="w-6 h-6 text-accent" />
-         </div>
-         <div className="flex-1">
-            <h4 className="font-bold text-primary text-sm">How it works</h4>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-               The Algo Lab simulates your logic against the last 24-48 hours of historical data across all NIFTY-20 stocks. 
-               <b>"Crosses Above"</b> rules are high-probability trend-following indicators, while <b>"LT/GT"</b> (fixed values) are typically used for mean-reversal strategies like RSI oversold conditions.
-            </p>
-         </div>
       </div>
     </div>
   );

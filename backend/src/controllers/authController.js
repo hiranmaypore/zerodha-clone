@@ -37,7 +37,7 @@ exports.registerUser = async (req, res, next) => {
     const user = await User.create({ name, email, password, balance: 100000 });
     if (user) {
       res.status(201).json({
-        _id: user._id, name: user.name, email: user.email, balance: user.balance,
+        _id: user._id, name: user.name, email: user.email, balance: user.balance, preferences: user.preferences,
         token: generateToken(user._id, user.name, user.email),
       });
     } else {
@@ -81,7 +81,7 @@ exports.loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
       res.json({
-        _id: user._id, name: user.name, email: user.email, balance: user.balance,
+        _id: user._id, name: user.name, email: user.email, balance: user.balance, preferences: user.preferences,
         token: generateToken(user._id, user.name, user.email),
       });
     } else {
@@ -96,7 +96,7 @@ exports.loginUser = async (req, res) => {
 exports.getUserProfile = async (req, res) => {
   if (!global.dbConnected) {
     const u = req.user;
-    return res.json({ _id: u._id, name: u.name, email: u.email, balance: u.balance });
+    return res.json({ _id: u._id, name: u.name, email: u.email, balance: u.balance, preferences: u.preferences });
   }
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -112,13 +112,15 @@ exports.updateProfile = async (req, res) => {
   if (!global.dbConnected) {
     const u = req.user;
     if (req.body.name) u.name = req.body.name;
-    return res.json({ success: true, user: { _id: u._id, name: u.name, email: u.email, balance: u.balance } });
+    if (req.body.preferences) u.preferences = { ...u.preferences, ...req.body.preferences };
+    return res.json({ success: true, user: { _id: u._id, name: u.name, email: u.email, balance: u.balance, preferences: u.preferences } });
   }
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    const { name, currentPassword, newPassword } = req.body;
+    const { name, currentPassword, newPassword, preferences } = req.body;
     if (name) user.name = name;
+    if (preferences) user.preferences = { ...user.preferences, ...preferences };
     if (newPassword) {
       if (!currentPassword) return res.status(400).json({ message: 'Current password required' });
       const isMatch = await user.matchPassword(currentPassword);
@@ -126,7 +128,7 @@ exports.updateProfile = async (req, res) => {
       user.password = newPassword;
     }
     await user.save();
-    res.json({ success: true, user: { _id: user._id, name: user.name, email: user.email, balance: user.balance } });
+    res.json({ success: true, user: { _id: user._id, name: user.name, email: user.email, balance: user.balance, preferences: user.preferences } });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -141,12 +141,12 @@ const PORT = process.env.PORT || 5000;
 
     priceSocket(io, getPrices);
 
-    // Notifications (only if DB connected)
-    if (dbOk) {
-      try {
-        const { initializeNotifications } = require('./services/orderNotifications');
-        initializeNotifications(io);
-      } catch(e) { logger.warn(`Notifications skipped: ${e.message}`); }
+    // Notifications (Always start so demo mode gets alerts too)
+    try {
+      const { initializeNotifications } = require('./services/orderNotifications');
+      initializeNotifications(io);
+    } catch (e) {
+      logger.warn(`Notifications skipped: ${e.message}`);
     }
 
     // MIS Auto Square-Off — always start (handles both demo + DB)

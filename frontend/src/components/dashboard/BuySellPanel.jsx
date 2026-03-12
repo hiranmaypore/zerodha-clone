@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { buyOrder, sellOrder, placeBracket } from '../../services/api';
+import { buyOrder, sellOrder, placeBracket, placeStopLoss } from '../../services/api';
 import { AlertCircle, CheckCircle, Minus, Plus, Shield, Target, Clock } from 'lucide-react';
 
 export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderPlaced, userBalance, tradeCommand }) {
@@ -13,7 +13,8 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
   const [productType, setPT]    = useState('CNC');           // 'CNC' | 'MIS'
   const [limitPrice, setLP]     = useState('');
   const [bracketMode, setBM]    = useState(false);
-  const [gttMode, setGTT]        = useState(false);
+  const [slMode, setSLMode]     = useState(false);
+  const [gttMode, setGTT]       = useState(false);
   const [triggerPrice, setTP]   = useState('');
   const [stopLoss, setSL]       = useState('');
   const [target, setTarget]     = useState('');
@@ -82,20 +83,32 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
 
     if (insufficient)     return showMsg('error', 'Insufficient balance');
 
-    // Bracket order validation
+    // Bracket check (isBuy) vs SL check (!isBuy)
     if (bracketMode && tab === 'buy') {
-      const sl = parseFloat(stopLoss);
       const tg = parseFloat(target);
       const entry = parseFloat(limitPrice) || currentPrice;
+      const sl = parseFloat(stopLoss);
       if (!sl || sl <= 0) return showMsg('error', 'Enter a valid Stop Loss price');
       if (!tg || tg <= 0) return showMsg('error', 'Enter a valid Target price');
       if (sl >= entry)    return showMsg('error', 'Stop Loss must be below entry price');
       if (tg <= entry)    return showMsg('error', 'Target must be above entry price');
     }
 
+    if (slMode && !isBuy) {
+      if (!stopLoss || parseFloat(stopLoss) <= 0) return showMsg('error', 'Enter a valid trigger price for Stop-Loss');
+    }
+
     setLoading(true);
     try {
-      if (bracketMode && tab === 'buy') {
+      if (slMode && !isBuy) {
+        await placeStopLoss({
+          stockSymbol: selectedStock.symbol,
+          quantity: q,
+          triggerPrice: parseFloat(stopLoss),
+          orderType
+        });
+        showMsg('success', `Stop-Loss order placed at trigger ₹${parseFloat(stopLoss).toFixed(2)}`);
+      } else if (bracketMode && tab === 'buy') {
         const entryPx = parseFloat(limitPrice) || currentPrice;
         await placeBracket({
           stockSymbol: selectedStock.symbol,
@@ -214,7 +227,7 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
         {/* ── GTT Toggle ── */}
         <div>
           <button
-            onClick={() => { setGTT(!gttMode); if(!gttMode) setBM(false); }}
+            onClick={() => { setGTT(!gttMode); if(!gttMode) { setBM(false); setSLMode(false); } }}
             className={`w-full py-1 rounded flex items-center justify-center gap-1.5 text-[9px] font-semibold transition-all border ${
               gttMode
                 ? 'bg-warning/20 border-warning/40 text-warning'
@@ -283,7 +296,7 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
         {isBuy && !gttMode && (
           <div>
             <button
-              onClick={() => setBM(b => !b)}
+              onClick={() => { setBM(b => !b); setSLMode(false); }}
               className={`w-full py-1 rounded flex items-center justify-center gap-1.5 text-[9px] font-semibold transition-all border ${
                 bracketMode
                   ? 'bg-purple-500/20 border-purple-500/40 text-purple-300'
@@ -292,6 +305,23 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
             >
               <Shield className="w-3 h-3" />
               {bracketMode ? 'Bracket Order (ON)' : 'Enable Bracket (SL + Target)'}
+            </button>
+          </div>
+        )}
+
+        {/* ── Stop Loss Order Toggle (only for SELL + NOT GTT) ── */}
+        {!isBuy && !gttMode && (
+          <div>
+            <button
+              onClick={() => { setSLMode(s => !s); setBM(false); }}
+              className={`w-full py-1 rounded flex items-center justify-center gap-1.5 text-[9px] font-semibold transition-all border ${
+                slMode
+                  ? 'bg-loss/20 border-loss/40 text-loss'
+                  : 'bg-surface border-edge text-muted hover:text-primary'
+              }`}
+            >
+              <Shield className="w-3 h-3" />
+              {slMode ? 'Stop-Loss Order (ON)' : 'Enable Stop-Loss (Sell)'}
             </button>
           </div>
         )}
@@ -333,8 +363,26 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
           </div>
         )}
 
+        {/* ── Stop-Loss Separate SL Fields ── */}
+        {slMode && !isBuy && (
+          <div className="bg-surface/60 border border-edge/50 rounded-lg p-2 space-y-1.5 animate-in slide-in-from-top-2 duration-300">
+            <div className="text-[9px] text-loss font-semibold flex items-center gap-1">
+              <Shield className="w-3 h-3" /> Stop-Loss Parameters
+            </div>
+            <div>
+              <div className="text-[8px] text-muted mb-0.5">Trigger Price (₹)</div>
+              <input
+                type="number" min="0" step="0.05"
+                value={stopLoss} onChange={e => setSL(e.target.value)}
+                placeholder="e.g. 490"
+                className="w-full bg-dark border border-loss/30 rounded px-2 py-1 text-[10px] text-primary placeholder-muted/40 focus:border-loss outline-none"
+              />
+            </div>
+          </div>
+        )}
+
         {/* ── Order summary ── */}
-        {!bracketMode && (
+        {!bracketMode && !slMode && (
           <div className="bg-surface rounded-lg p-2 space-y-1">
             <div className="flex justify-between text-[9px]">
               <span className="text-muted">Subtotal</span>
@@ -366,18 +414,20 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
         {/* ── Submit ── */}
         <button
           onClick={handleSubmit}
-          disabled={loading || q <= 0 || insufficient}
+          disabled={loading || q <= 0 || (insufficient && !slMode)}
           className={`w-full py-2 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all disabled:opacity-40 shadow-lg ${
             bracketMode
               ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-500/20'
               : gttMode
                 ? 'bg-warning hover:bg-warning/80 text-dark shadow-warning/20'
-                : isBuy
-                  ? 'bg-profit hover:bg-profit/80 text-dark shadow-profit/20'
-                  : 'bg-loss hover:bg-loss/80 text-white shadow-loss/20'
+                : slMode && !isBuy
+                  ? 'bg-loss hover:bg-loss/80 text-white shadow-loss/20'
+                  : isBuy
+                    ? 'bg-profit hover:bg-profit/80 text-dark shadow-profit/20'
+                    : 'bg-loss hover:bg-loss/80 text-white shadow-loss/20'
           }`}
         >
-          {loading ? '⏳ Placing...' : bracketMode ? '🛡 Place Bracket' : gttMode ? '📋 Place GTT Trigger' : `${isBuy ? 'BUY' : 'SELL'} ${productType}`}
+          {loading ? '⏳ Placing...' : bracketMode ? '🛡 Place Bracket' : gttMode ? '📋 Place GTT Trigger' : slMode ? '🛡 Place Stop-Loss' : `${isBuy ? 'BUY' : 'SELL'} ${productType}`}
         </button>
 
       </div>

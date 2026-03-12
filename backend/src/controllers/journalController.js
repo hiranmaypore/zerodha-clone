@@ -19,7 +19,18 @@ exports.getTradeJournal = async (req, res) => {
     if (orders.length === 0) {
       return res.json({
         success: true,
-        stats: { winRate: 0, totalTrades: 0, profitByDay: {}, avgHoldingTime: '0m', currentStreak: 0 }
+        stats: { 
+          winRate: 0, 
+          totalTrades: 0, 
+          profitByDay: { 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0, 'Sun': 0 }, 
+          avgHoldingTime: '0m', 
+          currentStreak: 0,
+          maxStreak: 0,
+          holdingStats: [
+            { label: 'Long-term (CNC)', value: '0%' },
+            { label: 'Intraday (MIS)', value: '0%' },
+          ]
+        }
       });
     }
 

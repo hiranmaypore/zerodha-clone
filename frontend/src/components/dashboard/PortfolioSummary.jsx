@@ -43,13 +43,14 @@ export default function PortfolioSummary({ holdings = [], livePrices = {} }) {
               try {
                 const toastId = toast.loading('Generating tax statement...');
                 const res = await downloadTaxStatement();
-                const url = window.URL.createObjectURL(new Blob([res.data]));
+                const url = window.URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }));
                 const link = document.createElement('a');
                 link.href = url;
                 link.setAttribute('download', `Tax_Statement_${new Date().toISOString().split('T')[0]}.csv`);
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
+                window.URL.revokeObjectURL(url);
                 toast.success('Downloaded Tax Statement CSV', { id: toastId });
               } catch {
                 toast.error('Failed to export tax data');

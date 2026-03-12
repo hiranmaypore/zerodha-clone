@@ -3,6 +3,7 @@ const Holding = require('../models/Holding');
 const User = require('../models/User');
 const { getPrices } = require('../services/priceSimulator');
 const crypto = require('crypto');
+const notifications = require('../services/orderNotifications');
 
 // ─── In-memory helpers ──────────────────────────────────────────────────────────
 function memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, currentPrice, productType) {
@@ -37,6 +38,9 @@ function memBuyStock(userId, stockSymbol, quantity, orderType, limitPrice, curre
     } else {
       mem.holdings.set(hKey, { user: userId, stock: stockSymbol, quantity, avgPrice: currentPrice, productType: productType || 'CNC', tradeDate: today });
     }
+  }
+  if (order.status === 'COMPLETED') {
+    notifications.notifyOrderExecuted(order);
   }
   return { order };
 }
@@ -74,6 +78,9 @@ function memSellStock(userId, stockSymbol, quantity, currentPrice, productType) 
     createdAt: new Date().toISOString(),
   };
   mem.orders.set(order._id, order);
+  if (order.status === 'COMPLETED') {
+    notifications.notifyOrderExecuted(order);
+  }
   return { order };
 }
 
@@ -143,6 +150,8 @@ exports.buyStock = async (req, res) => {
       productType: pType,
       quantity, price: currentPrice, status: 'COMPLETED'
     });
+    
+    notifications.notifyOrderExecuted(order);
     res.status(201).json(order);
   } catch (error) {
     console.error(error);
@@ -206,6 +215,8 @@ exports.sellStock = async (req, res) => {
       user: userId, stock: stockSymbol, type: 'SELL',
       orderType: orderType || 'MARKET', quantity, price: currentPrice, status: 'COMPLETED'
     });
+    
+    notifications.notifyOrderExecuted(order);
     return res.status(201).json(order);
   } catch (error) {
     console.error(error);
@@ -248,11 +259,12 @@ const cancelOrder = async (req, res) => {
     // Refund
     const user = mem.users.get(userId);
     if (user && order.type === 'BUY') user.balance += order.price * order.quantity;
+    
+    notifications.notifyOrderCancelled(order);
     return res.json({ success: true, message: 'Order cancelled', order });
   }
 
   try {
-    const { notifyOrderCancelled } = require('../services/orderNotifications');
     const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ message: 'Order not found' });
     if (order.user.toString() !== userId.toString())
@@ -261,13 +273,13 @@ const cancelOrder = async (req, res) => {
       return res.status(400).json({ message: `Cannot cancel order with status: ${order.status}` });
 
     const user = await User.findById(userId);
-    if (order.type === 'BUY') user.balance += order.price * order.quantity;
+    if (order.type === 'BUY') user.balance += (order.price || order.limitPrice) * order.quantity;
     order.status = 'CANCELLED';
     order.cancelledAt = new Date();
     order.cancelReason = 'User cancelled';
     await user.save();
     await order.save();
-    await notifyOrderCancelled(order);
+    notifications.notifyOrderCancelled(order);
 
     res.json({ success: true, message: 'Order cancelled successfully', order: { orderId: order._id, status: order.status } });
   } catch (error) {

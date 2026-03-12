@@ -1,5 +1,6 @@
 const { getPrices } = require('./priceSimulator');
 const logger = require('../utils/logger');
+const notifications = require('./orderNotifications');
 
 
 // In-memory matching engine for demo mode
@@ -35,7 +36,14 @@ const memMatchingEngine = () => {
             } else {
               mem.holdings.set(hKey, { user: order.user, stock: order.stock, quantity: order.quantity, avgPrice: currentPrice, productType: pType, tradeDate: today });
             }
+          } else if (order.type === 'SELL') {
+             if (user) user.balance = (user.balance || 0) + (currentPrice * order.quantity);
+             if (holding) {
+                holding.quantity -= order.quantity;
+                if (holding.quantity <= 0) mem.holdings.delete(hKey);
+             }
           }
+          notifications.notifyOrderExecuted(order);
         }
       }
     } catch (e) { /* silent */ }

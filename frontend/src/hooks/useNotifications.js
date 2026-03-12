@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { connectSocket, joinUserRoom } from '../services/socket';
+import { toast } from 'react-hot-toast';
 
 const MAX_NOTIFICATIONS = 50;
 
@@ -17,6 +18,19 @@ export function useNotifications(userId) {
     setNotifications(prev =>
       [entry, ...prev].slice(0, MAX_NOTIFICATIONS)
     );
+
+    // Also trigger toast for instant feedback
+    if (type === 'order_executed') {
+      toast.success(`${data.type} filled: ${data.quantity} × ${data.stock} @ ₹${data.price?.toFixed(2)}`, {
+        icon: '✅',
+        duration: 4000
+      });
+    } else if (type === 'price_alert') {
+       toast(data.message || 'Price Alert Triggered', {
+         icon: '🔔',
+         duration: 5000
+       });
+    }
   }, []);
 
   useEffect(() => {
@@ -31,6 +45,7 @@ export function useNotifications(userId) {
       bracket_entry:       (d) => push('bracket_entry',       d),
       mis_warning:         (d) => push('mis_warning',         d),
       mis_squaredoff:      (d) => push('mis_squaredoff',      d),
+      notification:        (d) => push('price_alert',         d),
     };
 
     Object.entries(handlers).forEach(([ev, fn]) => socket.on(ev, fn));

@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 
-import { login as loginAPI, signup as signupAPI, getProfile } from '../services/api';
+import { login as loginAPI, signup as signupAPI, getProfile, updateProfile as updateProfileAPI } from '../services/api';
 import { connectSocket, joinUserRoom, disconnectSocket } from '../services/socket';
 
 const AuthContext = createContext(null);
@@ -39,8 +39,21 @@ export function AuthProvider({ children }) {
     localStorage.setItem('preferences', JSON.stringify(preferences));
   }, [preferences]);
 
-  const updatePreference = (key, value) => {
-    setPreferences(prev => ({ ...prev, [key]: value }));
+  const updatePreference = async (key, value) => {
+    const newVal = value;
+    setPreferences(prev => {
+      const p = { ...prev, [key]: newVal };
+      localStorage.setItem('preferences', JSON.stringify(p));
+      return p;
+    });
+
+    if (user) {
+      try {
+        await updateProfileAPI({ preferences: { [key]: newVal } });
+      } catch (err) {
+        console.error('Failed to sync preference', err);
+      }
+    }
   };
 
   // ── Sync light/dark class with preferences ──
@@ -61,6 +74,9 @@ export function AuthProvider({ children }) {
         const parsed = JSON.parse(savedUser);
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(parsed);
+        if (parsed.preferences) {
+          setPreferences(prev => ({ ...prev, ...parsed.preferences }));
+        }
         connectSocket();
         joinUserRoom(parsed._id);
       } catch {
@@ -76,6 +92,9 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
+    if (data.preferences) {
+      setPreferences(prev => ({ ...prev, ...data.preferences }));
+    }
     connectSocket();
     joinUserRoom(data._id);
 
@@ -106,6 +125,9 @@ export function AuthProvider({ children }) {
       const updated = { ...user, ...data };
       localStorage.setItem('user', JSON.stringify(updated));
       setUser(updated);
+      if (data.preferences) {
+        setPreferences(prev => ({ ...prev, ...data.preferences }));
+      }
     } catch {
       // ignore empty block
     }

@@ -38,7 +38,7 @@ function calcBS(optionType, S, K, T_days, volatility, riskFreeRate) {
   return { price, delta, gamma, theta };
 }
 
-export default function OptionChain({ spotPrice = 22000, onTrade, onAnalyze }) {
+export default function OptionChain({ spotPrice = 22000, onAnalyze }) {
   const [expiry, setExpiry] = useState(7); // days
   const [iv, setIv] = useState(15); // volatility %
   const [selectedLegs, setSelectedLegs] = useState([]);
@@ -158,7 +158,7 @@ export default function OptionChain({ spotPrice = 22000, onTrade, onAnalyze }) {
         
         {/* ── Table Body ── */}
         <div className="divide-y divide-edge overflow-y-auto max-h-[50vh]">
-          {strikes.map((strike, idx) => {
+          {strikes.map((strike) => {
             const isITM_Call = strike < spotPrice;
             const isITM_Put = strike > spotPrice;
             const call = calcBS('call', spotPrice, strike, expiry, iv, 6.5);

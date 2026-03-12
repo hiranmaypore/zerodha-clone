@@ -1,32 +1,84 @@
 import { useState } from 'react';
-import { calcSIP, calcEMI, calcSWP, calcBrokerage } from '../services/api';
+import { 
+  calcSIP, calcEMI, calcSWP, calcBrokerage,
+  calcStepUpSIP, calcRetirement, calcNPS, calcSTP, calcFOMargin, calcBlackScholes
+} from '../services/api';
 import { Calculator as CalcIcon } from 'lucide-react';
 
 const calculators = [
-  { id: 'sip', name: 'SIP Calculator', fields: [
+  { id: 'sip', name: 'SIP', fields: [
     { key: 'monthlyInvestment', label: 'Monthly Investment (₹)', placeholder: '5000' },
     { key: 'expectedReturn', label: 'Expected Return (%)', placeholder: '12' },
     { key: 'timePeriod', label: 'Time Period (Years)', placeholder: '10' },
   ]},
-  { id: 'emi', name: 'EMI Calculator', fields: [
+  { id: 'stepup', name: 'Step-up SIP', fields: [
+    { key: 'monthlyInvestment', label: 'Initial Monthly Investment (₹)', placeholder: '5000' },
+    { key: 'annualIncrement', label: 'Annual Step-up (%)', placeholder: '10' },
+    { key: 'expectedReturn', label: 'Expected Return (%)', placeholder: '12' },
+    { key: 'timePeriod', label: 'Time Period (Years)', placeholder: '10' },
+  ]},
+  { id: 'retirement', name: 'Retirement', fields: [
+    { key: 'currentAge', label: 'Current Age', placeholder: '30' },
+    { key: 'retirementAge', label: 'Retirement Age', placeholder: '60' },
+    { key: 'lifeExpectancy', label: 'Life Expectancy', placeholder: '85' },
+    { key: 'monthlyExpenses', label: 'Current Monthly Expenses (₹)', placeholder: '50000' },
+    { key: 'inflationRate', label: 'Inflation Rate (%)', placeholder: '6' },
+    { key: 'expectedReturn', label: 'Expected Return (%)', placeholder: '12' },
+  ]},
+  { id: 'nps', name: 'NPS', fields: [
+    { key: 'currentAge', label: 'Current Age', placeholder: '30' },
+    { key: 'retirementAge', label: 'Retirement Age', placeholder: '60' },
+    { key: 'monthlyContribution', label: 'Monthly Contribution (₹)', placeholder: '5000' },
+    { key: 'expectedReturn', label: 'Expected Return (%)', placeholder: '10' },
+    { key: 'annuityRate', label: 'Expected Annuity Return (%)', placeholder: '6' },
+  ]},
+  { id: 'stp', name: 'STP', fields: [
+    { key: 'initialInvestment', label: 'Initial Investment (Lumpsum ₹)', placeholder: '500000' },
+    { key: 'monthlyTransfer', label: 'Monthly Transfer to Equity (₹)', placeholder: '10000' },
+    { key: 'sourceReturn', label: 'Debt/Source Return (%)', placeholder: '6' },
+    { key: 'targetReturn', label: 'Equity/Target Return (%)', placeholder: '12' },
+    { key: 'timePeriod', label: 'Time Period (Years)', placeholder: '4' },
+  ]},
+  { id: 'emi', name: 'EMI', fields: [
     { key: 'loanAmount', label: 'Loan Amount (₹)', placeholder: '1000000' },
     { key: 'interestRate', label: 'Interest Rate (%)', placeholder: '8.5' },
     { key: 'loanTenure', label: 'Tenure (Years)', placeholder: '20' },
   ]},
-  { id: 'swp', name: 'SWP Calculator', fields: [
+  { id: 'swp', name: 'SWP', fields: [
     { key: 'initialInvestment', label: 'Total Investment (₹)', placeholder: '5000000' },
     { key: 'monthlyWithdrawal', label: 'Monthly Withdrawal (₹)', placeholder: '25000' },
     { key: 'expectedReturn', label: 'Expected Return (%)', placeholder: '8' },
     { key: 'timePeriod', label: 'Time Period (Years)', placeholder: '20' },
   ]},
-  { id: 'brokerage', name: 'Brokerage Calculator', fields: [
+  { id: 'brokerage', name: 'Brokerage', fields: [
     { key: 'buyPrice', label: 'Buy Price (₹)', placeholder: '500' },
     { key: 'sellPrice', label: 'Sell Price (₹)', placeholder: '510' },
     { key: 'quantity', label: 'Quantity', placeholder: '100' },
   ]},
+  { id: 'fomargin', name: 'F&O Margin', fields: [
+    { key: 'instrumentType', label: 'Instrument Type (e.g. FUTIDX, OPTIDX)', type: 'text', placeholder: 'FUTIDX' },
+    { key: 'optionType', label: 'Option Type (CE/PE) - Leave blank if FUT', type: 'text', placeholder: 'CE' },
+    { key: 'spotPrice', label: 'Spot Price', placeholder: '22000' },
+    { key: 'strikePrice', label: 'Strike Price (Options only)', placeholder: '22100' },
+    { key: 'lotSize', label: 'Lot Size', placeholder: '50' },
+    { key: 'lots', label: 'Number of Lots', placeholder: '1' },
+    { key: 'volatility', label: 'Volatility / IV (%)', placeholder: '20' },
+  ]},
+  { id: 'blackscholes', name: 'Black-Scholes Pricing', fields: [
+    { key: 'optionType', label: 'Option Type (call/put)', type: 'text', placeholder: 'call' },
+    { key: 'spotPrice', label: 'Spot Price', placeholder: '22000' },
+    { key: 'strikePrice', label: 'Strike Price', placeholder: '22100' },
+    { key: 'daysToExpiry', label: 'Days to Expiry', placeholder: '7' },
+    { key: 'volatility', label: 'Implied Volatility (%)', placeholder: '15' },
+    { key: 'riskFreeRate', label: 'Risk Free Rate (%)', placeholder: '6.5' },
+  ]},
 ];
 
-const apiMap = { sip: calcSIP, emi: calcEMI, swp: calcSWP, brokerage: calcBrokerage };
+const apiMap = { 
+  sip: calcSIP, emi: calcEMI, swp: calcSWP, brokerage: calcBrokerage,
+  stepup: calcStepUpSIP, retirement: calcRetirement, nps: calcNPS, stp: calcSTP,
+  fomargin: calcFOMargin, blackscholes: calcBlackScholes
+};
 
 export default function Calculators() {
   const [active, setActive] = useState('sip');
@@ -45,14 +97,20 @@ export default function Calculators() {
     setResult(null);
     try {
       const payload = {};
-      calc.fields.forEach(f => { payload[f.key] = parseFloat(values[f.key]) || 0; });
+      calc.fields.forEach(f => {
+        if (f.type === 'text') {
+           payload[f.key] = values[f.key] || f.placeholder;
+        } else {
+           payload[f.key] = parseFloat(values[f.key] || f.placeholder) || 0; 
+        }
+      });
       
       if (active === 'brokerage') payload.tradeType = 'equity_intraday';
 
       const res = await apiMap[active](payload);
       setResult(res.data.data);
     } catch (err) {
-      setResult({ error: err.response?.data?.message || 'Calculation failed' });
+      setResult({ error: err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Calculation failed' });
     } finally {
       setLoading(false);
     }
