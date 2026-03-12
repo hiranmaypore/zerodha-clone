@@ -14791,3 +14791,630 @@
 2026-03-13 01:16:08 [info]: 🤖 [INFY] RSI Signal: SELL at ₹1430.61
 2026-03-13 01:16:08 [info]: 🤖 [ULTRACEMCO] EMA Signal: BUY at ₹9681.71
 2026-03-13 01:16:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:12 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:12 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:14 [info]: 🤖 [AXISBANK] EMA Signal: BUY at ₹1045.56
+2026-03-13 01:16:16 [info]: GET /api/funds 304 - - 2.774 ms
+2026-03-13 01:16:16 [info]: GET /api/funds 304 - - 2.623 ms
+2026-03-13 01:16:16 [info]: GET /api/holdings/dashboard 200 766 - 3.331 ms
+2026-03-13 01:16:16 [info]: GET /api/funds/equity 200 1229 - 3.100 ms
+2026-03-13 01:16:16 [info]: GET /api/holdings/dashboard 304 - - 4.282 ms
+2026-03-13 01:16:16 [info]: GET /api/funds/equity 200 1222 - 3.776 ms
+2026-03-13 01:16:17 [info]: 🤖 [RELIANCE] RSI Signal: SELL at ₹2517.89
+2026-03-13 01:16:17 [info]: 🤖 [TITAN] EMA Signal: SELL at ₹3225.05
+2026-03-13 01:16:18 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:18 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:18 [info]: GET /api/stocks 200 2038 - 0.843 ms
+2026-03-13 01:16:18 [info]: GET /api/stocks 304 - - 1.158 ms
+2026-03-13 01:16:20 [info]: 🤖 [ITC] EMA Signal: SELL at ₹415.94
+2026-03-13 01:16:20 [info]: 🤖 [BAJFINANCE] RSI Signal: BUY at ₹6225.32
+2026-03-13 01:16:20 [info]: 🤖 [SUNPHARMA] RSI Signal: BUY at ₹1589.92
+2026-03-13 01:16:23 [info]: 🤖 [RELIANCE] RSI Signal: SELL at ₹2534.2
+2026-03-13 01:16:23 [info]: 🤖 [HDFC] EMA Signal: SELL at ₹1629.62
+2026-03-13 01:16:23 [info]: 🤖 [ICICI] EMA Signal: SELL at ₹1003.7
+2026-03-13 01:16:24 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:26 [info]: 🤖 [TCS] EMA Signal: SELL at ₹3812.98
+2026-03-13 01:16:26 [info]: 🤖 [BHARTIARTL] RSI Signal: BUY at ₹1041.73
+2026-03-13 01:16:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:29 [info]: 🤖 [INFY] RSI Signal: SELL at ₹1442.44
+2026-03-13 01:16:29 [info]: 🤖 [SUNPHARMA] RSI Signal: BUY at ₹1582.07
+2026-03-13 01:16:30 [info]: GET /api/signals?limit=50 500 97 - 10011.410 ms
+2026-03-13 01:16:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:32 [info]: 🤖 [SBIN] EMA Signal: SELL at ₹651.86
+2026-03-13 01:16:32 [info]: 🤖 [TITAN] EMA Signal: BUY at ₹3243.99
+2026-03-13 01:16:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:35 [info]: 🤖 [ICICI] EMA Signal: BUY at ₹1016.23
+2026-03-13 01:16:35 [info]: 🤖 [BAJFINANCE] RSI Signal: BUY at ₹6162.12
+2026-03-13 01:16:35 [info]: GET /api/holdings/journal 200 302 - 4.497 ms
+2026-03-13 01:16:35 [info]: GET /api/holdings/journal 304 - - 4.035 ms
+2026-03-13 01:16:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:38 [info]: 🤖 [HDFC] RSI Signal: BUY at ₹1578.91
+2026-03-13 01:16:38 [info]: 🤖 [ICICI] EMA Signal: SELL at ₹1011.43
+2026-03-13 01:16:39 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:39 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:40 [info]: GET /api/signals?limit=50 500 97 - 10006.787 ms
+2026-03-13 01:16:41 [info]: 🤖 [BAJFINANCE] RSI Signal: BUY at ₹6132.35
+2026-03-13 01:16:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:47 [info]: 🤖 [RELIANCE] RSI Signal: SELL at ₹2555.49
+2026-03-13 01:16:47 [info]: 🤖 [AXISBANK] EMA Signal: SELL at ₹1031.92
+2026-03-13 01:16:47 [info]: 🤖 [ASIANPAINT] EMA Signal: BUY at ₹2746.02
+2026-03-13 01:16:48 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:48 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:51 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:53 [info]: 🤖 [TATAMOTORS] EMA Signal: BUY at ₹900.04
+2026-03-13 01:16:56 [info]: 🤖 [RELIANCE] RSI Signal: SELL at ₹2578.2
+2026-03-13 01:16:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:16:59 [info]: 🤖 [SUNPHARMA] EMA Signal: BUY at ₹1638.31
+2026-03-13 01:16:59 [info]: 🤖 [TATAMOTORS] EMA Signal: SELL at ₹888.9
+2026-03-13 01:17:02 [info]: 🤖 [TITAN] EMA Signal: SELL at ₹3219.4
+2026-03-13 01:17:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:05 [info]: 🤖 [BHARTIARTL] EMA Signal: BUY at ₹1064.3
+2026-03-13 01:17:05 [info]: 🤖 [ITC] EMA Signal: BUY at ₹419.73
+2026-03-13 01:17:06 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:11 [info]: 🤖 [KOTAKBANK] EMA Signal: SELL at ₹1710.99
+2026-03-13 01:17:11 [info]: 🤖 [LT] RSI Signal: SELL at ₹3749.68
+2026-03-13 01:17:11 [info]: 🤖 [TATAMOTORS] EMA Signal: BUY at ₹897.39
+2026-03-13 01:17:12 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:17 [info]: GET /api/watchlist 200 296 - 3.944 ms
+2026-03-13 01:17:17 [info]: GET /api/alerts 304 - - 3.425 ms
+2026-03-13 01:17:17 [info]: GET /api/stocks 200 2034 - 0.748 ms
+2026-03-13 01:17:17 [info]: GET /api/watchlist 304 - - 3.354 ms
+2026-03-13 01:17:17 [info]: GET /api/alerts 304 - - 2.279 ms
+2026-03-13 01:17:17 [info]: GET /api/stocks 304 - - 0.605 ms
+2026-03-13 01:17:17 [info]: GET /api/orders 304 - - 2.334 ms
+2026-03-13 01:17:17 [info]: GET /api/holdings 200 516 - 2.162 ms
+2026-03-13 01:17:17 [info]: GET /api/funds 304 - - 2.800 ms
+2026-03-13 01:17:17 [info]: 🤖 [RELIANCE] RSI Signal: SELL at ₹2610.75
+2026-03-13 01:17:17 [info]: 🤖 [SBIN] EMA Signal: BUY at ₹656.46
+2026-03-13 01:17:17 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1678.32
+2026-03-13 01:17:20 [info]: 🤖 [MARUTI] RSI Signal: BUY at ₹9790.31
+2026-03-13 01:17:20 [info]: 🤖 [ASIANPAINT] RSI Signal: SELL at ₹2798.77
+2026-03-13 01:17:20 [info]: POST /api/orders/buy 201 237 - 1.794 ms
+2026-03-13 01:17:20 [info]: GET /api/orders 200 725 - 2.585 ms
+2026-03-13 01:17:20 [info]: GET /api/holdings 200 748 - 2.208 ms
+2026-03-13 01:17:20 [info]: GET /api/funds 200 35 - 3.591 ms
+2026-03-13 01:17:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:23 [info]: 🤖 [TITAN] EMA Signal: BUY at ₹3254.47
+2026-03-13 01:17:26 [info]: 🤖 [ASIANPAINT] RSI Signal: SELL at ₹2820.12
+2026-03-13 01:17:27 [info]: GET /api/signals?limit=5 500 97 - 10007.372 ms
+2026-03-13 01:17:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:27 [info]: POST /api/orders/buy 201 237 - 2.656 ms
+2026-03-13 01:17:27 [info]: GET /api/orders 200 963 - 2.607 ms
+2026-03-13 01:17:27 [info]: GET /api/holdings 200 758 - 2.498 ms
+2026-03-13 01:17:27 [info]: GET /api/funds 200 34 - 2.367 ms
+2026-03-13 01:17:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:32 [info]: 🤖 [ITC] EMA Signal: SELL at ₹416.3
+2026-03-13 01:17:32 [info]: 🤖 [TITAN] EMA Signal: SELL at ₹3220.54
+2026-03-13 01:17:32 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1684.93
+2026-03-13 01:17:32 [info]: 🤖 [ULTRACEMCO] RSI Signal: SELL at ₹10094.47
+2026-03-13 01:17:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:35 [info]: 🤖 [WIPRO] EMA Signal: SELL at ₹490.1
+2026-03-13 01:17:35 [info]: POST /api/orders/sell 201 218 - 2.962 ms
+2026-03-13 01:17:35 [info]: GET /api/orders 200 1182 - 1.749 ms
+2026-03-13 01:17:35 [info]: GET /api/holdings 200 756 - 2.280 ms
+2026-03-13 01:17:35 [info]: GET /api/funds 200 34 - 2.404 ms
+2026-03-13 01:17:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:37 [info]: GET /api/signals?limit=5 500 97 - 10005.571 ms
+2026-03-13 01:17:38 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1685.82
+2026-03-13 01:17:41 [info]: GET /api/holdings/journal 200 302 - 3.870 ms
+2026-03-13 01:17:41 [info]: GET /api/holdings/journal 304 - - 3.902 ms
+2026-03-13 01:17:41 [info]: 🤖 [BAJFINANCE] EMA Signal: BUY at ₹6224.99
+2026-03-13 01:17:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:44 [info]: 🤖 [SBIN] EMA Signal: SELL at ₹650.53
+2026-03-13 01:17:44 [info]: 🤖 [LT] EMA Signal: SELL at ₹3632.63
+2026-03-13 01:17:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:47 [info]: 🤖 [TCS] EMA Signal: BUY at ₹3844.35
+2026-03-13 01:17:47 [info]: 🤖 [ICICI] EMA Signal: BUY at ₹1015.04
+2026-03-13 01:17:47 [info]: 🤖 [BHARTIARTL] EMA Signal: SELL at ₹1061.36
+2026-03-13 01:17:48 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:50 [info]: 🤖 [BHARTIARTL] EMA Signal: BUY at ₹1070.04
+2026-03-13 01:17:50 [info]: 🤖 [ASIANPAINT] EMA Signal: SELL at ₹2739.28
+2026-03-13 01:17:51 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:53 [info]: 🤖 [KOTAKBANK] EMA Signal: BUY at ₹1742.99
+2026-03-13 01:17:53 [info]: 🤖 [AXISBANK] RSI Signal: BUY at ₹1005.25
+2026-03-13 01:17:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:17:59 [info]: 🤖 [ICICI] EMA Signal: SELL at ₹999.71
+2026-03-13 01:17:59 [info]: 🤖 [TATAMOTORS] EMA Signal: SELL at ₹892.11
+2026-03-13 01:18:00 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:00 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:02 [info]: 🤖 [TATAMOTORS] EMA Signal: BUY at ₹898.17
+2026-03-13 01:18:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:05 [info]: 🤖 [ITC] EMA Signal: BUY at ₹419.72
+2026-03-13 01:18:05 [info]: 🤖 [AXISBANK] RSI Signal: BUY at ₹998.02
+2026-03-13 01:18:05 [info]: 🤖 [MARUTI] EMA Signal: BUY at ₹10013.86
+2026-03-13 01:18:05 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1706.19
+2026-03-13 01:18:05 [info]: 🤖 [ASIANPAINT] EMA Signal: BUY at ₹2772.92
+2026-03-13 01:18:08 [info]: 🤖 [LT] EMA Signal: BUY at ₹3672.97
+2026-03-13 01:18:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:11 [info]: 🤖 [WIPRO] RSI Signal: BUY at ₹475.65
+2026-03-13 01:18:11 [info]: 🤖 [MARUTI] EMA Signal: SELL at ₹9885.76
+2026-03-13 01:18:11 [info]: 🤖 [TATAMOTORS] EMA Signal: SELL at ₹888.62
+2026-03-13 01:18:12 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:14 [info]: 🤖 [ITC] EMA Signal: SELL at ₹413.81
+2026-03-13 01:18:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:17 [info]: 🤖 [ITC] EMA Signal: BUY at ₹417.37
+2026-03-13 01:18:17 [info]: 🤖 [AXISBANK] RSI Signal: BUY at ₹989.77
+2026-03-13 01:18:18 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:20 [info]: 🤖 [RELIANCE] EMA Signal: SELL at ₹2565.23
+2026-03-13 01:18:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:23 [info]: 🤖 [INFY] EMA Signal: SELL at ₹1441.74
+2026-03-13 01:18:23 [info]: 🤖 [SBIN] EMA Signal: BUY at ₹655.21
+2026-03-13 01:18:23 [info]: 🤖 [AXISBANK] RSI Signal: BUY at ₹989.33
+2026-03-13 01:18:24 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:26 [info]: 🤖 [WIPRO] RSI Signal: BUY at ₹472.33
+2026-03-13 01:18:26 [info]: 🤖 [BAJFINANCE] RSI Signal: SELL at ₹6460.09
+2026-03-13 01:18:26 [info]: 🤖 [MARUTI] EMA Signal: BUY at ₹10054.63
+2026-03-13 01:18:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:32 [info]: 🤖 [KOTAKBANK] EMA Signal: SELL at ₹1723.35
+2026-03-13 01:18:32 [info]: 🤖 [ULTRACEMCO] EMA Signal: SELL at ₹9888.85
+2026-03-13 01:18:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:34 [info]: GET /api/holdings/journal 304 - - 2.787 ms
+2026-03-13 01:18:34 [info]: GET /api/holdings/journal 304 - - 2.478 ms
+2026-03-13 01:18:35 [info]: 🤖 [SBIN] RSI Signal: SELL at ₹665.92
+2026-03-13 01:18:35 [info]: 🤖 [LT] EMA Signal: SELL at ₹3644.85
+2026-03-13 01:18:35 [info]: 🤖 [WIPRO] RSI Signal: BUY at ₹467.81
+2026-03-13 01:18:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:38 [info]: Client disconnected: AVXX5y78ZlYJoxWAAAAB
+2026-03-13 01:18:38 [info]: Client disconnected: _PhfTP_pUFn9PrqMAAAD
+2026-03-13 01:18:39 [info]: GET /api/holdings/journal 304 - - 2.824 ms
+2026-03-13 01:18:39 [info]: GET /api/holdings/journal 304 - - 2.686 ms
+2026-03-13 01:18:39 [info]: Client connected: mUhSpZjF7gCu7vAOAAAI
+2026-03-13 01:18:39 [info]: Client connected: iTWkD0I7ypRRcWBjAAAJ
+2026-03-13 01:18:39 [info]: Client connected: 0D4gKLewt3yJFKfNAAAK
+2026-03-13 01:18:39 [info]: Client connected: K8gv_E9h5hsvH97lAAAL
+2026-03-13 01:18:41 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1731
+2026-03-13 01:18:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:44 [info]: 🤖 [ICICI] EMA Signal: BUY at ₹1012.01
+2026-03-13 01:18:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:47 [info]: 🤖 [RELIANCE] EMA Signal: BUY at ₹2594.97
+2026-03-13 01:18:47 [info]: 🤖 [SBIN] RSI Signal: SELL at ₹671.65
+2026-03-13 01:18:47 [info]: 🤖 [TITAN] EMA Signal: BUY at ₹3226.02
+2026-03-13 01:18:51 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:53 [info]: 🤖 [AXISBANK] RSI Signal: BUY at ₹977.57
+2026-03-13 01:18:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:56 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1742.54
+2026-03-13 01:18:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:18:59 [info]: 🤖 [BHARTIARTL] EMA Signal: SELL at ₹1055.69
+2026-03-13 01:18:59 [info]: 🤖 [ITC] EMA Signal: SELL at ₹414.12
+2026-03-13 01:19:02 [info]: 🤖 [INFY] RSI Signal: BUY at ₹1393.52
+2026-03-13 01:19:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:05 [info]: 🤖 [RELIANCE] EMA Signal: SELL at ₹2538.83
+2026-03-13 01:19:05 [info]: 🤖 [ULTRACEMCO] EMA Signal: BUY at ₹9987.51
+2026-03-13 01:19:06 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:08 [info]: 🤖 [AXISBANK] RSI Signal: BUY at ₹972.6
+2026-03-13 01:19:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:11 [info]: 🤖 [LT] EMA Signal: BUY at ₹3677.72
+2026-03-13 01:19:11 [info]: 🤖 [ULTRACEMCO] RSI Signal: SELL at ₹10192.82
+2026-03-13 01:19:12 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:14 [info]: 🤖 [ICICI] EMA Signal: SELL at ₹1000.47
+2026-03-13 01:19:14 [info]: 🤖 [HCLTECH] EMA Signal: BUY at ₹1259.72
+2026-03-13 01:19:14 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1754.96
+2026-03-13 01:19:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:17 [info]: 🤖 [TCS] EMA Signal: SELL at ₹3853.05
+2026-03-13 01:19:18 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:20 [info]: 🤖 [KOTAKBANK] EMA Signal: BUY at ₹1727.96
+2026-03-13 01:19:20 [info]: 🤖 [TATAMOTORS] EMA Signal: BUY at ₹904.32
+2026-03-13 01:19:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:24 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:24 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:24 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:26 [info]: 🤖 [RELIANCE] EMA Signal: BUY at ₹2581.48
+2026-03-13 01:19:26 [info]: 🤖 [TITAN] EMA Signal: SELL at ₹3165.35
+2026-03-13 01:19:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:29 [info]: 🤖 [KOTAKBANK] EMA Signal: SELL at ₹1708.83
+2026-03-13 01:19:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:32 [info]: 🤖 [KOTAKBANK] EMA Signal: BUY at ₹1721.68
+2026-03-13 01:19:35 [info]: 🤖 [RELIANCE] EMA Signal: SELL at ₹2559.17
+2026-03-13 01:19:35 [info]: 🤖 [HCLTECH] EMA Signal: SELL at ₹1244.78
+2026-03-13 01:19:35 [info]: 🤖 [KOTAKBANK] EMA Signal: SELL at ₹1709.55
+2026-03-13 01:19:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:38 [info]: 🤖 [HDFC] EMA Signal: BUY at ₹1569.52
+2026-03-13 01:19:38 [info]: 🤖 [AXISBANK] EMA Signal: BUY at ₹991.52
+2026-03-13 01:19:39 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:44 [info]: 🤖 [RELIANCE] EMA Signal: BUY at ₹2580.19
+2026-03-13 01:19:44 [info]: 🤖 [HDFC] EMA Signal: SELL at ₹1552.09
+2026-03-13 01:19:44 [info]: 🤖 [AXISBANK] EMA Signal: SELL at ₹985.32
+2026-03-13 01:19:44 [info]: 🤖 [ULTRACEMCO] EMA Signal: SELL at ₹9936.45
+2026-03-13 01:19:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:48 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:48 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:50 [info]: 🤖 [ICICI] EMA Signal: BUY at ₹1008.2
+2026-03-13 01:19:50 [info]: 🤖 [ITC] EMA Signal: BUY at ₹419.93
+2026-03-13 01:19:53 [info]: 🤖 [ICICI] EMA Signal: SELL at ₹1003.11
+2026-03-13 01:19:53 [info]: 🤖 [BAJFINANCE] EMA Signal: SELL at ₹6377.79
+2026-03-13 01:19:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:19:56 [info]: 🤖 [BHARTIARTL] EMA Signal: BUY at ₹1064.6
+2026-03-13 01:19:59 [info]: 🤖 [ICICI] EMA Signal: BUY at ₹1008.44
+2026-03-13 01:19:59 [info]: 🤖 [LT] EMA Signal: SELL at ₹3626.36
+2026-03-13 01:20:00 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:00 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:02 [info]: 🤖 [ULTRACEMCO] EMA Signal: BUY at ₹10037.28
+2026-03-13 01:20:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:05 [info]: 🤖 [KOTAKBANK] EMA Signal: BUY at ₹1730.73
+2026-03-13 01:20:05 [info]: 🤖 [BAJFINANCE] EMA Signal: BUY at ₹6493.18
+2026-03-13 01:20:05 [info]: 🤖 [TATAMOTORS] EMA Signal: SELL at ₹889.95
+2026-03-13 01:20:05 [info]: 🤖 [ULTRACEMCO] EMA Signal: SELL at ₹9995.03
+2026-03-13 01:20:06 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:08 [info]: 🤖 [BAJFINANCE] EMA Signal: SELL at ₹6421.35
+2026-03-13 01:20:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:11 [info]: 🤖 [INFY] EMA Signal: BUY at ₹1414.17
+2026-03-13 01:20:11 [info]: 🤖 [ICICI] EMA Signal: SELL at ₹999.53
+2026-03-13 01:20:11 [info]: 🤖 [ULTRACEMCO] EMA Signal: BUY at ₹10060.04
+2026-03-13 01:20:12 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:17 [info]: 🤖 [BHARTIARTL] RSI Signal: SELL at ₹1092.04
+2026-03-13 01:20:17 [info]: 🤖 [MARUTI] EMA Signal: SELL at ₹9933.03
+2026-03-13 01:20:18 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:20 [info]: 🤖 [ASIANPAINT] EMA Signal: SELL at ₹2805.49
+2026-03-13 01:20:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:23 [info]: 🤖 [SUNPHARMA] EMA Signal: SELL at ₹1738.75
+2026-03-13 01:20:23 [info]: 🤖 [ASIANPAINT] EMA Signal: BUY at ₹2814.88
+2026-03-13 01:20:26 [info]: 🤖 [HCLTECH] EMA Signal: BUY at ₹1255.87
+2026-03-13 01:20:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:29 [info]: 🤖 [INFY] EMA Signal: SELL at ₹1394
+2026-03-13 01:20:29 [info]: 🤖 [TITAN] EMA Signal: BUY at ₹3204.91
+2026-03-13 01:20:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:32 [info]: 🤖 [BAJFINANCE] EMA Signal: BUY at ₹6524.2
+2026-03-13 01:20:32 [info]: 🤖 [TITAN] EMA Signal: SELL at ₹3172.3
+2026-03-13 01:20:32 [info]: 🤖 [ULTRACEMCO] RSI Signal: SELL at ₹10240.76
+2026-03-13 01:20:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:35 [info]: 🤖 [HCLTECH] EMA Signal: SELL at ₹1231.13
+2026-03-13 01:20:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:38 [info]: 🤖 [SBIN] EMA Signal: SELL at ₹666.34
+2026-03-13 01:20:38 [info]: 🤖 [ITC] RSI Signal: SELL at ₹431.2
+2026-03-13 01:20:39 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:39 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:41 [info]: 🤖 [BAJFINANCE] EMA Signal: SELL at ₹6421.86
+2026-03-13 01:20:41 [info]: 🤖 [SUNPHARMA] RSI Signal: BUY at ₹1704.74
+2026-03-13 01:20:41 [info]: 🤖 [ASIANPAINT] EMA Signal: SELL at ₹2795.58
+2026-03-13 01:20:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:44 [info]: 🤖 [TCS] EMA Signal: BUY at ₹3893.28
+2026-03-13 01:20:44 [info]: 🤖 [AXISBANK] EMA Signal: BUY at ₹987.3
+2026-03-13 01:20:44 [info]: 🤖 [MARUTI] EMA Signal: BUY at ₹10075.57
+2026-03-13 01:20:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:47 [info]: 🤖 [HDFC] EMA Signal: BUY at ₹1562.12
+2026-03-13 01:20:47 [info]: 🤖 [LT] RSI Signal: BUY at ₹3569.71
+2026-03-13 01:20:48 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:48 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:51 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:51 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:51 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:56 [info]: 🤖 [KOTAKBANK] EMA Signal: SELL at ₹1716.44
+2026-03-13 01:20:56 [info]: 🤖 [BAJFINANCE] EMA Signal: BUY at ₹6499.18
+2026-03-13 01:20:56 [info]: 🤖 [MARUTI] EMA Signal: SELL at ₹10001.7
+2026-03-13 01:20:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:20:59 [info]: 🤖 [TCS] RSI Signal: SELL at ₹3958.1
+2026-03-13 01:20:59 [info]: 🤖 [ICICI] EMA Signal: BUY at ₹1004.63
+2026-03-13 01:20:59 [info]: 🤖 [HCLTECH] EMA Signal: BUY at ₹1253.21
+2026-03-13 01:20:59 [info]: 🤖 [MARUTI] EMA Signal: BUY at ₹10104.6
+2026-03-13 01:20:59 [info]: 🤖 [TITAN] EMA Signal: BUY at ₹3193.49
+2026-03-13 01:21:02 [info]: 🤖 [ASIANPAINT] EMA Signal: BUY at ₹2837.54
+2026-03-13 01:21:06 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:06 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:06 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:11 [info]: 🤖 [MARUTI] EMA Signal: SELL at ₹9980.59
+2026-03-13 01:21:12 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:14 [info]: 🤖 [BHARTIARTL] EMA Signal: SELL at ₹1072.07
+2026-03-13 01:21:14 [info]: 🤖 [BAJFINANCE] EMA Signal: SELL at ₹6387.73
+2026-03-13 01:21:17 [info]: 🤖 [HCLTECH] EMA Signal: SELL at ₹1223.41
+2026-03-13 01:21:17 [info]: 🤖 [AXISBANK] EMA Signal: SELL at ₹977.91
+2026-03-13 01:21:17 [info]: 🤖 [MARUTI] EMA Signal: BUY at ₹10105.97
+2026-03-13 01:21:17 [info]: 🤖 [TITAN] EMA Signal: SELL at ₹3129.29
+2026-03-13 01:21:20 [info]: 🤖 [SBIN] EMA Signal: BUY at ₹675.85
+2026-03-13 01:21:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:24 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:24 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:26 [info]: 🤖 [RELIANCE] RSI Signal: SELL at ₹2680.61
+2026-03-13 01:21:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:29 [info]: 🤖 [ITC] EMA Signal: SELL at ₹423.49
+2026-03-13 01:21:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:32 [info]: 🤖 [HDFC] EMA Signal: SELL at ₹1549.99
+2026-03-13 01:21:32 [info]: 🤖 [HCLTECH] EMA Signal: BUY at ₹1254.82
+2026-03-13 01:21:32 [info]: 🤖 [WIPRO] EMA Signal: BUY at ₹467.42
+2026-03-13 01:21:32 [info]: 🤖 [TITAN] RSI Signal: BUY at ₹3070.42
+2026-03-13 01:21:35 [info]: 🤖 [TATAMOTORS] RSI Signal: BUY at ₹865.32
+2026-03-13 01:21:36 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:38 [info]: 🤖 [SUNPHARMA] EMA Signal: BUY at ₹1739.74
+2026-03-13 01:21:39 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:44 [info]: 🤖 [TITAN] RSI Signal: BUY at ₹3060.01
+2026-03-13 01:21:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:47 [info]: 🤖 [AXISBANK] EMA Signal: BUY at ₹984.73
+2026-03-13 01:21:48 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:50 [info]: 🤖 [TCS] EMA Signal: SELL at ₹3888.31
+2026-03-13 01:21:50 [info]: 🤖 [BAJFINANCE] EMA Signal: BUY at ₹6475.89
+2026-03-13 01:21:53 [info]: 🤖 [RELIANCE] EMA Signal: SELL at ₹2605.6
+2026-03-13 01:21:53 [info]: 🤖 [MARUTI] EMA Signal: SELL at ₹9943.05
+2026-03-13 01:21:53 [info]: 🤖 [TATAMOTORS] RSI Signal: BUY at ₹854.08
+2026-03-13 01:21:53 [info]: 🤖 [ASIANPAINT] EMA Signal: SELL at ₹2788.23
+2026-03-13 01:21:54 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:56 [info]: 🤖 [INFY] EMA Signal: BUY at ₹1388.58
+2026-03-13 01:21:56 [info]: 🤖 [TITAN] RSI Signal: BUY at ₹3028.98
+2026-03-13 01:21:57 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:21:59 [info]: 🤖 [SBIN] EMA Signal: SELL at ₹668.31
+2026-03-13 01:22:00 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:00 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:02 [info]: 🤖 [BHARTIARTL] RSI Signal: BUY at ₹1038.81
+2026-03-13 01:22:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:03 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:05 [info]: 🤖 [RELIANCE] RSI Signal: BUY at ₹2560.4
+2026-03-13 01:22:05 [info]: 🤖 [TATAMOTORS] RSI Signal: BUY at ₹851.26
+2026-03-13 01:22:06 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:06 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:08 [info]: 🤖 [BAJFINANCE] RSI Signal: SELL at ₹6608.17
+2026-03-13 01:22:08 [info]: 🤖 [ULTRACEMCO] EMA Signal: SELL at ₹10172.75
+2026-03-13 01:22:09 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:11 [info]: 🤖 [HCLTECH] RSI Signal: SELL at ₹1284.82
+2026-03-13 01:22:11 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1770.91
+2026-03-13 01:22:12 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:14 [info]: 🤖 [TCS] EMA Signal: BUY at ₹3971.64
+2026-03-13 01:22:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:15 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:17 [info]: 🤖 [INFY] EMA Signal: SELL at ₹1369.24
+2026-03-13 01:22:17 [info]: 🤖 [ICICI] EMA Signal: SELL at ₹998.15
+2026-03-13 01:22:17 [info]: 🤖 [LT] EMA Signal: BUY at ₹3629.5
+2026-03-13 01:22:18 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:18 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:20 [info]: 🤖 [BAJFINANCE] RSI Signal: SELL at ₹6659.02
+2026-03-13 01:22:20 [info]: 🤖 [MARUTI] EMA Signal: BUY at ₹10202.9
+2026-03-13 01:22:20 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1778.33
+2026-03-13 01:22:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:21 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:23 [info]: 🤖 [ASIANPAINT] RSI Signal: BUY at ₹2728.57
+2026-03-13 01:22:24 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:27 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:29 [info]: 🤖 [TCS] RSI Signal: SELL at ₹4054.38
+2026-03-13 01:22:29 [info]: 🤖 [SBIN] EMA Signal: BUY at ₹677.98
+2026-03-13 01:22:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:30 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:32 [info]: 🤖 [KOTAKBANK] RSI Signal: BUY at ₹1650.75
+2026-03-13 01:22:32 [info]: 🤖 [MARUTI] RSI Signal: SELL at ₹10375.99
+2026-03-13 01:22:33 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:35 [info]: 🤖 [BHARTIARTL] EMA Signal: BUY at ₹1067
+2026-03-13 01:22:35 [info]: 🤖 [HCLTECH] EMA Signal: SELL at ₹1248.24
+2026-03-13 01:22:35 [info]: 🤖 [BAJFINANCE] RSI Signal: SELL at ₹6706.2
+2026-03-13 01:22:35 [info]: 🤖 [TITAN] RSI Signal: BUY at ₹2986.18
+2026-03-13 01:22:35 [info]: 🤖 [SUNPHARMA] RSI Signal: SELL at ₹1793.97
+2026-03-13 01:22:38 [info]: 🤖 [WIPRO] EMA Signal: SELL at ₹460.33
+2026-03-13 01:22:39 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:39 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:41 [info]: 🤖 [KOTAKBANK] RSI Signal: BUY at ₹1640.07
+2026-03-13 01:22:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:42 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:45 [info]: 🤖 [HCLTECH] EMA Signal: BUY at ₹1268.35
+2026-03-13 01:22:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:45 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:46 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:48 [info]: 🤖 [ICICI] EMA Signal: BUY at ₹1015.39
+2026-03-13 01:22:48 [info]: 🤖 [LT] EMA Signal: SELL at ₹3572
+2026-03-13 01:22:48 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:51 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:54 [info]: 🤖 [TATAMOTORS] RSI Signal: BUY at ₹829.67
+2026-03-13 01:22:54 [info]: 🤖 [ULTRACEMCO] EMA Signal: BUY at ₹10271.14
+2026-03-13 01:22:55 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:58 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:22:58 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:00 [info]: 🤖 [ICICI] EMA Signal: SELL at ₹1000.11
+2026-03-13 01:23:00 [info]: 🤖 [ASIANPAINT] RSI Signal: BUY at ₹2685.75
+2026-03-13 01:23:03 [info]: 🤖 [BAJFINANCE] EMA Signal: SELL at ₹6510.52
+2026-03-13 01:23:04 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:04 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:06 [info]: 🤖 [RELIANCE] RSI Signal: BUY at ₹2520.15
+2026-03-13 01:23:06 [info]: 🤖 [ASIANPAINT] RSI Signal: BUY at ₹2666.59
+2026-03-13 01:23:09 [info]: 🤖 [SBIN] EMA Signal: SELL at ₹666.76
+2026-03-13 01:23:09 [info]: 🤖 [AXISBANK] EMA Signal: SELL at ₹987.51
+2026-03-13 01:23:09 [info]: 🤖 [SUNPHARMA] EMA Signal: SELL at ₹1762.99
+2026-03-13 01:23:09 [info]: 🤖 [TATAMOTORS] RSI Signal: BUY at ₹821.58
+2026-03-13 01:23:10 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:10 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:12 [info]: 🤖 [HDFC] EMA Signal: BUY at ₹1540.84
+2026-03-13 01:23:12 [info]: 🤖 [BHARTIARTL] EMA Signal: SELL at ₹1050.74
+2026-03-13 01:23:12 [info]: 🤖 [SUNPHARMA] EMA Signal: BUY at ₹1777.07
+2026-03-13 01:23:13 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:16 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:16 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:18 [info]: 🤖 [ICICI] RSI Signal: BUY at ₹980.14
+2026-03-13 01:23:18 [info]: 🤖 [ITC] EMA Signal: BUY at ₹423.69
+2026-03-13 01:23:18 [info]: 🤖 [SUNPHARMA] EMA Signal: SELL at ₹1753.71
+2026-03-13 01:23:19 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:19 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:19 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:19 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:21 [info]: 🤖 [RELIANCE] RSI Signal: BUY at ₹2491.46
+2026-03-13 01:23:21 [info]: 🤖 [ULTRACEMCO] EMA Signal: SELL at ₹10056.88
+2026-03-13 01:23:22 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:22 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:22 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:28 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:28 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:28 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:30 [info]: 🤖 [RELIANCE] RSI Signal: BUY at ₹2481.05
+2026-03-13 01:23:30 [info]: 🤖 [SBIN] EMA Signal: BUY at ₹674.74
+2026-03-13 01:23:31 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:31 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:33 [info]: 🤖 [TCS] EMA Signal: SELL at ₹3985.39
+2026-03-13 01:23:33 [info]: 🤖 [INFY] RSI Signal: BUY at ₹1320.55
+2026-03-13 01:23:33 [info]: 🤖 [KOTAKBANK] EMA Signal: BUY at ₹1649.67
+2026-03-13 01:23:39 [info]: 🤖 [ITC] EMA Signal: SELL at ₹416.61
+2026-03-13 01:23:39 [info]: 🤖 [TATAMOTORS] EMA Signal: BUY at ₹841.87
+2026-03-13 01:23:40 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:40 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:42 [info]: 🤖 [INFY] RSI Signal: BUY at ₹1312.13
+2026-03-13 01:23:42 [info]: 🤖 [AXISBANK] EMA Signal: BUY at ₹1000.02
+2026-03-13 01:23:43 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:43 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:43 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:45 [info]: 🤖 [BHARTIARTL] EMA Signal: BUY at ₹1067.01
+2026-03-13 01:23:48 [info]: 🤖 [ULTRACEMCO] EMA Signal: BUY at ₹10183.75
+2026-03-13 01:23:49 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:49 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:51 [info]: 🤖 [BHARTIARTL] EMA Signal: SELL at ₹1053.39
+2026-03-13 01:23:52 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:52 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:55 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:23:57 [info]: 🤖 [INFY] RSI Signal: BUY at ₹1295.75
+2026-03-13 01:23:57 [info]: 🤖 [RELIANCE] RSI Signal: BUY at ₹2448.86
+2026-03-13 01:23:58 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:00 [info]: 🤖 [SUNPHARMA] EMA Signal: BUY at ₹1775.65
+2026-03-13 01:24:01 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:03 [info]: 🤖 [LT] EMA Signal: BUY at ₹3598.08
+2026-03-13 01:24:03 [info]: 🤖 [TITAN] RSI Signal: BUY at ₹2824.05
+2026-03-13 01:24:03 [info]: 🤖 [ULTRACEMCO] EMA Signal: SELL at ₹10068.23
+2026-03-13 01:24:07 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:07 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:10 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:12 [info]: 🤖 [BHARTIARTL] EMA Signal: BUY at ₹1065.81
+2026-03-13 01:24:12 [info]: 🤖 [KOTAKBANK] RSI Signal: SELL at ₹1696.84
+2026-03-13 01:24:13 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:13 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:13 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:18 [info]: 🤖 [ICICI] RSI Signal: BUY at ₹962.49
+2026-03-13 01:24:18 [info]: 🤖 [ITC] EMA Signal: BUY at ₹423.3
+2026-03-13 01:24:18 [info]: 🤖 [BAJFINANCE] RSI Signal: BUY at ₹6296.74
+2026-03-13 01:24:18 [info]: 🤖 [TATAMOTORS] EMA Signal: SELL at ₹834.21
+2026-03-13 01:24:21 [info]: 🤖 [TCS] RSI Signal: BUY at ₹3861.1
+2026-03-13 01:24:21 [info]: 🤖 [MARUTI] RSI Signal: SELL at ₹10656.41
+2026-03-13 01:24:22 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:22 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:24 [info]: 🤖 [AXISBANK] EMA Signal: SELL at ₹996.4
+2026-03-13 01:24:27 [info]: 🤖 [WIPRO] EMA Signal: BUY at ₹458.62
+2026-03-13 01:24:28 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:28 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:28 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:28 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:30 [info]: 🤖 [INFY] RSI Signal: BUY at ₹1281.97
+2026-03-13 01:24:31 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:31 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:33 [info]: 🤖 [RELIANCE] RSI Signal: BUY at ₹2403.67
+2026-03-13 01:24:34 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:36 [info]: 🤖 [ITC] EMA Signal: SELL at ₹413.76
+2026-03-13 01:24:37 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:39 [info]: 🤖 [AXISBANK] EMA Signal: BUY at ₹1010.9
+2026-03-13 01:24:39 [info]: 🤖 [WIPRO] EMA Signal: SELL at ₹455.33
+2026-03-13 01:24:39 [info]: 🤖 [TITAN] RSI Signal: BUY at ₹2764.08
+2026-03-13 01:24:40 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:42 [info]: 🤖 [LT] EMA Signal: SELL at ₹3576.08
+2026-03-13 01:24:42 [info]: 🤖 [WIPRO] EMA Signal: BUY at ₹459.9
+2026-03-13 01:24:43 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:45 [info]: 🤖 [MARUTI] EMA Signal: SELL at ₹10386.61
+2026-03-13 01:24:46 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:48 [info]: 🤖 [LT] EMA Signal: BUY at ₹3641.33
+2026-03-13 01:24:48 [info]: 🤖 [ASIANPAINT] RSI Signal: BUY at ₹2613.78
+2026-03-13 01:24:49 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:49 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:49 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:51 [info]: 🤖 [HCLTECH] RSI Signal: SELL at ₹1315.31
+2026-03-13 01:24:52 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:52 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:54 [info]: 🤖 [SBIN] EMA Signal: SELL at ₹676.14
+2026-03-13 01:24:54 [info]: 🤖 [TATAMOTORS] EMA Signal: BUY at ₹841.26
+2026-03-13 01:24:55 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:58 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:24:58 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:25:00 [info]: 🤖 [ICICI] RSI Signal: BUY at ₹932.42
+2026-03-13 01:25:01 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:25:03 [info]: 🤖 [TCS] RSI Signal: BUY at ₹3800.59
+2026-03-13 01:25:04 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:25:04 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:25:09 [info]: 🤖 [LT] EMA Signal: SELL at ₹3586.66
+2026-03-13 01:25:10 [error]: Failed to save signal: Operation `signals.insertOne()` buffering timed out after 10000ms
+2026-03-13 01:25:13 [info]: ⏳ Setting initial stock prices...
+2026-03-13 01:25:15 [info]: ✅ Initial Prices Set: WIPRO, AXISBANK, SUNPHARMA, ICICI, HDFC, SBIN, TATAMOTORS, TITAN, MARUTI, ITC, INFY, LT, KOTAKBANK, RELIANCE, HCLTECH, BAJFINANCE, ULTRACEMCO, TCS, BHARTIARTL, ASIANPAINT
+2026-03-13 01:25:15 [info]: ⚙️  Matching Engine Started (DB mode)...
+2026-03-13 01:25:15 [info]: 📊 Price History Service Started (5s OHLC bars)...
+2026-03-13 01:25:15 [info]: 🔔 Alert Engine Started...
+2026-03-13 01:25:15 [info]: 🤖 Quantitative AlgoBot Started: Using EMA Crossover Strategy (9/21)
+2026-03-13 01:25:15 [info]: 🚀 Server running on port 5000 (🟢 Live DB)
+2026-03-13 01:25:15 [info]: Client connected: J6kgo_Q0RT0fBbz3AAAB
+2026-03-13 01:25:15 [info]: Client connected: VLUq9-nt1RXxt4e8AAAE
+2026-03-13 01:25:16 [info]: Client connected: 1AHmOfSixwvJ3iSxAAAF
