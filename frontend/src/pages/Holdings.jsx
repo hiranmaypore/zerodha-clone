@@ -8,6 +8,7 @@ import {
   TrendingUp, TrendingDown, Briefcase, BarChart2,
   ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Activity, Download
 } from 'lucide-react';
+import PortfolioAnalytics from '../components/dashboard/PortfolioAnalytics';
 
 export default function Holdings() {
   const navigate  = useNavigate();
@@ -304,6 +305,9 @@ export default function Holdings() {
               })}
             </div>
           </div>
+
+          {/* ── Portfolio Analytics ── */}
+          <PortfolioAnalytics />
 
           {/* ── Holdings table ── */}
           <div className="bg-card border border-edge rounded-xl overflow-x-auto">

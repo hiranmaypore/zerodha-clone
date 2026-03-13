@@ -56,6 +56,8 @@ export const getDashboard = () => API.get('/holdings/dashboard');
 export const getLeaderboard = () => API.get('/holdings/leaderboard');
 export const getJournal = () => API.get('/holdings/journal');
 export const downloadTaxStatement = () => API.get('/holdings/export', { responseType: 'blob' });
+export const getPortfolioAnalytics = () => API.get('/holdings/analytics');
+export const getMarketNews = (params) => API.get('/holdings/news', { params });
 
 
 // Watchlist

@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllStocks } from '../services/api';
+import { getAllStocks, getMarketNews } from '../services/api';
 import { connectSocket } from '../services/socket';
 import { StockIcon } from '../components/StockIcon';
 import { 
   Activity, Zap, TrendingUp, TrendingDown, 
   BarChart3, Search, ChevronRight, Filter,
-  PieChart, Gauge, AlertCircle, RefreshCw
+  PieChart, Gauge, AlertCircle, RefreshCw, Newspaper, ExternalLink
 } from 'lucide-react';
 
 export default function Pulse() {
@@ -15,6 +15,8 @@ export default function Pulse() {
   const [prices, setPrices] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('VOLUME_SPIKE');
+  const [news, setNews] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
@@ -34,6 +36,23 @@ export default function Pulse() {
       setPrices(prev => ({ ...prev, ...incoming }));
     });
     return () => socket.off('price_update');
+  }, []);
+
+  // Fetch news
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await getMarketNews({ limit: 12 });
+        setNews(res.data.news || []);
+      } catch (err) {
+        console.error('Failed to fetch news', err);
+      } finally {
+        setNewsLoading(false);
+      }
+    };
+    fetchNews();
+    const interval = setInterval(fetchNews, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   // ── Technical Logic (Simulated for Demo) ──────────────────────
@@ -300,6 +319,75 @@ export default function Pulse() {
         </div>
 
       </div>
+
+      {/* ── Market News Feed ── */}
+      <div className="mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Newspaper className="w-5 h-5 text-accent" />
+            <h2 className="text-lg font-bold text-primary">Market News</h2>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-card border border-edge rounded-full">
+              <div className="w-1.5 h-1.5 rounded-full bg-profit animate-pulse" />
+              <span className="text-[9px] font-bold text-muted uppercase">Live Feed</span>
+            </div>
+          </div>
+          <button 
+            onClick={() => { setNewsLoading(true); getMarketNews({ limit: 12 }).then(r => { setNews(r.data.news || []); setNewsLoading(false); }); }}
+            className="p-2 bg-card border border-edge rounded-xl text-muted hover:text-primary hover:bg-surface transition-all"
+          >
+            <RefreshCw className={`w-4 h-4 ${newsLoading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+
+        {newsLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1,2,3].map(i => (
+              <div key={i} className="bg-card border border-edge rounded-2xl p-5 animate-pulse">
+                <div className="h-3 bg-surface rounded w-1/3 mb-3" />
+                <div className="h-4 bg-surface rounded w-full mb-2" />
+                <div className="h-4 bg-surface rounded w-2/3 mb-4" />
+                <div className="h-3 bg-surface rounded w-1/4" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {news.map(n => (
+              <div 
+                key={n.id} 
+                className="bg-card border border-edge rounded-2xl p-5 hover:border-accent/40 transition-all group cursor-pointer flex flex-col"
+                onClick={() => navigate(`/dashboard?stock=${n.symbol}`)}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+                    n.sentiment === 'Bullish' ? 'bg-profit/10 text-profit border-profit/20' :
+                    n.sentiment === 'Bearish' ? 'bg-loss/10 text-loss border-loss/20' :
+                    n.sentiment === 'Breaking' ? 'bg-warning/10 text-warning border-warning/20' :
+                    'bg-surface text-muted border-edge'
+                  }`}>{n.sentiment}</span>
+                  <span className="text-[9px] text-muted bg-surface px-1.5 py-0.5 rounded">{n.category}</span>
+                  {n.impact === 'HIGH' && (
+                    <span className="text-[9px] font-bold text-warning bg-warning/10 px-1.5 py-0.5 rounded">⚡ HIGH</span>
+                  )}
+                </div>
+                <p className="text-sm font-semibold text-primary leading-snug mb-3 flex-1 group-hover:text-accent transition-colors">
+                  {n.headline}
+                </p>
+                <div className="flex items-center justify-between mt-auto pt-3 border-t border-edge/50">
+                  <div className="flex items-center gap-2">
+                    <StockIcon symbol={n.symbol} className="w-5 h-5" textSize="text-[7px]" />
+                    <span className="text-[10px] text-muted font-medium">{n.symbol}</span>
+                  </div>
+                  <div className="text-[10px] text-muted">
+                    {n.source} · {n.minutesAgo < 60 ? `${n.minutesAgo}m ago` : `${Math.floor(n.minutesAgo / 60)}h ago`}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

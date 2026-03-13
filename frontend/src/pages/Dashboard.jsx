@@ -13,6 +13,7 @@ import ActiveOrders     from '../components/dashboard/ActiveOrders';
 import PortfolioSummary from '../components/dashboard/PortfolioSummary';
 import AIPredictionCard from '../components/dashboard/AIPredictionCard';
 import AlertsPanel      from '../components/dashboard/AlertsPanel';
+import MobileBottomSheet from '../components/dashboard/MobileBottomSheet';
 import {
   TrendingUp, TrendingDown, DollarSign, Activity,
   BarChart2, RefreshCw, Bot, Copy
@@ -243,15 +244,29 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Buy/Sell Panel — 2 cols */}
-        <div className="col-span-12 lg:col-span-2 min-w-0 self-start">
+        {/* Buy/Sell Panel — 2 cols on desktop, bottom sheet on mobile */}
+        <div className="hidden lg:block col-span-2 min-w-0 self-start">
           <BuySellPanel
             selectedStock={selectedStock}
             currentPrice={currentPrice}
             onOrderPlaced={handleOrderPlaced}
             userBalance={balance}
+            tradeCommand={tradeCommand}
           />
         </div>
+
+        {/* Mobile Bottom Sheet */}
+        <MobileBottomSheet selectedStock={selectedStock} currentPrice={currentPrice}>
+          <div className="lg:hidden">
+            <BuySellPanel
+              selectedStock={selectedStock}
+              currentPrice={currentPrice}
+              onOrderPlaced={() => { handleOrderPlaced(); }}
+              userBalance={balance}
+              tradeCommand={tradeCommand}
+            />
+          </div>
+        </MobileBottomSheet>
 
       </div>
 

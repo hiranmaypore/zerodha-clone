@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { getJournal } from '../services/api';
 import { 
   TrendingUp, TrendingDown, Clock, Calendar, 
-  BarChart2, Award, Zap, ChevronRight, Download
+  BarChart2, Award, Zap, Download, ArrowUpRight, ArrowDownRight,
+  Target, Shield, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { downloadTaxStatement } from '../services/api';
+import { StockIcon } from '../components/StockIcon';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
@@ -14,6 +16,8 @@ export default function Journal() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [exporting, setExporting] = useState(false);
+  const [tradeSort, setTradeSort] = useState({ key: 'exitDate', dir: -1 });
+  const [showAllTrades, setShowAllTrades] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -61,14 +65,42 @@ export default function Journal() {
     profit: val
   }));
 
+  const trades = stats.trades || [];
+  const sortedTrades = [...trades].sort((a, b) => {
+    const av = a[tradeSort.key];
+    const bv = b[tradeSort.key];
+    if (tradeSort.key === 'exitDate' || tradeSort.key === 'entryDate') {
+      return (new Date(av) - new Date(bv)) * tradeSort.dir;
+    }
+    return ((av || 0) - (bv || 0)) * tradeSort.dir;
+  });
+
+  const displayedTrades = showAllTrades ? sortedTrades : sortedTrades.slice(0, 10);
+
+  const toggleSort = (key) => {
+    setTradeSort(s => ({ key, dir: s.key === key ? -s.dir : -1 }));
+  };
+
+  const bestDay = Object.entries(stats.profitByDay || {}).reduce(
+    (best, [day, val]) => (val > best.val ? { day, val } : best),
+    { day: '—', val: -Infinity }
+  );
+
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-fade-in p-2 md:p-6">
+    <div className="space-y-6 max-w-6xl mx-auto animate-fade-in p-2 md:p-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
             <Calendar className="w-6 h-6 text-accent" /> Trade Journal
           </h1>
-          <p className="text-sm text-muted mt-1">Institutional-grade performance analytics</p>
+          <p className="text-sm text-muted mt-1">
+            Real-time P&L analytics from your matched trades
+            {stats.totalTrades > 0 && (
+              <span className="ml-2 text-accent text-xs font-bold bg-accent/10 px-2 py-0.5 rounded-full">
+                {stats.totalTrades} round-trips
+              </span>
+            )}
+          </p>
         </div>
         <button 
           onClick={async () => {
@@ -104,9 +136,26 @@ export default function Journal() {
         <MetricCard 
           label="Win Rate" 
           value={`${stats.winRate}%`} 
-          sub="Last 100 trades"
+          sub={`${stats.wins || 0}W / ${stats.losses || 0}L`}
           icon={<Award className="w-5 h-5 text-profit" />}
           gradient="from-profit/20 to-transparent"
+        />
+        <MetricCard 
+          label="Total P&L" 
+          value={`${(stats.totalPnl || 0) >= 0 ? '+' : ''}₹${Math.abs(stats.totalPnl || 0).toLocaleString()}`}
+          sub="All matched trades"
+          icon={(stats.totalPnl || 0) >= 0 
+            ? <TrendingUp className="w-5 h-5 text-profit" /> 
+            : <TrendingDown className="w-5 h-5 text-loss" />}
+          gradient={(stats.totalPnl || 0) >= 0 ? "from-profit/20 to-transparent" : "from-loss/20 to-transparent"}
+          valueColor={(stats.totalPnl || 0) >= 0 ? 'text-profit' : 'text-loss'}
+        />
+        <MetricCard 
+          label="Win Streak" 
+          value={`${stats.currentStreak} 🔥`} 
+          sub={`Best: ${stats.maxStreak}`}
+          icon={<Zap className="w-5 h-5 text-warning" />}
+          gradient="from-warning/20 to-transparent"
         />
         <MetricCard 
           label="Avg. Holding" 
@@ -115,20 +164,47 @@ export default function Journal() {
           icon={<Clock className="w-5 h-5 text-accent" />}
           gradient="from-accent/20 to-transparent"
         />
-        <MetricCard 
-          label="Current Streak" 
-          value={`${stats.currentStreak} 🔥`} 
-          sub={`Max: ${stats.maxStreak}`}
-          icon={<Zap className="w-5 h-5 text-warning" />}
-          gradient="from-warning/20 to-transparent"
-        />
-        <MetricCard 
-          label="Total Trades" 
-          value={stats.totalTrades} 
-          sub="All Time"
-          icon={<BarChart2 className="w-5 h-5 text-primary" />}
-        />
       </div>
+
+      {/* ── Best / Worst Trade + Day ── */}
+      {(stats.bestTrade || stats.worstTrade) && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {stats.bestTrade && (
+            <div className="bg-card border border-profit/20 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 bg-profit/10 rounded-xl flex items-center justify-center">
+                <ArrowUpRight className="w-6 h-6 text-profit" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted uppercase tracking-wider font-bold">Best Trade</p>
+                <p className="text-lg font-bold text-profit font-mono">+₹{stats.bestTrade.pnl.toLocaleString()}</p>
+                <p className="text-xs text-secondary">{stats.bestTrade.stock} ({stats.bestTrade.pnlPercent > 0 ? '+' : ''}{stats.bestTrade.pnlPercent}%)</p>
+              </div>
+            </div>
+          )}
+          {stats.worstTrade && (
+            <div className="bg-card border border-loss/20 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 bg-loss/10 rounded-xl flex items-center justify-center">
+                <ArrowDownRight className="w-6 h-6 text-loss" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted uppercase tracking-wider font-bold">Worst Trade</p>
+                <p className="text-lg font-bold text-loss font-mono">₹{stats.worstTrade.pnl.toLocaleString()}</p>
+                <p className="text-xs text-secondary">{stats.worstTrade.stock} ({stats.worstTrade.pnlPercent}%)</p>
+              </div>
+            </div>
+          )}
+          <div className="bg-card border border-accent/20 rounded-2xl p-5 flex items-center gap-4">
+            <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center">
+              <Target className="w-6 h-6 text-accent" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted uppercase tracking-wider font-bold">Best Day</p>
+              <p className="text-lg font-bold text-primary">{bestDay.day}</p>
+              <p className="text-xs text-profit font-mono">+₹{bestDay.val > 0 ? bestDay.val.toLocaleString() : 0}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Day of Week Heatmap */}
@@ -172,7 +248,7 @@ export default function Journal() {
         <div className="bg-card border border-edge rounded-2xl p-6 flex flex-col">
            <h3 className="text-sm font-bold text-primary mb-6">Trading Behavior</h3>
            <div className="space-y-6 flex-1">
-             {stats.holdingStats.map(s => (
+             {(stats.holdingStats || []).map(s => (
                <div key={s.label}>
                  <div className="flex justify-between text-xs mb-2">
                     <span className="text-muted">{s.label}</span>
@@ -187,18 +263,121 @@ export default function Journal() {
                </div>
              ))}
 
-             <div className="mt-8 p-4 bg-surface/50 rounded-xl border border-edge">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Top Advice</p>
-                <p className="text-xs text-primary mt-2">"You are most profitable on **Wednesdays**. Consider increasing your position sizes mid-week."</p>
-             </div>
+             {bestDay.val > 0 && (
+               <div className="mt-8 p-4 bg-surface/50 rounded-xl border border-edge">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">AI Insight</p>
+                  <p className="text-xs text-primary mt-2">
+                    You are most profitable on <strong className="text-accent">{bestDay.day}s</strong>.
+                    {stats.winRate > 50 
+                      ? ' Your win rate is above average — consider scaling positions on strong conviction trades.'
+                      : ' Focus on reducing position sizes on losing streaks to protect capital.'}
+                  </p>
+               </div>
+             )}
            </div>
         </div>
       </div>
+
+      {/* ── Trade History Table ── */}
+      {trades.length > 0 && (
+        <div className="bg-card border border-edge rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-edge flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-accent" />
+              <h3 className="text-sm font-bold text-primary">Trade History</h3>
+              <span className="text-xs text-muted bg-surface px-2 py-0.5 rounded-full">{trades.length} trades</span>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[700px]">
+              <thead>
+                <tr className="border-b border-edge text-[10px] text-muted uppercase tracking-wide">
+                  <th className="text-left px-5 py-3 font-medium">Stock</th>
+                  <th 
+                    className="text-right px-4 py-3 font-medium cursor-pointer hover:text-primary select-none"
+                    onClick={() => toggleSort('buyPrice')}
+                  >
+                    Entry {tradeSort.key === 'buyPrice' && (tradeSort.dir === 1 ? '↑' : '↓')}
+                  </th>
+                  <th 
+                    className="text-right px-4 py-3 font-medium cursor-pointer hover:text-primary select-none"
+                    onClick={() => toggleSort('sellPrice')}
+                  >
+                    Exit {tradeSort.key === 'sellPrice' && (tradeSort.dir === 1 ? '↑' : '↓')}
+                  </th>
+                  <th className="text-right px-4 py-3 font-medium">Qty</th>
+                  <th 
+                    className="text-right px-4 py-3 font-medium cursor-pointer hover:text-primary select-none"
+                    onClick={() => toggleSort('pnl')}
+                  >
+                    P&L {tradeSort.key === 'pnl' && (tradeSort.dir === 1 ? '↑' : '↓')}
+                  </th>
+                  <th className="text-right px-4 py-3 font-medium hidden md:table-cell">Hold Time</th>
+                  <th 
+                    className="text-right px-5 py-3 font-medium cursor-pointer hover:text-primary select-none hidden md:table-cell"
+                    onClick={() => toggleSort('exitDate')}
+                  >
+                    Date {tradeSort.key === 'exitDate' && (tradeSort.dir === 1 ? '↑' : '↓')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-edge">
+                {displayedTrades.map((t, i) => (
+                  <tr key={i} className="hover:bg-surface/60 transition-colors">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <StockIcon symbol={t.stock} className="w-7 h-7" textSize="text-[9px]" />
+                        <div>
+                          <div className="font-semibold text-primary text-xs">{t.stock}</div>
+                          <div className="text-[9px] text-muted">{t.productType || 'CNC'}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="text-right px-4 py-3 font-mono text-xs text-secondary">
+                      ₹{t.buyPrice?.toFixed(2)}
+                    </td>
+                    <td className="text-right px-4 py-3 font-mono text-xs text-secondary">
+                      ₹{t.sellPrice?.toFixed(2)}
+                    </td>
+                    <td className="text-right px-4 py-3 font-mono text-xs text-primary">
+                      {t.quantity}
+                    </td>
+                    <td className="text-right px-4 py-3">
+                      <div className={`font-semibold font-mono text-xs ${t.pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                        {t.pnl >= 0 ? '+' : ''}₹{t.pnl?.toLocaleString()}
+                      </div>
+                      <div className={`text-[9px] font-mono ${t.pnlPercent >= 0 ? 'text-profit' : 'text-loss'}`}>
+                        {t.pnlPercent >= 0 ? '+' : ''}{t.pnlPercent}%
+                      </div>
+                    </td>
+                    <td className="text-right px-4 py-3 text-[10px] text-muted hidden md:table-cell">
+                      {t.holdTime}
+                    </td>
+                    <td className="text-right px-5 py-3 text-[10px] text-muted hidden md:table-cell">
+                      {new Date(t.exitDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {trades.length > 10 && (
+            <div className="px-6 py-3 border-t border-edge text-center">
+              <button 
+                onClick={() => setShowAllTrades(s => !s)}
+                className="text-xs text-accent hover:text-accent/80 font-bold flex items-center gap-1 mx-auto transition-colors"
+              >
+                {showAllTrades ? <><ChevronUp className="w-3.5 h-3.5" /> Show Less</> : <><ChevronDown className="w-3.5 h-3.5" /> Show All {trades.length} Trades</>}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function MetricCard({ label, value, sub, icon, gradient = "" }) {
+function MetricCard({ label, value, sub, icon, gradient = "", valueColor = "" }) {
   return (
     <div className={`bg-card border border-edge p-6 rounded-2xl relative overflow-hidden bg-linear-to-br ${gradient}`}>
       <div className="relative z-10 flex flex-col gap-1">
@@ -206,7 +385,7 @@ function MetricCard({ label, value, sub, icon, gradient = "" }) {
           <span className="text-[10px] font-bold text-muted uppercase tracking-wider">{label}</span>
           {icon}
         </div>
-        <h2 className="text-3xl font-bold text-primary mt-2">{value}</h2>
+        <h2 className={`text-2xl md:text-3xl font-bold mt-2 ${valueColor || 'text-primary'}`}>{value}</h2>
         <p className="text-[10px] text-muted-foreground mt-1">{sub}</p>
       </div>
     </div>
