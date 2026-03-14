@@ -226,6 +226,7 @@ export default function Navbar() {
               <NavLink
                 key={path}
                 to={path}
+                data-tour={`sidebar-${path.replace('/', '')}`}
                 className={({ isActive }) =>
                   `px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-150 ${
                     isActive
@@ -417,7 +418,7 @@ export default function Navbar() {
             )}
           </div>
 
-          <ThemeToggle />
+          <div data-tour="theme-toggle"><ThemeToggle /></div>
 
           {/* Settings → Profile */}
           <button

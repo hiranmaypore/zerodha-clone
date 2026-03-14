@@ -1,6 +1,8 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Sidebar';
 import { ToastContainer } from './Toast';
+import OnboardingTour from './OnboardingTour';
+import KeyboardShortcuts from './KeyboardShortcuts';
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -9,6 +11,8 @@ export default function Layout() {
   return (
     <div className="h-screen flex flex-col bg-dark overflow-hidden">
       <Navbar />
+      <OnboardingTour />
+      <KeyboardShortcuts />
       {isDashboard ? (
         /* Dashboard: exactly fits on desktop, scrolls on mobile */
         <main className="flex-1 min-h-0 pt-14 pb-16 md:pb-0 overflow-y-auto lg:overflow-hidden">

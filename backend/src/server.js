@@ -15,6 +15,7 @@ const inMemoryDB = {
   users: new Map(),   // id -> user
   orders: new Map(),  // id -> order
   holdings: new Map(), // userId:stock -> holding
+  signals: [],        // global signals array for demo mode
   _nextId: 1,
   newId() { return String(this._nextId++); }
 };
@@ -78,6 +79,7 @@ app.use("/api/funds", fundsRoutes);
 app.use("/api/stocks", stockRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/signals", signalRoutes);
+app.use("/api/algo", require('./routes/backtestRoutes'));
 
 
 // Health check
@@ -171,8 +173,32 @@ const PORT = process.env.PORT || 5000;
     io.on('connection', (socket) => {
       logger.info(`Client connected: ${socket.id}`);
       
+      // Track subscribed symbols per client
+      socket.subscribedSymbols = new Set();
+
       socket.on('join_user_room', (userId) => {
         socket.join(userId);
+      });
+
+      // Symbol subscription channels
+      socket.on('subscribe_symbols', (symbols) => {
+        if (Array.isArray(symbols)) {
+          symbols.forEach(s => {
+            const sym = s.toUpperCase();
+            socket.subscribedSymbols.add(sym);
+            socket.join(`stock:${sym}`);
+          });
+        }
+      });
+
+      socket.on('unsubscribe_symbols', (symbols) => {
+        if (Array.isArray(symbols)) {
+          symbols.forEach(s => {
+            const sym = s.toUpperCase();
+            socket.subscribedSymbols.delete(sym);
+            socket.leave(`stock:${sym}`);
+          });
+        }
       });
       
       socket.on('disconnect', () => {

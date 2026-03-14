@@ -9,6 +9,7 @@ import {
   ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Activity, Download
 } from 'lucide-react';
 import PortfolioAnalytics from '../components/dashboard/PortfolioAnalytics';
+import { SkeletonPage } from '../components/Skeleton';
 
 export default function Holdings() {
   const navigate  = useNavigate();
@@ -96,13 +97,7 @@ export default function Holdings() {
         : <ArrowDownRight className="w-3 h-3 inline text-accent" />
       : <Minus className="w-3 h-3 inline text-muted/30" />;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <SkeletonPage type="list" />;
 
   return (
     <div className="space-y-5 animate-fade-in">

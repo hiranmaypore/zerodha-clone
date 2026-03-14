@@ -16,6 +16,7 @@ import Leaderboard from './pages/Leaderboard';
 import AlgoLab from './pages/AlgoLab';
 import Pulse from './pages/Pulse';
 import Bids from './pages/Bids';
+import StockDetail from './pages/StockDetail';
 import { Toaster } from 'react-hot-toast';
 
 function ProtectedRoute({ children }) {
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="/algolab" element={<AlgoLab />} />
             <Route path="/pulse" element={<Pulse />} />
             <Route path="/bids" element={<Bids />} />
+            <Route path="/stock/:symbol" element={<StockDetail />} />
             <Route path="/calculators" element={<Calculators />} />
             <Route path="/profile" element={<Profile />} />
           </Route>

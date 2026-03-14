@@ -17,6 +17,23 @@ export default function Pulse() {
   const [activeFilter, setActiveFilter] = useState('VOLUME_SPIKE');
   const [news, setNews] = useState([]);
   const [newsLoading, setNewsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Derived market sentiment from Advance/Decline ratio
+  const sentimentScore = useMemo(() => {
+    if (!stocks.length) return 50;
+    const up = stocks.filter(s => (prices[s.symbol] || s.price) > (s.openingPrice || s.price)).length;
+    return Math.round((up / stocks.length) * 100);
+  }, [stocks, prices]);
+
+  const filteredNews = useMemo(() => {
+    if (!searchQuery) return news;
+    const q = searchQuery.toLowerCase();
+    return news.filter(n => 
+      n.headline.toLowerCase().includes(q) || 
+      n.symbol.toLowerCase().includes(q)
+    );
+  }, [news, searchQuery]);
 
   useEffect(() => {
     const load = async () => {
@@ -321,22 +338,74 @@ export default function Pulse() {
       </div>
 
       {/* ── Market News Feed ── */}
-      <div className="mt-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Newspaper className="w-5 h-5 text-accent" />
-            <h2 className="text-lg font-bold text-primary">Market News</h2>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-card border border-edge rounded-full">
-              <div className="w-1.5 h-1.5 rounded-full bg-profit animate-pulse" />
-              <span className="text-[9px] font-bold text-muted uppercase">Live Feed</span>
+      <div className="mt-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-accent/10 rounded-xl">
+              <Newspaper className="w-5 h-5 text-accent" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-primary">Intelligence Hub</h2>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-profit animate-pulse" />
+                <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Global Intelligence Feed</span>
+              </div>
             </div>
           </div>
-          <button 
-            onClick={() => { setNewsLoading(true); getMarketNews({ limit: 12 }).then(r => { setNews(r.data.news || []); setNewsLoading(false); }); }}
-            className="p-2 bg-card border border-edge rounded-xl text-muted hover:text-primary hover:bg-surface transition-all"
-          >
-            <RefreshCw className={`w-4 h-4 ${newsLoading ? 'animate-spin' : ''}`} />
-          </button>
+
+          <div className="flex items-center gap-2">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted group-focus-within:text-accent transition-colors" />
+              <input 
+                type="text"
+                placeholder="Search headlines or symbols..."
+                className="pl-9 pr-4 py-2 bg-surface border border-edge rounded-xl text-sm focus:outline-none focus:border-accent w-full md:w-64 transition-all"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <button 
+              onClick={() => { setNewsLoading(true); getMarketNews({ limit: 12 }).then(r => { setNews(r.data.news || []); setNewsLoading(false); }); }}
+              className="p-2.5 bg-surface border border-edge rounded-xl text-muted hover:text-primary transition-all shadow-sm"
+            >
+              <RefreshCw className={`w-4 h-4 ${newsLoading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Global Market Sentiment Bar */}
+        <div className="bg-card border border-edge rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center gap-8 shadow-sm">
+           <div className="flex flex-col gap-1 shrink-0">
+              <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Market Sentiment</p>
+              <div className="flex items-center gap-2">
+                 <Gauge className="w-5 h-5 text-accent" />
+                 <span className="text-xl font-black text-primary tracking-tighter">
+                   {sentimentScore >= 66 ? 'GREED' : sentimentScore <= 33 ? 'FEAR' : 'NEUTRAL'}
+                 </span>
+              </div>
+           </div>
+
+           <div className="flex-1 w-full space-y-3">
+              <div className="flex justify-between text-[10px] font-bold">
+                 <span className="text-loss flex items-center gap-1"><TrendingDown className="w-3 h-3" /> EXTREME FEAR</span>
+                 <span className="text-profit flex items-center gap-1">EXTREME GREED <TrendingUp className="w-3 h-3" /></span>
+              </div>
+              <div className="relative h-3 bg-surface rounded-full overflow-hidden border border-edge/30">
+                 <div className="absolute inset-0 bg-linear-to-r from-loss via-warning to-profit opacity-20" />
+                 <div 
+                   className="absolute top-0 bottom-0 w-1.5 bg-primary border border-white shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-1000 ease-out z-10"
+                   style={{ left: `${sentimentScore}%` }}
+                 />
+              </div>
+              <div className="flex justify-between items-center">
+                 <p className="text-[10px] text-muted leading-relaxed max-w-md">
+                   {sentimentScore > 50 
+                     ? 'Market bias is currently bullish. Institutional flows show high appetite for equity risk.' 
+                     : 'Market bias is cautious. Traders are moving towards defensive assets like FMCG and Pharma.'}
+                 </p>
+                 <span className="text-xs font-mono font-bold text-accent">{sentimentScore}/100</span>
+              </div>
+           </div>
         </div>
 
         {newsLoading ? (
@@ -352,7 +421,7 @@ export default function Pulse() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {news.map(n => (
+            {filteredNews.map(n => (
               <div 
                 key={n.id} 
                 className="bg-card border border-edge rounded-2xl p-5 hover:border-accent/40 transition-all group cursor-pointer flex flex-col"
@@ -384,6 +453,13 @@ export default function Pulse() {
                 </div>
               </div>
             ))}
+            {filteredNews.length === 0 && (
+              <div className="col-span-full py-20 text-center bg-surface/30 rounded-2xl border border-dashed border-edge">
+                 <Search className="w-12 h-12 mx-auto text-muted/20 mb-3" />
+                 <p className="text-sm text-primary font-bold">No results found for "{searchQuery}"</p>
+                 <p className="text-xs text-muted mt-1">Try searching for a different keyword or symbol</p>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -5,10 +5,18 @@ let openingPrices = {};
 
 function startSimulation(io) {
   setInterval(() => {
+    const updatedPrices = {};
     for (let symbol in prices) {
-      prices[symbol] = randomWalk(prices[symbol]);
+      const oldPrice = prices[symbol];
+      prices[symbol] = randomWalk(oldPrice);
+      updatedPrices[symbol] = prices[symbol];
+
+      // Emit to specific symbol rooms for clients subscribed to these stocks
+      io.to(`stock:${symbol}`).emit('price_update', { [symbol]: prices[symbol] });
     }
 
+    // Still broadcast full map for legacy components/initial state
+    // but at a slower frequency or only for active symbols
     io.emit("price_update", prices);
   }, 1000);
 }

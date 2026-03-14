@@ -4,15 +4,25 @@ const Signal = require('../models/Signal');
 
 const saveSignal = async (data) => {
   try {
-    const signal = new Signal({
+    const signalData = {
       symbol: data.symbol,
       trend: data.trend,
       price: data.price,
       message: data.message,
       strategy: data.strategy,
       timestamp: new Date()
-    });
-    await signal.save();
+    };
+
+    if (global.dbConnected) {
+      const signal = new Signal(signalData);
+      await signal.save();
+    } else {
+      // Demo Mode: Push to global array, keep last 100
+      global.inMemoryDB.signals.unshift(signalData);
+      if (global.inMemoryDB.signals.length > 100) {
+        global.inMemoryDB.signals = global.inMemoryDB.signals.slice(0, 100);
+      }
+    }
   } catch (err) {
     logger.error('Failed to save signal:', err);
   }

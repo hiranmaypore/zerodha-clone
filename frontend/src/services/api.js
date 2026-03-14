@@ -40,6 +40,7 @@ export const updateProfile = (data) => API.put('/auth/profile', data);
 // Stocks
 export const getAllStocks = () => API.get('/stocks');
 export const getSentiment = (symbol) => API.get(`/stocks/${symbol}/sentiment`);
+export const getStockDetail = (symbol) => API.get(`/stocks/${symbol}/detail`);
 
 // Orders
 export const buyOrder = (data) => API.post('/orders/buy', data);
@@ -92,8 +93,9 @@ export const getAlerts = () => API.get('/alerts');
 export const createAlert = (data) => API.post('/alerts', data);
 export const deleteAlert = (id) => API.delete(`/alerts/${id}`);
 
-// Signals
+// Signals & Algo
 export const getSignals = (limit) => API.get(`/signals?limit=${limit || 20}`);
+export const runBacktest = (data) => API.post('/algo/run', data);
 
 export default API;
 

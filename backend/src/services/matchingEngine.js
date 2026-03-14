@@ -160,8 +160,34 @@ const dbMatchingEngine = () => {
             await user.save();
 
             // Deduct from the holding (or delete it when qty reaches zero)
-            const holding = await Holding.findOne({ user: order.user, stock: order.stock, productType: pType, tradeDate: today });
+            const holding = await Holding.findOne({ user: order.user, stock: order.stock, productType: pType });
+            
+            // Create Trade Ledger Entry for Journal/Analytics
             if (holding) {
+              const Trade = require('../models/Trade');
+              const STOCKS = require('../config/stocks');
+              const stockMeta = STOCKS.find(s => s.symbol === order.stock);
+              
+              const pnl = (currentPrice - holding.avgPrice) * order.quantity;
+              const pnlPercent = holding.avgPrice > 0 ? (pnl / (holding.avgPrice * order.quantity)) * 100 : 0;
+              
+              await Trade.create({
+                user: order.user,
+                stock: order.stock,
+                sector: stockMeta?.sector || 'Unknown',
+                buyPrice: holding.avgPrice,
+                entryDate: holding.createdAt || holding.updatedAt,
+                sellOrderId: order._id,
+                sellPrice: currentPrice,
+                exitDate: new Date(),
+                quantity: order.quantity,
+                pnl,
+                pnlPercent,
+                isWin: pnl > 0,
+                dayOfWeek: new Date().getDay(),
+                productType: pType,
+              });
+
               holding.quantity -= order.quantity;
               if (holding.quantity <= 0) await Holding.deleteOne({ _id: holding._id });
               else await holding.save();

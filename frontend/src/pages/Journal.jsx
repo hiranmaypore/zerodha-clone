@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getJournal } from '../services/api';
+import { SkeletonPage } from '../components/Skeleton';
 import { 
   TrendingUp, TrendingDown, Clock, Calendar, 
   BarChart2, Award, Zap, Download, ArrowUpRight, ArrowDownRight,
@@ -38,11 +39,7 @@ export default function Journal() {
     fetch();
   }, []);
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-[60vh]">
-      <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <SkeletonPage type="cards" />;
 
   if (error || !stats) return (
     <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4">
@@ -132,7 +129,7 @@ export default function Journal() {
       </div>
 
       {/* ── Metric Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricCard 
           label="Win Rate" 
           value={`${stats.winRate}%`} 
@@ -149,6 +146,22 @@ export default function Journal() {
             : <TrendingDown className="w-5 h-5 text-loss" />}
           gradient={(stats.totalPnl || 0) >= 0 ? "from-profit/20 to-transparent" : "from-loss/20 to-transparent"}
           valueColor={(stats.totalPnl || 0) >= 0 ? 'text-profit' : 'text-loss'}
+        />
+        <MetricCard 
+          label="Sharpe Ratio" 
+          value={stats.sharpeRatio || '0.00'} 
+          sub="Risk-adjusted Return"
+          icon={<Activity className="w-5 h-5 text-cyan-500" />}
+          gradient="from-cyan-500/20 to-transparent"
+          valueColor={stats.sharpeRatio > 1 ? 'text-profit' : stats.sharpeRatio > 0 ? 'text-warning' : 'text-loss'}
+        />
+        <MetricCard 
+          label="Max Drawdown" 
+          value={`₹${(stats.maxDrawdown || 0).toLocaleString()}`} 
+          sub="Peak to Trough"
+          icon={<Shield className="w-5 h-5 text-loss" />}
+          gradient="from-loss/20 to-transparent"
+          valueColor="text-loss"
         />
         <MetricCard 
           label="Win Streak" 

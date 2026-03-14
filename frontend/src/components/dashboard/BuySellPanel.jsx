@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { buyOrder, sellOrder, placeBracket, placeStopLoss } from '../../services/api';
 import { AlertCircle, CheckCircle, Minus, Plus, Shield, Target, Clock } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderPlaced, userBalance, tradeCommand }) {
   const { user, preferences } = useAuth();
@@ -65,6 +66,9 @@ export default function BuySellPanel({ selectedStock, currentPrice = 0, onOrderP
 
   const showMsg = (type, text) => {
     setMsg({ type, text });
+    // Also fire a global toast
+    if (type === 'success') toast.success(text);
+    else if (type === 'error') toast.error(text);
     setTimeout(() => setMsg(null), 4000);
   };
 

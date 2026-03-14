@@ -144,21 +144,28 @@ exports.getTradeJournal = async (req, res) => {
       else break;
     }
 
-    // ── Avg holding time ──
-    const totalHoldMs = trades.reduce((s, t) => s + t.holdTimeMs, 0);
-    const avgHoldMs = trades.length > 0 ? totalHoldMs / trades.length : 0;
-    const avgHoldingTime = formatHoldTime(avgHoldMs);
-
-    // ── Profit by day of week ──
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const profitByDay = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
-    trades.forEach(t => {
-      const day = dayNames[t.exitDate.getDay()];
-      profitByDay[day] = parseFloat((profitByDay[day] + t.pnl).toFixed(2));
-    });
-
     // ── Total P&L ──
     const totalPnl = parseFloat(trades.reduce((s, t) => s + t.pnl, 0).toFixed(2));
+
+    // ── Sharpe Ratio & Max Drawdown ──
+    // Simple realized Sharpe based on trade returns
+    const realizedReturns = trades.map(t => t.pnlPercent);
+    const avgRet = realizedReturns.reduce((a, b) => a + b, 0) / (trades.length || 1);
+    const variance = realizedReturns.reduce((s, r) => s + Math.pow(r - avgRet, 2), 0) / (trades.length || 1);
+    const stdDev = Math.sqrt(variance);
+    const sharpeRatio = stdDev > 0 ? parseFloat((avgRet / stdDev).toFixed(2)) : 0;
+
+    // Max Drawdown calculation from cumulative P&L curve
+    let peak = 0;
+    let maxDrawdown = 0;
+    let cumulativePnl = 0;
+    // Iterate chronological (oldest to newest) to track the curve
+    [...trades].reverse().forEach(t => {
+      cumulativePnl += t.pnl;
+      if (cumulativePnl > peak) peak = cumulativePnl;
+      const dd = peak - cumulativePnl;
+      if (dd > maxDrawdown) maxDrawdown = dd;
+    });
 
     // ── Best/Worst ──
     const best = trades.reduce((a, b) => (a.pnl > b.pnl ? a : b), trades[0]);
@@ -179,6 +186,8 @@ exports.getTradeJournal = async (req, res) => {
         maxStreak,
         avgHoldingTime,
         totalPnl,
+        sharpeRatio,
+        maxDrawdown,
         profitByDay,
         bestTrade: {
           stock: best.stock,
