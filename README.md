@@ -3,56 +3,31 @@
 A high-fidelity, professional-grade virtual trading platform built with the **MERN Stack** (MongoDB, Express, React, Node.js). This platform features real-time price simulation, advanced algorithmic trading signals, a stunning dark/light theme system, and institutional-grade portfolio analytics.
 
 > 💡 **Start Trading Instantly**: New users are credited with **₹1,00,000** in virtual capital to trade 20 real NSE stocks with zero financial risk.
+## 🚀 V2: The Professional Overhaul
+
+### 📊 Portfolio Analytics (Institutional-Grade)
+- **Risk Assessment**: Integrated **Sharpe Ratio** (risk-adjusted returns) and **Max Drawdown** (capital protection) metrics in the Journal.
+- **Sector Allocation**: A dynamic glassmorphism pie chart showing your exposure across Banking, IT, Auto, and more.
+- **Deep Performance**: Track realize/unrealized P&L distributions with institutional-grade accuracy.
+
+### 🗞️ Advanced Pulse (Market Intelligence)
+- **Live Intelligence Hub**: A deep-search news feed that aggregates and filters market headlines in real-time.
+- **Sentiment Bar**: A real-time market conviction gauge (Fear & Greed) derived from advance-decline ratios and volume momentum.
+- **Stock Convergence**: News items are now logically linked to tickers for quick context gathering.
+
+### 📱 Mobile-First Trading Experience
+- **Kite-Style Bottom Sheets**: A premium, slide-up "Bottom Sheet" interaction for mobile trading (Buy/Sell), maximizing screen real estate.
+- **Persistent Action**: A localized, floating "Quick Trade" button for instant execution on small screens.
+- **Touch-Optimized**: Completely rebuilt navigation and controls for a thumb-driven mobile experience.
+
+### 🧪 Algo Lab (Strategy Playground)
+- **Historical Backtesting**: A dedicated playback engine that simulates trading strategies over historical data windows.
+- **Performance Projections**: Visualize projected ROI, win rates, and equity curves before deploying capital.
+- **Strategy Tuning**: Switch between EMA Crossovers, RSI Reversals, and Bollinger Breakouts in a controlled sandbox.
 
 ---
 
-## 🚀 What's New: Professional Upgrades
-
-### 🌓 High-Fidelity Theme System
-
-- **CopyCase Switcher**: A premium, animated Sun/Moon toggle (inspired by CopyCase Dribbble design) with custom CSS micro-animations.
-- **Adaptive Design**: Semantic CSS variables ensure every component (cards, charts, buttons) adapts its visual language perfectly between Dark and Light modes.
-- **State Persistence**: Your theme preference is preserved across sessions using LocalStorage.
-
-### 🔥 Market Heatmap & Sector Analysis
-
-- **Sector Rotation**: Visualize which sectors (Banking, IT, Auto, FMCG, etc.) are currently leading the market.
-- **Live Performance**: Real-time "Day Change %" calculation based on backend-verified opening prices.
-- **Visual Intelligence**: Interactive heatmap blocks that shift colors based on sector-wide momentum.
-
-### 🤖 Persistent AI Trading Signals
-
-- **Signal Persistence**: Every AI-generated signal (EMA Crossover & RSI Mean Reversion) is now saved to MongoDB.
-- **Historical Feed**: The dashboard loads the last 5 high-probability signals instantly, ensuring you never miss a trade even if you refresh the page.
-- **Signal Model**: High-fidelity data including strategy type, ticker, price, and timestamp.
-
-### 📊 Portfolio Equity Curve
-
-- **Net Worth Tracking**: Automatic snapshots of your total wealth (Cash + Holdings Value).
-- **Interactive Recharts**: A professional Area Chart on the Funds page to visualize your performance over time like a fund manager.
-- **Theme-Aware Scaling**: Chart grids and labels automatically adjust for maximum legibility in light and dark modes.
-
-### 📜 Professional Trade Journaling
-
-- **Win-Rate Tracker**: Institutional-grade analytics showing your profit percentage and current winning streaks.
-- **Daily Heatmap**: Visualize which days of the week you are most profitable using high-fidelity Recharts heatmaps.
-- **Avg. Holding Time**: Track how long you stay in trades across CNC and MIS products to refine your strategy.
-
-### � Alpha Leaderboards
-
-- **Global Rankings**: Compare your ROI against every other trader on the net worth growth leaderboard.
-- **Badges of Honor**: Earn titles like "The Wizard" (50%+ ROI) or "Scalping Specialist" (50+ trades) based on your performance.
-- **Competitive Edge**: Real-time rank updates as balance and portfolio values fluctuate.
-
-### 📈 Interactive Chart Drawing Tools
-
-- **Professional Analysis**: Add trendlines, horizontal support/resistance levels, and Fibonacci retracement directly on the canvas.
-- **Scale Invariant**: Drawings remain perfectly aligned with price action during real-time zoom and pan operations.
-- **Quick Controls**: Specialized toolbar for switching tools or clearing all analysis with one click.
-
----
-
-## �🎯 Core Features
+## 🎯 Core Features
 
 ### 🧠 AI & Quant Suite
 
@@ -60,11 +35,11 @@ A high-fidelity, professional-grade virtual trading platform built with the **ME
 | ----------------------------- | --------------------------------------------------------------------------- | ------ |
 | **EMA Crossover (9/21)**      | Generates BUY/SELL signals on 9-period/21-period moving average crossovers. | ✅     |
 | **RSI Mean Reversion**        | Identifies overbought (>70) and oversold (<30) market conditions.           | ✅     |
-| **Floating Signal Feed**      | Premium top-middle overlay for real-time AI signal broadcasts.              | ✅     |
-| **Persistent Signal History** | Historical signals saved to DB and available on load.                       | ✅ NEW |
+| **Algo Backtester**           | **NEW**: Stress-test strategies on historical data with equity projections. | ✅ NEW |
+| **Market Sentiment Bar**      | **NEW**: Real-time Fear & Greed gauge derived from market internals.        | ✅ NEW |
+| **Institutional Analytics**   | **NEW**: Sharpe Ratio and Max Drawdown calculations for risk profiling.     | ✅ NEW |
 | **One-Click Copy Trading**    | Instantly auto-fills order panels based on AI signals.                      | ✅     |
-| **Quant Backtester**          | Analyze the last 24h performance of any stock locally.                      | ✅     |
-| **Custom Algo Architect**     | Tune EMA periods and risk parameters directly from your profile.            | ✅     |
+| **Floating Signal Feed**      | Real-time top-middle overlay for AI signal broadcasts.                      | ✅     |
 
 ### ⚡ Trading System
 
