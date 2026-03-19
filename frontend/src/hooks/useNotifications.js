@@ -12,6 +12,22 @@ export function useNotifications(userId) {
   const [notifications, setNotifications] = useState([]);
   const seqRef = useRef(0);
 
+  // Request browser notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  const triggerNativeNotification = (title, body) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, {
+        body,
+        icon: '/favicon.ico', 
+      });
+    }
+  };
+
   const push = useCallback((type, data) => {
     const id = ++seqRef.current;
     const entry = { id, type, data, read: false, time: new Date() };
@@ -19,17 +35,19 @@ export function useNotifications(userId) {
       [entry, ...prev].slice(0, MAX_NOTIFICATIONS)
     );
 
-    // Also trigger toast for instant feedback
+    // Also trigger toast for instant feedback and Native Push
     if (type === 'order_executed') {
-      toast.success(`${data.type} filled: ${data.quantity} × ${data.stock} @ ₹${data.price?.toFixed(2)}`, {
-        icon: '✅',
-        duration: 4000
-      });
+      const msg = `${data.type} filled: ${data.quantity} × ${data.stock} @ ₹${data.price?.toFixed(2)}`;
+      toast.success(msg, { icon: '✅', duration: 4000 });
+      triggerNativeNotification('Order Executed', msg);
     } else if (type === 'price_alert') {
-       toast(data.message || 'Price Alert Triggered', {
-         icon: '🔔',
-         duration: 5000
-       });
+       const msg = data.message || 'Price Alert Triggered';
+       toast(msg, { icon: '🔔', duration: 5000 });
+       triggerNativeNotification('Price Alert Triggered', msg);
+    } else if (type === 'mis_squaredoff') {
+       const msg = `${data.stock} MIS position squared off automatically.`;
+       toast.error(msg, { icon: '⚡', duration: 5000 });
+       triggerNativeNotification('MIS Auto Square-off', msg);
     }
   }, []);
 
@@ -46,12 +64,12 @@ export function useNotifications(userId) {
       mis_warning:         (d) => push('mis_warning',         d),
       mis_squaredoff:      (d) => push('mis_squaredoff',      d),
       notification:        (d) => push('price_alert',         d),
+      ai_signal:           (d) => { push('price_alert', { message: `AI Signal: ${d.trend} on ${d.symbol}` }); } // Add AI Signal push
     };
 
     Object.entries(handlers).forEach(([ev, fn]) => socket.on(ev, fn));
     return () => Object.entries(handlers).forEach(([ev, fn]) => socket.off(ev, fn));
   }, [userId, push]);
-
 
   const markAllRead = useCallback(() =>
     setNotifications(prev => prev.map(n => ({ ...n, read: true }))),

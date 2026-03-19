@@ -17,7 +17,11 @@ import AlgoLab from './pages/AlgoLab';
 import Pulse from './pages/Pulse';
 import Bids from './pages/Bids';
 import StockDetail from './pages/StockDetail';
+import SIPSimulator from './pages/SIPSimulator';
+import MultiChart from './pages/MultiChart';
+import SocialFeed from './pages/SocialFeed';
 import { Toaster } from 'react-hot-toast';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -41,36 +45,41 @@ function PublicRoute({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Toaster position="top-center" reverseOrder={false} />
-      <AuthProvider>
-        <Routes>
-          {/* Public Landing & Auth */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Toaster position="top-center" reverseOrder={false} />
+        <AuthProvider>
+          <Routes>
+            {/* Public Landing & Auth */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
 
-          {/* Protected */}
-          <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/market" element={<Market />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/holdings" element={<Holdings />} />
-            <Route path="/watchlist" element={<Watchlist />} />
-            <Route path="/funds" element={<Funds />} />
-            <Route path="/journal" element={<Journal />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/algolab" element={<AlgoLab />} />
-            <Route path="/pulse" element={<Pulse />} />
-            <Route path="/bids" element={<Bids />} />
-            <Route path="/stock/:symbol" element={<StockDetail />} />
-            <Route path="/calculators" element={<Calculators />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
+            {/* Protected */}
+            <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/market" element={<Market />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/holdings" element={<Holdings />} />
+              <Route path="/watchlist" element={<Watchlist />} />
+              <Route path="/funds" element={<Funds />} />
+              <Route path="/journal" element={<Journal />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/algolab" element={<AlgoLab />} />
+              <Route path="/pulse" element={<Pulse />} />
+              <Route path="/bids" element={<Bids />} />
+              <Route path="/stock/:symbol" element={<StockDetail />} />
+              <Route path="/calculators" element={<Calculators />} />
+              <Route path="/sip" element={<SIPSimulator />} />
+              <Route path="/multichart" element={<MultiChart />} />
+              <Route path="/community" element={<SocialFeed />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }

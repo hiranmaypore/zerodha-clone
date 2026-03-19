@@ -1,83 +1,63 @@
-// ── Input Validation Middleware ──
-// Lightweight validation without external deps (Joi-like but zero-dependency)
+const { validationResult, body } = require('express-validator');
 
-function validate(schema) {
-  return (req, res, next) => {
-    const errors = [];
-
-    for (const [field, rules] of Object.entries(schema)) {
-      const value = req.body[field];
-
-      if (rules.required && (value === undefined || value === null || value === '')) {
-        errors.push(`${field} is required`);
-        continue;
-      }
-
-      if (value === undefined || value === null) continue;
-
-      if (rules.type === 'string' && typeof value !== 'string') {
-        errors.push(`${field} must be a string`);
-      }
-
-      if (rules.type === 'number') {
-        const num = Number(value);
-        if (isNaN(num)) {
-          errors.push(`${field} must be a number`);
-        } else {
-          if (rules.min !== undefined && num < rules.min) {
-            errors.push(`${field} must be at least ${rules.min}`);
-          }
-          if (rules.max !== undefined && num > rules.max) {
-            errors.push(`${field} must be at most ${rules.max}`);
-          }
-        }
-      }
-
-      if (rules.enum && !rules.enum.includes(value)) {
-        errors.push(`${field} must be one of: ${rules.enum.join(', ')}`);
-      }
-
-      if (rules.maxLength && typeof value === 'string' && value.length > rules.maxLength) {
-        errors.push(`${field} must be at most ${rules.maxLength} characters`);
-      }
-    }
-
-    if (errors.length > 0) {
-      return res.status(400).json({ message: 'Validation failed', errors });
-    }
-
-    next();
-  };
-}
-
-// ── Pre-built schemas ──
-const orderSchema = {
-  stockSymbol: { required: true, type: 'string', maxLength: 30 },
-  quantity: { required: true, type: 'number', min: 1, max: 100000 },
-  orderType: { type: 'string', enum: ['MARKET', 'LIMIT'] },
-  productType: { type: 'string', enum: ['CNC', 'MIS'] },
-  limitPrice: { type: 'number', min: 0.01 },
+// Validation execution middleware — used as the LAST element in a schema array
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      message: 'Validation failed', 
+      errors: errors.array() 
+    });
+  }
+  next();
 };
 
-const authSchema = {
-  email: { required: true, type: 'string', maxLength: 100 },
-  password: { required: true, type: 'string', maxLength: 128 },
-};
+// ── Authentication Schemas ──
+const signupSchema = [
+  body('name').trim().notEmpty().withMessage('Name is required')
+    .isLength({ min: 2, max: 50 }).withMessage('Name must be between 2 and 50 characters'),
+  body('email').trim().isEmail().withMessage('Must be a valid email address')
+    .normalizeEmail(),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  validate
+];
 
-const signupSchema = {
-  name: { required: true, type: 'string', maxLength: 60 },
-  email: { required: true, type: 'string', maxLength: 100 },
-  password: { required: true, type: 'string', maxLength: 128 },
-};
+const loginSchema = [
+  body('email').trim().notEmpty().withMessage('Email is required').isEmail().normalizeEmail(),
+  body('password').notEmpty().withMessage('Password is required'),
+  validate
+];
 
-const fundsSchema = {
-  amount: { required: true, type: 'number', min: 1, max: 10000000 },
-};
+// ── Order Schemas ──
+const orderSchema = [
+  body('stockSymbol').trim().notEmpty().withMessage('Stock symbol is required'),
+  body('quantity').isInt({ gt: 0 }).withMessage('Quantity must be a positive integer'),
+  body('orderType').optional().isIn(['MARKET', 'LIMIT', 'SL', 'SL-M']).withMessage('Invalid order type'),
+  body('productType').optional().isIn(['CNC', 'MIS', 'NRML']).withMessage('Invalid product type'),
+  body('price').optional().isFloat({ gt: 0 }).withMessage('Price must be a positive number'),
+  body('limitPrice').optional().isFloat({ gt: 0 }).withMessage('Limit price must be a positive number'),
+  validate
+];
+
+// ── Funds Schemas ──
+const fundsSchema = [
+  body('amount').isFloat({ gt: 0 }).withMessage('Amount must be a positive number'),
+  validate
+];
+
+// ── Calculator Schemas ──
+const sipSchema = [
+  body('monthlyInvestment').isFloat({ gt: 0 }),
+  body('expectedReturn').isFloat({ min: 0, max: 100 }),
+  body('timePeriod').isFloat({ gt: 0 }),
+  validate
+];
 
 module.exports = {
   validate,
-  orderSchema,
-  authSchema,
   signupSchema,
+  loginSchema,
+  orderSchema,
   fundsSchema,
+  sipSchema
 };

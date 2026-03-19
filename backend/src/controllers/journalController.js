@@ -167,6 +167,20 @@ exports.getTradeJournal = async (req, res) => {
       if (dd > maxDrawdown) maxDrawdown = dd;
     });
 
+    // ── Avg Holding Time ──
+    const totalHoldTimeMs = trades.reduce((s, t) => s + (t.holdTimeMs || 0), 0);
+    const avgHoldingTime = formatHoldTime(trades.length > 0 ? totalHoldTimeMs / trades.length : 0);
+
+    // ── Profit by Day of Week ──
+    const profitByDay = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    trades.forEach(t => {
+      const day = dayNames[t.exitDate.getDay()];
+      profitByDay[day] += t.pnl;
+    });
+    // Round each day
+    Object.keys(profitByDay).forEach(d => { profitByDay[d] = parseFloat(profitByDay[d].toFixed(2)); });
+
     // ── Best/Worst ──
     const best = trades.reduce((a, b) => (a.pnl > b.pnl ? a : b), trades[0]);
     const worst = trades.reduce((a, b) => (a.pnl < b.pnl ? a : b), trades[0]);

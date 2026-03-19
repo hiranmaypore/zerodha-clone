@@ -50,6 +50,9 @@ const navItems = [
   { path: "/watchlist",  label: "Watchlist",  icon: Bookmark },
   { path: "/funds",      label: "Funds",      icon: null },
   { path: "/calculators",label: "Calculators",icon: null },
+  { path: "/sip",        label: "SIP Matrix", icon: null },
+  { path: "/multichart", label: "Multi-Chart",icon: null },
+  { path: "/community",  label: "Community",  icon: null },
 ];
 
 // Config per notification type

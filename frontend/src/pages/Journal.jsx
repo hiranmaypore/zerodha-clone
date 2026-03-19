@@ -4,7 +4,7 @@ import { SkeletonPage } from '../components/Skeleton';
 import { 
   TrendingUp, TrendingDown, Clock, Calendar, 
   BarChart2, Award, Zap, Download, ArrowUpRight, ArrowDownRight,
-  Target, Shield, ChevronDown, ChevronUp
+  Target, Shield, ChevronDown, ChevronUp, Activity
 } from 'lucide-react';
 import { downloadTaxStatement } from '../services/api';
 import { StockIcon } from '../components/StockIcon';

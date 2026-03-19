@@ -287,4 +287,31 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-module.exports = { buyStock: exports.buyStock, sellStock: exports.sellStock, getOrders, cancelOrder };
+// ─── Social Feed (Global) ──────────────────────────────────────────────────
+const getSocialFeed = async (req, res) => {
+  try {
+    if (!global.dbConnected) {
+      const allOrders = Array.from(global.inMemoryDB.orders.values())
+        .filter(o => o.status === 'COMPLETED')
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 50);
+
+      const populated = allOrders.map(o => {
+        const u = global.inMemoryDB.users.get(o.user?.toString());
+        return { ...o, user: { name: u?.name || 'Anonymous Trader' } };
+      });
+      return res.json({ success: true, feed: populated });
+    }
+
+    const feed = await Order.find({ status: 'COMPLETED' })
+      .populate('user', 'name')
+      .sort({ createdAt: -1 })
+      .limit(50);
+      
+    res.json({ success: true, feed });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to load social feed' });
+  }
+};
+
+module.exports = { buyStock: exports.buyStock, sellStock: exports.sellStock, getOrders, cancelOrder, getSocialFeed };
