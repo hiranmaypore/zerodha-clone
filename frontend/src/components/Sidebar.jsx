@@ -212,15 +212,8 @@ export default function Navbar() {
             className="flex items-center gap-2 cursor-pointer shrink-0"
             onClick={() => navigate("/dashboard")}
           >
-            <div className="relative w-8 h-8">
-              <svg viewBox="0 0 40 40" fill="none" className="w-full h-full">
-                <path d="M8 20C8 14 12 8 20 8"    stroke="#7C3AED" strokeWidth="3" strokeLinecap="round" />
-                <path d="M14 20C14 16 16 12 20 12" stroke="#A78BFA" strokeWidth="3" strokeLinecap="round" />
-                <path d="M20 8C28 8 32 14 32 20"   stroke="#7C3AED" strokeWidth="3" strokeLinecap="round" />
-                <path d="M20 12C24 12 26 16 26 20"  stroke="#A78BFA" strokeWidth="3" strokeLinecap="round" />
-                <path d="M32 20C32 26 28 32 20 32"  stroke="#7C3AED" strokeWidth="3" strokeLinecap="round" />
-                <circle cx="20" cy="20" r="2" fill="#A78BFA" />
-              </svg>
+            <div className="relative w-8 h-8 rounded overflow-hidden">
+              <img src="/kiteclone.jpg" alt="Logo" className="w-full h-full object-cover" />
             </div>
           </div>
 

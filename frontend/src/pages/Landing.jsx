@@ -13,11 +13,11 @@ export default function Landing() {
       <nav className="border-b border-edge/50 bg-dark/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-linear-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/20">
-              <BarChart3 className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden shadow-lg shadow-purple-500/20">
+              <img src="/kiteclone.jpg" alt="Logo" className="w-full h-full object-cover" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-white">
-              Kite<span className="text-accent">Clone</span>
+            <span className="text-xl font-bold tracking-tight text-primary">
+              Kite<span className="text-accent">Tread</span>
             </span>
           </div>
 
@@ -67,7 +67,7 @@ export default function Landing() {
             LIVE VIRTUAL TRADING ENVIRONMENT
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight animate-slide-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-primary mb-6 leading-tight animate-slide-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
             Invest in everything.<br />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-accent to-purple-500">
               Risk absolutely nothing.
@@ -81,7 +81,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
             <Link
               to={user ? "/dashboard" : "/login"}
-              className="w-full sm:w-auto px-8 py-4 text-base font-bold bg-white text-dark hover:bg-gray-100 rounded-xl transition-all shadow-xl shadow-white/10 flex items-center justify-center gap-2 group"
+              className="w-full sm:w-auto px-8 py-4 text-base font-bold bg-primary text-surface hover:opacity-90 rounded-xl transition-all shadow-xl flex items-center justify-center gap-2 group"
             >
               Start Trading Now
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -119,7 +119,7 @@ export default function Landing() {
       <section id="features" className="py-24 bg-surface/30 border-y border-edge relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-primary mb-4">
               Built for speed. Designed for you.
             </h2>
             <p className="text-secondary max-w-2xl mx-auto text-lg">
@@ -149,7 +149,7 @@ export default function Landing() {
                 <div className="w-12 h-12 bg-surface rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   {f.icon}
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{f.title}</h3>
+                <h3 className="text-xl font-bold text-primary mb-3">{f.title}</h3>
                 <p className="text-secondary leading-relaxed">{f.desc}</p>
               </div>
             ))}
@@ -161,7 +161,7 @@ export default function Landing() {
       <section id="calculators" className="py-24 bg-dark relative">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-primary mb-4">
               Plan your finances.
             </h2>
             <p className="text-secondary max-w-2xl mx-auto text-lg">
@@ -179,9 +179,11 @@ export default function Landing() {
       <footer className="py-12 bg-dark border-t border-edge text-sm text-secondary">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-accent" />
-            <span className="font-bold text-white">
-              Kite<span className="text-accent">Clone</span>
+            <div className="w-5 h-5 rounded overflow-hidden">
+              <img src="/kiteclone.jpg" alt="Logo" className="w-full h-full object-cover" />
+            </div>
+            <span className="font-bold text-primary">
+              Kite<span className="text-accent">Tread</span>
             </span>
           </div>
           <div className="flex items-center gap-6">
@@ -191,7 +193,7 @@ export default function Landing() {
             <a href="#" className="hover:text-primary transition-colors">Privacy</a>
           </div>
           <div>
-            © {new Date().getFullYear()} KiteClone. Not a real trading platform.
+            © {new Date().getFullYear()} KiteTread. Not a real trading platform.
           </div>
         </div>
       </footer>

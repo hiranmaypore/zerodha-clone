@@ -205,6 +205,27 @@ const PORT = process.env.PORT || 5000;
         logger.info(`Client disconnected: ${socket.id}`);
       });
     });
+    // Graceful shutdown logic to release the port
+    const shutdown = () => {
+      logger.info('🛑 Shutting down server and releasing port...');
+      server.close(() => {
+        process.exit(0);
+      });
+    };
+
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+    process.on('SIGUSR2', shutdown); // For nodemon restarts
+
+    server.on('error', (e) => {
+      if (e.code === 'EADDRINUSE') {
+        logger.error(`❌ Port ${PORT} is already in use by another instance. Please close the duplicate terminal or use a different port.`);
+        process.exit(1);
+      } else {
+        logger.error(`❌ Server error: ${e.message}`);
+        process.exit(1);
+      }
+    });
 
     server.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT} (${global.dbConnected ? '🟢 Live DB' : '🟡 Demo Mode'})`);
