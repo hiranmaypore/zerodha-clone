@@ -1,14 +1,15 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { 
   History, Calendar, Info, 
   ArrowUpRight, Building2, Coins, Landmark,
-  ChevronRight, Search, Clock
+  ChevronRight, Search, Clock, ShieldCheck, X
 } from 'lucide-react';
 
 const IPOS = [
-  { id: 1, name: 'Nova Genesis Ltd', symbol: 'NOVA', category: 'Mainboard', priceRange: '₹450 - ₹475', lotSize: 30, status: 'OPEN', closeDate: '2026-03-15' },
-  { id: 2, name: 'GreenFlow Hydro', symbol: 'GFH', category: 'SME', priceRange: '₹120 - ₹128', lotSize: 1200, status: 'OPEN', closeDate: '2026-03-14' },
-  { id: 3, name: 'CyberShield AI', symbol: 'CSAI', category: 'Mainboard', priceRange: '₹890 - ₹940', lotSize: 15, status: 'UPCOMING', closeDate: '2026-03-22' },
+  { id: 1, name: 'Nova Genesis Ltd', symbol: 'NOVA', category: 'Mainboard', priceRange: '₹450 - ₹475', lotSize: 30, minAmount: 14250, status: 'OPEN', closeDate: '2026-03-15' },
+  { id: 2, name: 'GreenFlow Hydro', symbol: 'GFH', category: 'SME', priceRange: '₹120 - ₹128', lotSize: 1200, minAmount: 153600, status: 'OPEN', closeDate: '2026-03-14' },
+  { id: 3, name: 'CyberShield AI', symbol: 'CSAI', category: 'Mainboard', priceRange: '₹890 - ₹940', lotSize: 15, minAmount: 14100, status: 'UPCOMING', closeDate: '2026-03-22' },
 ];
 
 const BONDS = [
@@ -19,6 +20,45 @@ const BONDS = [
 export default function Bids() {
   const [tab, setTab] = useState('IPO');
   const [search, setSearch] = useState('');
+  const [modal, setModal] = useState(null); // { type: 'ipo' | 'bond', data: ... }
+  const [lots, setLots] = useState(1);
+  const [applying, setApplying] = useState(false);
+
+  const handleIPOApply = (ipo) => {
+    setLots(1);
+    setModal({ type: 'ipo', data: ipo });
+  };
+
+  const handleBondBid = (bond) => {
+    setModal({ type: 'bond', data: bond });
+  };
+
+  const confirmApply = () => {
+    setApplying(true);
+    setTimeout(() => {
+      setApplying(false);
+      setModal(null);
+      toast.success(`Application submitted for ${modal.data.name}!`);
+    }, 1200);
+  };
+
+  const confirmBondBid = () => {
+    setApplying(true);
+    setTimeout(() => {
+      setApplying(false);
+      setModal(null);
+      toast.success(`Bid placed for ${modal.data.name}!`);
+    }, 1200);
+  };
+
+  const filteredIPOs = IPOS.filter(i => 
+    i.name.toLowerCase().includes(search.toLowerCase()) || 
+    i.symbol.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredBonds = BONDS.filter(b =>
+    b.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-fade-in p-2 md:p-6 pb-20">
@@ -66,7 +106,7 @@ export default function Bids() {
         <div className="space-y-4">
            {/* IPO Grid */}
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {IPOS.map(ipo => (
+              {filteredIPOs.map(ipo => (
                  <div key={ipo.id} className="bg-card border border-edge rounded-2xl p-5 hover:border-accent/40 transition-all flex flex-col group">
                     <div className="flex items-start justify-between mb-4">
                        <div className="w-12 h-12 bg-surface rounded-xl flex items-center justify-center border border-edge group-hover:bg-accent/5 group-hover:border-accent/20 transition-all shadow-sm">
@@ -98,7 +138,10 @@ export default function Bids() {
                           <Clock className="w-3 h-3" />
                           <span className="text-[10px] font-medium">Closes {new Date(ipo.closeDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
                        </div>
-                       <button className="px-4 py-1.5 bg-accent text-white rounded-lg text-xs font-bold hover:bg-accent/80 transition-all shadow-lg shadow-accent/20">
+                       <button 
+                         onClick={() => ipo.status === 'OPEN' ? handleIPOApply(ipo) : toast('You will be notified when this IPO opens!', { icon: '🔔' })}
+                         className="px-4 py-1.5 bg-accent text-white rounded-lg text-xs font-bold hover:bg-accent/80 transition-all shadow-lg shadow-accent/20"
+                       >
                           {ipo.status === 'OPEN' ? 'Apply' : 'Notify'}
                        </button>
                     </div>
@@ -129,7 +172,7 @@ export default function Bids() {
                  </tr>
               </thead>
               <tbody className="divide-y divide-edge">
-                 {BONDS.map(bond => (
+                 {filteredBonds.map(bond => (
                     <tr key={bond.id} className="hover:bg-surface/50 transition-colors">
                        <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
@@ -149,7 +192,10 @@ export default function Bids() {
                           <span className="text-sm font-bold text-secondary font-mono">{bond.price}</span>
                        </td>
                        <td className="px-5 py-4 text-right">
-                          <button className="text-xs font-bold text-accent hover:underline flex items-center gap-1 ml-auto">
+                          <button 
+                            onClick={() => handleBondBid(bond)}
+                            className="text-xs font-bold text-accent hover:underline flex items-center gap-1 ml-auto"
+                          >
                              Place Bid <ChevronRight className="w-3.5 h-3.5" />
                           </button>
                        </td>
@@ -167,10 +213,86 @@ export default function Bids() {
          </p>
       </div>
 
+      {/* ── Application Modal ── */}
+      {modal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-card border border-edge rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-primary">
+                {modal.type === 'ipo' ? 'Apply for IPO' : 'Place Bond Bid'}
+              </h3>
+              <button onClick={() => setModal(null)} className="p-1.5 bg-surface rounded-lg text-muted hover:text-primary transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 bg-surface/50 rounded-xl border border-edge">
+                <p className="text-sm font-bold text-primary">{modal.data.name}</p>
+                <p className="text-[10px] text-muted mt-1">
+                  {modal.type === 'ipo' ? `${modal.data.symbol} · ${modal.data.category}` : modal.data.type}
+                </p>
+              </div>
+
+              {modal.type === 'ipo' && (
+                <>
+                  <div>
+                    <label className="text-xs text-muted font-bold block mb-2">Number of Lots</label>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => setLots(l => Math.max(1, l - 1))} 
+                        className="w-10 h-10 bg-surface border border-edge rounded-xl text-primary font-bold text-lg hover:bg-card transition-colors"
+                      >−</button>
+                      <span className="text-2xl font-bold text-primary font-mono w-12 text-center">{lots}</span>
+                      <button 
+                        onClick={() => setLots(l => Math.min(5, l + 1))} 
+                        className="w-10 h-10 bg-surface border border-edge rounded-xl text-primary font-bold text-lg hover:bg-card transition-colors"
+                      >+</button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-surface/30 rounded-xl border border-edge">
+                      <p className="text-[10px] text-muted font-bold">Shares</p>
+                      <p className="text-sm font-bold text-primary font-mono">{modal.data.lotSize * lots}</p>
+                    </div>
+                    <div className="p-3 bg-surface/30 rounded-xl border border-edge">
+                      <p className="text-[10px] text-muted font-bold">Amount</p>
+                      <p className="text-sm font-bold text-primary font-mono">₹{(modal.data.minAmount * lots).toLocaleString()}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {modal.type === 'bond' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-surface/30 rounded-xl border border-edge">
+                    <p className="text-[10px] text-muted font-bold">Interest</p>
+                    <p className="text-sm font-bold text-profit">{modal.data.interest}</p>
+                  </div>
+                  <div className="p-3 bg-surface/30 rounded-xl border border-edge">
+                    <p className="text-[10px] text-muted font-bold">Price / Yield</p>
+                    <p className="text-sm font-bold text-primary font-mono">{modal.data.price}</p>
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={modal.type === 'ipo' ? confirmApply : confirmBondBid}
+                disabled={applying}
+                className="w-full py-3 bg-accent text-white rounded-xl text-sm font-bold hover:bg-accent/80 transition-all shadow-lg shadow-accent/20 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {applying ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : null}
+                {applying ? 'Processing...' : modal.type === 'ipo' ? 'Confirm Application' : 'Confirm Bid'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
 
-function ShieldCheck({ className }) {
-   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>;
-}

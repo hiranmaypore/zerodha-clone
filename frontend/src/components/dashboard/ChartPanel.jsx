@@ -126,7 +126,7 @@ export default function ChartPanel({ selectedStock, stocks = [], onStockChange, 
   const { preferences } = useAuth();
   const COLORS = useMemo(() => THEMES[preferences.theme] || THEMES.dark, [preferences.theme]);
 
-  const [activeTimeframe, setActiveTimeframe] = useState('1W');
+  const [activeTimeframe, setActiveTimeframe] = useState('1h');
   const [candles, setCandles]           = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery]   = useState('');
