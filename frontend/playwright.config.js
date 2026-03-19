@@ -1,18 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
 
-
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  workers: 1,
+  reporter: 'list',
+  timeout: 30000,
+
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:5173',
-    trace: 'on',
-    screenshot: 'on',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
     viewport: { width: 1280, height: 720 },
   },
 
@@ -23,10 +23,24 @@ export default defineConfig({
     },
   ],
 
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://127.0.0.1:5173',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  /* Auto-start both backend and frontend before tests */
+  webServer: [
+    {
+      command: 'npm run dev',
+      cwd: '../backend',
+      url: 'http://localhost:5000/api/stocks',
+      reuseExistingServer: true,
+      timeout: 60000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+    {
+      command: 'npm run dev',
+      url: 'http://localhost:5173',
+      reuseExistingServer: true,
+      timeout: 30000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+  ],
 });
