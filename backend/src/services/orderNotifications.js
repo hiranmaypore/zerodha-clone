@@ -1,101 +1,49 @@
-/**
- * Order Notifications via WebSocket
- * Emits real-time events for order updates
- */
-
 let io = null;
 
 const initializeNotifications = (socketIo) => {
   io = socketIo;
-  console.log('🔔 Order Notifications Service Initialized');
 };
 
-/**
- * Emit order executed notification
- */
 const notifyOrderExecuted = async (order) => {
-  if (!io) return;
-  
-  const userId = order.user.toString();
-  
-  io.to(userId).emit('order_executed', {
-    orderId: order._id,
-    stock: order.stock,
-    type: order.type,
-    quantity: order.quantity,
-    price: order.price,
-    orderCategory: order.orderCategory,
-    timestamp: new Date()
-  });
-  
-  console.log(`📢 Notified user ${userId}: Order ${order._id} executed`);
+  try {
+    if (!io) return;
+    const userId = order.user?.toString?.() || order.user;
+    io.to(userId).emit('order_executed', {
+      orderId: order._id,
+      stock: order.stock,
+      type: order.type,
+      quantity: order.quantity,
+      price: order.price,
+      status: 'COMPLETED',
+    });
+  } catch (e) { /* silent */ }
 };
 
-/**
- * Emit order cancelled notification
- */
 const notifyOrderCancelled = async (order) => {
-  if (!io) return;
-  
-  const userId = order.user.toString();
-  
-  io.to(userId).emit('order_cancelled', {
-    orderId: order._id,
-    stock: order.stock,
-    type: order.type,
-    quantity: order.quantity,
-    cancelReason: order.cancelReason,
-    timestamp: new Date()
-  });
-  
-  console.log(`📢 Notified user ${userId}: Order ${order._id} cancelled`);
+  try {
+    if (!io) return;
+    const userId = order.user?.toString?.() || order.user;
+    io.to(userId).emit('order_cancelled', {
+      orderId: order._id,
+      stock: order.stock,
+    });
+  } catch (e) { /* silent */ }
 };
 
-/**
- * Emit stop-loss triggered notification
- */
-const notifyStopLossTriggered = async (order, currentPrice) => {
-  if (!io) return;
-  
-  const userId = order.user.toString();
-  
-  io.to(userId).emit('stop_loss_triggered', {
-    orderId: order._id,
-    stock: order.stock,
-    quantity: order.quantity,
-    triggerPrice: order.stopLossPrice,
-    executedPrice: currentPrice,
-    timestamp: new Date()
-  });
-  
-  console.log(`⚠️  Notified user ${userId}: Stop-Loss triggered for ${order.stock}`);
+const notifyStopLossTriggered = async (order, price) => {
+  try {
+    if (!io) return;
+    const userId = order.user?.toString?.() || order.user;
+    io.to(userId).emit('stop_loss_triggered', { orderId: order._id, stock: order.stock, price });
+  } catch (e) { /* silent */ }
 };
 
-/**
- * Emit bracket order entry notification
- */
-const notifyBracketEntry = async (order, currentPrice) => {
-  if (!io) return;
-  
-  const userId = order.user.toString();
-  
-  io.to(userId).emit('bracket_entry_executed', {
-    orderId: order._id,
-    stock: order.stock,
-    quantity: order.quantity,
-    entryPrice: currentPrice,
-    targetPrice: order.targetPrice,
-    stopLossPrice: order.stopLossPrice,
-    timestamp: new Date()
-  });
-  
-  console.log(`📊 Notified user ${userId}: Bracket entry for ${order.stock}`);
+const notifyBracketEntry = async (order, price) => {
+  try {
+    if (!io) return;
+    const userId = order.user?.toString?.() || order.user;
+    io.to(userId).emit('bracket_entry', { orderId: order._id, stock: order.stock, price });
+  } catch (e) { /* silent */ }
 };
 
-module.exports = {
-  initializeNotifications,
-  notifyOrderExecuted,
-  notifyOrderCancelled,
-  notifyStopLossTriggered,
-  notifyBracketEntry
-};
+module.exports = { initializeNotifications, notifyOrderExecuted, notifyOrderCancelled, notifyStopLossTriggered, notifyBracketEntry };

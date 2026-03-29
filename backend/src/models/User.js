@@ -6,6 +6,14 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   balance: { type: Number, default: 100000 },
+  preferences: {
+    theme: { type: String, enum: ['system', 'dark', 'light'], default: 'system' },
+    hideBalance: { type: Boolean, default: false },
+    orderConfirmations: { type: Boolean, default: true },
+    riskProfile: { type: String, enum: ['CONSERVATIVE', 'BALANCED', 'AGGRESSIVE'], default: 'BALANCED' },
+    defaultSL: { type: Number, default: null },
+    defaultTarget: { type: Number, default: null }
+  }
 }, { timestamps: true });
 
 userSchema.pre('save', async function () {

@@ -1,0 +1,21 @@
+{
+  "name": "Zerodha Clone - Pro Trader",
+  "short_name": "Zerodha",
+  "description": "Professional Grade Stock Trading Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/kiteclone.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/kiteclone.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
